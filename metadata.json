@@ -1,0 +1,8 @@
+{
+  "name": "PLCC Vault",
+  "description": "A high-performance ministry management ecosystem. One place for ministry, members, and mission.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}

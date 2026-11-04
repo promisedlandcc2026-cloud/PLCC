@@ -1,0 +1,112 @@
+{
+    "buildCommand": "vite build",
+    "outputDirectory": "dist",
+    "framework": "vite",
+    "cleanUrls": true,
+    "functions": {
+        "api/vault.ts": {
+            "maxDuration": 60,
+            "includeFiles": "{api/**,public/images/awc-logo.png}"
+        },
+        "api/warm.ts": {
+            "maxDuration": 30,
+            "includeFiles": "api/**"
+        },
+        "api/servant-keeper.ts": {
+            "maxDuration": 30,
+            "includeFiles": "api/**"
+        },
+        "api/integrations/rhemanotes/members.ts": {
+            "maxDuration": 30,
+            "includeFiles": "api/**"
+        },
+        "api/integrations/rhemanotes/study-guide.ts": {
+            "maxDuration": 30,
+            "includeFiles": "api/**"
+        },
+        "api/livekit-webhook.ts": {
+            "maxDuration": 30,
+            "includeFiles": "api/**"
+        },
+        "api/share-huddle.ts": {
+            "maxDuration": 10,
+            "includeFiles": "{api/**,public/images/share/**,public/images/awc-connect-logo.png}"
+        },
+        "api/share-huddle-image.ts": {
+            "maxDuration": 15,
+            "includeFiles": "{api/**,public/images/share/**,public/images/awc-connect-logo.png}"
+        },
+        "api/share-flyer.ts": {
+            "maxDuration": 10,
+            "includeFiles": "{api/**,public/images/share/**}"
+        },
+        "api/share-rsvp.ts": {
+            "maxDuration": 10,
+            "includeFiles": "{api/**,public/images/share/**,public/images/awc-logo.png}"
+        }
+    },
+    "crons": [
+        {
+            "path": "/api/warm",
+            "schedule": "0 12 * * *"
+        },
+        {
+            "path": "/api/warm?task=daily-reminder",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/warm?task=daily-reminder",
+            "schedule": "1 12 * * *"
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/api/servant-keeper",
+            "destination": "/api/servant-keeper"
+        },
+        {
+            "source": "/api/integrations/rhemanotes/members",
+            "destination": "/api/integrations/rhemanotes/members"
+        },
+        {
+            "source": "/api/integrations/rhemanotes/study-guide",
+            "destination": "/api/integrations/rhemanotes/study-guide"
+        },
+        {
+            "source": "/api/livekit-webhook",
+            "destination": "/api/livekit-webhook"
+        },
+        {
+            "source": "/api/share-huddle",
+            "destination": "/api/share-huddle"
+        },
+        {
+            "source": "/api/share-huddle-image",
+            "destination": "/api/share-huddle-image"
+        },
+        {
+            "source": "/api/share-flyer",
+            "destination": "/api/share-flyer"
+        },
+        {
+            "source": "/api/share-rsvp",
+            "destination": "/api/share-rsvp"
+        },
+        {
+            "source": "/api/warm",
+            "destination": "/api/warm"
+        },
+        {
+            "source": "/api/(.*)",
+            "destination": "/api/vault"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ],
+    "env": {
+        "CI": "false",
+        "NPM_CONFIG_PRODUCTION": "false"
+    }
+}

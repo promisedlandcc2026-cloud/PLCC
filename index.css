@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset & Normalize */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: #fcfcfc;
+  scroll-behavior: smooth;
+  /* Prevent horizontal bounce on some mobile browsers */
+  overscroll-behavior-x: none;
+}
+
+html {
+  font-size: 16px;
+}
+
+/* Allow full multi-page print (SPA height:100% otherwise clips) */
+@media print {
+  html, body, #root {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #374151;
+}
+
+/*
+  Site-wide readability: light greys used for text were disappearing on white.
+  Darken TEXT utilities only — leave bg-/border-gray-* unchanged.
+*/
+@layer utilities {
+  .text-gray-200 {
+    color: #9ca3af !important;
+  }
+  .text-gray-300 {
+    color: #6b7280 !important;
+  }
+  .text-gray-400 {
+    color: #4b5563 !important;
+  }
+  .text-gray-500 {
+    color: #374151 !important;
+  }
+
+  .placeholder\:text-gray-200::placeholder {
+    color: #9ca3af !important;
+  }
+  .placeholder\:text-gray-300::placeholder {
+    color: #6b7280 !important;
+  }
+  .placeholder\:text-gray-400::placeholder {
+    color: #4b5563 !important;
+  }
+
+  /* Tiny arbitrary sizes → readable floor (~12–13px) */
+  .text-\[8px\],
+  .text-\[9px\],
+  .text-\[10px\],
+  .text-\[11px\] {
+    font-size: 0.8125rem !important; /* 13px */
+    line-height: 1.25rem !important;
+  }
+}
+
+/* Typography: do NOT shrink text on small screens */
+@media (max-width: 640px) {
+  h1 { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+  h2 { font-size: 1.5rem !important; line-height: 2rem !important; }
+}
+
+/* My Profile: section titles sit next to an icon and action links inside cards,
+   so the app-wide 24px phone size wraps them over 3–4 lines. Keep them readable
+   but card-sized here only. */
+@media (max-width: 640px) {
+  .cp-profile h2 { font-size: 1.125rem !important; line-height: 1.5rem !important; }
+  .cp-profile h1 { font-size: 1.75rem !important; line-height: 2.125rem !important; }
+}
+
+/* Prevent auto-zoom on iOS for inputs smaller than 16px */
+input, textarea, select {
+  font-size: 16px !important;
+}
+
+/* Ensure UI buttons aren't selectable */
+button, .nav-item {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Scrollbar refinement */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(29, 55, 44, 0.1);
+  border-radius: 10px;
+}
+
+/* Safe Area Helpers */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/*
+ * Floating mobile bottom nav footprint (pill + outer inset + home-indicator).
+ * Used by AppShell / pages so last content clears the dock.
+ */
+:root {
+  /* Pill (~4rem) + outer inset + breathing room above the dock */
+  --awc-mobile-nav-clearance: calc(9.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --awc-mobile-nav-clearance: 0px;
+  }
+}
+
+/*
+ * Seasonal accents. Burgundy and gold stay the brand.
+ * White on --season-accent and ink #0d1a14 on --season-accent-soft meet WCAG AA.
+ */
+:root,
+html[data-season='brand'] {
+  --season-accent: #1d372c;
+  --season-accent-soft: #fdf6d8;
+  --season-gradient: linear-gradient(135deg, rgba(29, 55, 44, 0.2), transparent);
+}
+html[data-season='fall'],
+html[data-season='thanksgiving'] {
+  --season-accent: #9a3412;
+  --season-accent-soft: #ffedd5;
+  --season-gradient: linear-gradient(180deg, rgba(154, 52, 18, 0.28), transparent);
+}
+html[data-season='winter'] {
+  --season-accent: #1e3a5f;
+  --season-accent-soft: #e8eef5;
+  --season-gradient: linear-gradient(180deg, rgba(30, 58, 95, 0.28), transparent);
+}
+html[data-season='spring'] {
+  --season-accent: #166534;
+  --season-accent-soft: #f0fdf4;
+  --season-gradient: linear-gradient(180deg, rgba(22, 101, 52, 0.22), transparent);
+}
+html[data-season='easter'] {
+  --season-accent: #6b21a8;
+  --season-accent-soft: #faf5ff;
+  --season-gradient: linear-gradient(180deg, rgba(107, 33, 168, 0.22), transparent);
+}
+html[data-season='summer'] {
+  --season-accent: #854d0e;
+  --season-accent-soft: #fef9c3;
+  --season-gradient: linear-gradient(180deg, rgba(133, 77, 14, 0.2), transparent);
+}
+html[data-season='christmas'] {
+  --season-accent: #14532d;
+  --season-accent-soft: #f0fdf4;
+  --season-gradient: linear-gradient(180deg, rgba(20, 83, 45, 0.28), transparent);
+}
+html[data-season='new_year'],
+html[data-season='anniversary'] {
+  --season-accent: #1d372c;
+  --season-accent-soft: #fdf6d8;
+  --season-gradient: linear-gradient(180deg, rgba(201, 163, 90, 0.35), transparent);
+}
+
+/* Home hero fall leaves — HTML so they stay visible in Chrome and Safari. */
+.awc-falling-leaf {
+  position: absolute;
+  top: 0;
+  line-height: 1;
+  animation-name: awc-leaf-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  filter: drop-shadow(0 2px 2px rgba(13, 26, 20, 0.35));
+}
+/* Travel in px. A % translate is the leaf's own height, so Chrome only
+   dropped them a short way under the top edge, then the loop hid them. */
+@keyframes awc-leaf-fall {
+  0% { transform: translate3d(0, -48px, 0) rotate(0deg); }
+  50% { transform: translate3d(-16px, 240px, 0) rotate(160deg); }
+  100% { transform: translate3d(28px, 560px, 0) rotate(320deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .awc-falling-leaf { animation: none; }
+}
+
+/* iOS Smooth Scroll Utility */
+.scrolling-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
