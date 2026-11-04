@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import MobileBottomNav from './MobileBottomNav';
-import MediaNoticeModal from '../Consent/MediaNoticeModal';
 import { useNav } from '../../App';
 import { useLocation } from 'react-router-dom';
 import { Section } from '../../types';
@@ -120,7 +119,6 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-white text-gray-900 overflow-hidden">
-      <MediaNoticeModal />
       <Topbar />
 
       <div className="flex flex-1 overflow-hidden relative">
