@@ -458,7 +458,7 @@ export function greetingEmailHtml(title: string, body: string): string {
     <div style="background:#0e1914;padding:26px 24px 22px;text-align:center">
       <img src="${CHURCH_SEAL_URL}" width="92" height="92" alt="Promised Land Christian Center" style="display:block;margin:0 auto 12px;width:92px;height:92px;border-radius:50%" />
       <p style="margin:0;font-size:22px;color:#FFFFFF;letter-spacing:.5px">Promised Land Christian Center</p>
-      <p style="margin:6px 0 0;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#E9C979">Where Everybody Is Somebody</p>
+      <p style="margin:6px 0 0;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#E9C979">Changing Hearts. Transforming Lives.</p>
     </div>
     <div style="padding:30px 26px 32px;text-align:center">
       <h1 style="font-size:28px;margin:0 0 16px;color:#15281f;font-weight:normal">${escapeHtml(title)}</h1>

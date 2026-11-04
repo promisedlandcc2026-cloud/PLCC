@@ -561,4 +561,4 @@ Check-In (2 volunteers needed)
 
 ---
 
-> "Where Everybody Is Somebody and Jesus Christ is Lord."
+> "Changing Hearts. Transforming Lives."

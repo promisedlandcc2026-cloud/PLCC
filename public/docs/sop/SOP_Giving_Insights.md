@@ -55,7 +55,7 @@ To maintain financial integrity and strategic direction, the following review sc
 ## 4. Vision Alignment
 The Giving Insights Dashboard ensures that financial stewardship remains Transparent, Strategic, and Responsible.
 
-> “Where Everybody Is Somebody and Jesus Christ is Lord.”
+> “Changing Hearts. Transforming Lives.”
 
 ---
 **Approved By:** __________________________  **Date:** __________

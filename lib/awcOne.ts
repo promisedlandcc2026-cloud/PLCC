@@ -34,7 +34,6 @@ export const AWC_ONE_APPS: AwcOneApp[] = [
   { id: 'vault', name: 'PLCC Vault', blurb: 'Church Administration', icon: '/images/awc-one/icon-vault.webp', iconH: 54 },
   { id: 'connect', name: 'PLCC Connect', blurb: 'Members & Community', icon: '/images/awc-one/icon-connect.webp', iconH: 46 },
   { id: 'tithe', name: 'PLCC Tithe', blurb: 'Giving & Contributions', icon: '/images/awc-one/icon-tithe.webp', iconH: 52 },
-  { id: 'ark', name: 'PLCC Ark', blurb: 'Games, Family Fun & Friendly Competition', icon: '/images/awc-one/icon-ark.webp', iconH: 44 },
 ];
 
 /** Where each app opens when there is no sign-on handoff. */

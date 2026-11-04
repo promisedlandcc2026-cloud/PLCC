@@ -809,7 +809,7 @@ export const MemberProfileView: React.FC = () => {
             PLCC Vault &middot; Promised Land Christian Center
           </div>
           <div className="absolute bottom-4 right-6 hidden md:block text-right text-white/90 text-xs">
-            <span className="italic font-sans tracking-wide">&ldquo;Where Everybody is Somebody&rdquo;</span>
+            <span className="italic font-sans tracking-wide">&ldquo;Changing Hearts. Transforming Lives.&rdquo;</span>
           </div>
         </div>
 

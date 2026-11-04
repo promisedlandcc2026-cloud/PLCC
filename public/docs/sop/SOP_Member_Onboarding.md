@@ -291,7 +291,7 @@ Connect new members with ministry opportunities:
 ## 9. Vision Alignment
 The Member Onboarding Process ensures that every person experiences Excellence, Care, and Integration from their first day at PLCC.
 
-> "Where Everybody Is Somebody and Jesus Christ is Lord."
+> "Changing Hearts. Transforming Lives."
 
 ---
 **Approved By:** __________________________  **Date:** __________

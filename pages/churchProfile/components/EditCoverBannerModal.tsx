@@ -115,7 +115,7 @@ export const EditCoverBannerModal: React.FC<EditCoverBannerModalProps> = ({
                 PLCC Vault &middot; Promised Land Christian Center
               </div>
               <div className="absolute bottom-3 left-4 text-white text-xs">
-                <span className="font-sans italic">&ldquo;Where Everybody is Somebody&rdquo;</span>
+                <span className="font-sans italic">&ldquo;Changing Hearts. Transforming Lives.&rdquo;</span>
               </div>
             </div>
           </div>

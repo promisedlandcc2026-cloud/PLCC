@@ -72,7 +72,7 @@ const GiveOnlinePage: React.FC = () => {
             <br />
             Blessing Our City
           </h1>
-          <p className="text-white/80 text-base mb-6">Where Everybody Is Somebody</p>
+          <p className="text-white/80 text-base mb-6">Changing Hearts. Transforming Lives.</p>
 
           <p className="text-white/70 text-[15px] italic mb-8" style={serif}>
             “God loves a cheerful giver.” <span className="not-italic text-white/50 text-xs">— 2 Corinthians 9:7</span>

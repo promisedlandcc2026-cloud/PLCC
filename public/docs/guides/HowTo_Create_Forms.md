@@ -474,4 +474,4 @@ Example: Show "Dietary Restrictions" only if "Attending Meal" is "Yes"
 
 ---
 
-> "Where Everybody Is Somebody and Jesus Christ is Lord."
+> "Changing Hearts. Transforming Lives."

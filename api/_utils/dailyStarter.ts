@@ -275,7 +275,7 @@ export const STARTER_SUNDAY: StarterDevotional[] = [
     ref: 'Hebrews 10:24-25',
     body:
       'The writer of Hebrews tells us not to give up meeting together. Why? Because we need each other to keep going — to be stirred up to love and good works, and to be encouraged when the week has been hard.\n\n' +
-      'Your presence at church matters more than you know. Somebody needs your smile, your handshake, or your prayer today. Where everybody is somebody, that includes you.',
+      'Your presence at church matters more than you know. Somebody needs your smile, your handshake, or your prayer today. At PLCC, everybody matters, and that includes you.',
     question: 'Who can you encourage at church today with a kind word or a prayer?',
     prayer: 'Lord, thank You for my church family. Use me today to encourage someone who needs it. Amen.',
   },

@@ -349,7 +349,7 @@ Protect church assets throughout the process:
 ## 8. Vision Alignment
 The Counting Session Workflow ensures that every dollar entrusted to PLCC is handled with Integrity, Accuracy, and Accountability.
 
-> "Where Everybody Is Somebody and Jesus Christ is Lord."
+> "Changing Hearts. Transforming Lives."
 
 ---
 **Approved By:** __________________________  **Date:** __________

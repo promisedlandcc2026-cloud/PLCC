@@ -182,7 +182,7 @@ export function renderFlyerSharePreviewHtml(card: {
 }): string {
   const title = escapeHtml(card.title);
   const description = escapeHtml(
-    card.description || 'Promised Land Christian Center — Where Everybody is Somebody'
+    card.description || 'Promised Land Christian Center — Changing Hearts. Transforming Lives.'
   );
   const imageUrl = escapeHtml(card.imageUrl);
   const previewShareUrl = escapeHtml(card.previewShareUrl);

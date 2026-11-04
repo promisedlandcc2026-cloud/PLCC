@@ -206,7 +206,7 @@ export const DirectoryModal: React.FC<DirectoryModalProps> = ({
         {/* Footer */}
         <div className="px-6 py-3 bg-stone-50 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500 shrink-0">
           <span className="font-sans italic text-[#1d372c] text-[11px]">
-            &ldquo;Where Everybody is Somebody&rdquo;
+            &ldquo;Changing Hearts. Transforming Lives.&rdquo;
           </span>
           <button
             onClick={onClose}

@@ -128,7 +128,7 @@ const HomeHeroBanner: React.FC<Props> = ({
             Promised Land Christian Center
           </p>
           <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-burgundy/80 mt-0.5 bg-white/70 px-2 py-0.5 rounded inline-block">
-            Where everybody is somebody
+            Changing Hearts. Transforming Lives.
           </p>
         </div>
       </div>
@@ -154,7 +154,7 @@ const HomeHeroBanner: React.FC<Props> = ({
             <p className="mt-2 text-sm font-black text-gold tracking-tight">{theme.greeting}</p>
           ) : null}
           <p className="mt-2 text-xs sm:text-sm font-black uppercase tracking-[0.22em] text-gold">
-            Where everybody is somebody
+            Changing Hearts. Transforming Lives.
           </p>
           {verseText ? (
             <blockquote className="mt-4 sm:mt-5 text-sm sm:text-[15px] text-white/90 font-medium leading-relaxed border-l-2 border-gold/60 pl-4 max-w-md">

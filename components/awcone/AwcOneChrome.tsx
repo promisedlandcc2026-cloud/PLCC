@@ -126,7 +126,7 @@ export const AwcOneTile: React.FC<{
   );
 };
 
-/** Phone: 3 tiles over 2. Desktop / tablet: all five in a row with their blurbs. */
+/** Phone: 2 x 2 tiles. Desktop / tablet: all four in a row with their blurbs. */
 export const AwcOneTiles: React.FC<{
   onOpen: (id: AwcOneAppId) => void;
   busyId?: AwcOneAppId | null;
@@ -134,19 +134,12 @@ export const AwcOneTiles: React.FC<{
   badges?: Partial<Record<AwcOneAppId, number>>;
 }> = ({ onOpen, busyId, badges }) => (
   <nav aria-label="PLCC apps" className="w-full">
-    <div className="md:hidden flex flex-col gap-3">
-      <div className="grid grid-cols-3 gap-[11px]">
-        {(['chat', 'vault', 'connect'] as AwcOneAppId[]).map((id) => (
-          <AwcOneTile key={id} id={id} onOpen={onOpen} busy={busyId === id} badge={badges?.[id]} />
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-[11px] px-[11%]">
-        {(['tithe', 'ark'] as AwcOneAppId[]).map((id) => (
-          <AwcOneTile key={id} id={id} onOpen={onOpen} busy={busyId === id} badge={badges?.[id]} />
-        ))}
-      </div>
+    <div className="md:hidden grid grid-cols-2 gap-[11px]">
+      {AWC_ONE_APPS.map((a) => (
+        <AwcOneTile key={a.id} id={a.id} onOpen={onOpen} busy={busyId === a.id} badge={badges?.[a.id]} />
+      ))}
     </div>
-    <div className="hidden md:grid grid-cols-5 gap-4 lg:gap-5">
+    <div className="hidden md:grid grid-cols-4 gap-4 lg:gap-5">
       {AWC_ONE_APPS.map((a) => (
         <AwcOneTile key={a.id} id={a.id} onOpen={onOpen} busy={busyId === a.id} size="wide" badge={badges?.[a.id]} />
       ))}
@@ -157,6 +150,6 @@ export const AwcOneTiles: React.FC<{
 export const AwcOneFooter: React.FC = () => (
   <footer className="text-center flex flex-col gap-0.5 pb-6 pt-4">
     <span className="text-lg font-extrabold">Promised Land Christian Center</span>
-    <span className="text-base font-bold italic text-[#E4C98F]">Where Everybody is Somebody.</span>
+    <span className="text-base font-bold italic text-[#E4C98F]">Changing Hearts. Transforming Lives.</span>
   </footer>
 );

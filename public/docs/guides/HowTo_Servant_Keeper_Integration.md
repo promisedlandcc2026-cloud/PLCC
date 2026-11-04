@@ -530,4 +530,4 @@ SUPPORT:
 
 ---
 
-> "Where Everybody Is Somebody and Jesus Christ is Lord."
+> "Changing Hearts. Transforming Lives."

@@ -101,7 +101,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const html = renderFlyerSharePreviewHtml({
     title: card.title,
-    description: 'Promised Land Christian Center — Where Everybody is Somebody',
+    description: 'Promised Land Christian Center — Changing Hearts. Transforming Lives.',
     imageUrl: card.imageUrl,
     previewShareUrl: card.previewShareUrl,
     destinationHref: card.destinationHref,

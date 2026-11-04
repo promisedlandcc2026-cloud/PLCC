@@ -73,7 +73,7 @@ Blessings,
 [Pastor Name]
 Promised Land Christian Center
 
-"Where Everybody Is Somebody and Jesus Christ is Lord"
+"Changing Hearts. Transforming Lives."
 ```
 
 **Save Template**
@@ -452,4 +452,4 @@ Example: After welcome email:
 
 ---
 
-> "Where Everybody Is Somebody and Jesus Christ is Lord."
+> "Changing Hearts. Transforming Lives."

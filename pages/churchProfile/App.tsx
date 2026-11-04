@@ -95,7 +95,7 @@ function ChurchProfileApp() {
             <span className="font-black tracking-tight text-ink">Promised Land Christian Center</span>
             <span aria-hidden="true">&middot;</span>
             <span className="italic text-burgundy">
-              &ldquo;Where Everybody is Somebody&rdquo;
+              &ldquo;Changing Hearts. Transforming Lives.&rdquo;
             </span>
           </div>
 

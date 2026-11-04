@@ -13,7 +13,7 @@ export const INITIAL_MEMBERS: Member[] = [
     title: 'Senior Pastor & Overseer',
     role: 'SUPER_ADMIN',
     avatarUrl: PASTOR_AVATAR,
-    summary: 'Walking by faith, loving people passionately. Where Everybody is Somebody!',
+    summary: 'Walking by faith, loving people passionately. Changing Hearts. Transforming Lives.',
     bio: `Called to pastor Promised Land Christian Center with a passion for transformative biblical teaching, discipleship, and community empowerment. Pastor Marcus holds a Master of Divinity and has been shepherding PLCC since its founding. 
 
 His heart beats for raising Kingdom leaders, fostering deep family connections, and ensuring every single soul walking through our doors knows they are seen, valued, and loved by God. Married to Lady Eleanor for 18 glorious years.`,

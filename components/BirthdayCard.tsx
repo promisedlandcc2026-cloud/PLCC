@@ -55,7 +55,7 @@ export default function BirthdayCard({ title, body, onClose }: Props) {
           />
           <p className="font-serif text-2xl text-white">Promised Land Christian Center</p>
           <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#E9C979]">
-            Where Everybody Is Somebody
+            Changing Hearts. Transforming Lives.
           </p>
         </div>
         <div className="px-6 pb-8 pt-7 text-center">

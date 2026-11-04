@@ -380,7 +380,7 @@ Keep leadership informed and aligned:
 ## 10. Vision Alignment
 The Meeting Minutes Workflow ensures that PLCC operates with Transparency, Accountability, and Excellence in all governance matters.
 
-> "Where Everybody Is Somebody and Jesus Christ is Lord."
+> "Changing Hearts. Transforming Lives."
 
 ---
 **Approved By:** __________________________  **Date:** __________

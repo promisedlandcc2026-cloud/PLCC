@@ -196,7 +196,7 @@ To maintain security and efficiency, the following roles are defined:
 ## 8. Vision Alignment
 The Child Check-In System ensures that families experience Safety, Efficiency, and Excellence in children's ministry.
 
-> "Where Everybody Is Somebody and Jesus Christ is Lord."
+> "Changing Hearts. Transforming Lives."
 
 ---
 **Approved By:** __________________________  **Date:** __________
