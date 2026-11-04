@@ -433,7 +433,7 @@ function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 }
 
-const VAULT_ORIGIN = (process.env.VAULT_PUBLIC_ORIGIN || 'https://plcc-vault.vercel.app').replace(/\/+$/, '');
+const VAULT_ORIGIN = (process.env.VAULT_PUBLIC_ORIGIN || 'https://plcc-opal.vercel.app').replace(/\/+$/, '');
 /** The church seal, hosted with the Vault so email apps can load it. */
 export const CHURCH_SEAL_URL = `${VAULT_ORIGIN}/images/awc-seal.png`;
 

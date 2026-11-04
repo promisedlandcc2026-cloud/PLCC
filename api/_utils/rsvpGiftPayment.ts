@@ -109,7 +109,7 @@ export function buildTitheRsvpPayUrl(input: {
 
 /** The RSVP confirmation address Tithe sends guests back to after paying. */
 export function rsvpReturnUrl(origin: string, eventId: string, registrationId: string): string {
-  const base = String(origin || 'https://plcc-vault.vercel.app').replace(/\/$/, '');
+  const base = String(origin || 'https://plcc-opal.vercel.app').replace(/\/$/, '');
   return `${base}/#/events/${encodeURIComponent(eventId)}/rsvp?r=${encodeURIComponent(registrationId)}`;
 }
 

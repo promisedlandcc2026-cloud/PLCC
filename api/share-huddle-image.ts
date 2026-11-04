@@ -29,7 +29,7 @@ function requestOrigin(req: VercelRequest): string {
     const proto = protoHeader === 'http' ? 'http' : 'https';
     return `${proto}://${hostHeader}`;
   }
-  return 'https://plcc-vault.vercel.app';
+  return 'https://plcc-opal.vercel.app';
 }
 
 async function loadLocalPublicImage(relPath: string): Promise<Buffer | null> {

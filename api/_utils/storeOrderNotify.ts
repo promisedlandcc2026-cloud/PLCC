@@ -48,7 +48,7 @@ export async function notifyStoreOrderEmails(order: StoreOrderNotifyPayload): Pr
   const vaultUrl =
     process.env.STORE_ORDERS_VAULT_URL ||
     process.env.VITE_APP_URL ||
-    'https://plcc-vault.vercel.app';
+    'https://plcc-opal.vercel.app';
   const ordersLink = `${vaultUrl.replace(/\/$/, '')}/#/store/orders`;
 
   const name = order.customer_name || 'Customer';

@@ -69,7 +69,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Shared secret for store/Supabase → Vault notify webhook:
 # STORE_ORDERS_WEBHOOK_SECRET=long-random-string
 # Optional public Vault URL used in email links:
-# STORE_ORDERS_VAULT_URL=https://plcc-vault.vercel.app
+# STORE_ORDERS_VAULT_URL=https://plcc-opal.vercel.app
 
 # Optional: extra event calendar approvers (comma-separated user UUIDs).
 # SUPER_ADMIN / PASTOR / ADMIN always approve; this seeds others (also seeded via

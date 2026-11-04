@@ -8,8 +8,8 @@
  *
  * Usage:
  *   node scripts/mobile-readiness-audit.mjs
- *   node scripts/mobile-readiness-audit.mjs --live https://plcc-vault.vercel.app
- *   node scripts/mobile-readiness-audit.mjs --live https://plcc-vault.vercel.app --auth
+ *   node scripts/mobile-readiness-audit.mjs --live https://plcc-opal.vercel.app
+ *   node scripts/mobile-readiness-audit.mjs --live https://plcc-opal.vercel.app --auth
  *
  * Auth credentials (never commit these):
  *   MOBILE_AUDIT_EMAIL / MOBILE_AUDIT_PASSWORD
@@ -371,9 +371,9 @@ if (liveBase) {
   await runLive(liveBase);
 } else {
   console.log('\nTip:');
-  console.log('  node scripts/mobile-readiness-audit.mjs --live https://plcc-vault.vercel.app');
+  console.log('  node scripts/mobile-readiness-audit.mjs --live https://plcc-opal.vercel.app');
   console.log(
-    '  node scripts/mobile-readiness-audit.mjs --live https://plcc-vault.vercel.app --auth'
+    '  node scripts/mobile-readiness-audit.mjs --live https://plcc-opal.vercel.app --auth'
   );
   console.log('  (set MOBILE_AUDIT_EMAIL + MOBILE_AUDIT_PASSWORD in the environment)');
 }

@@ -24,7 +24,7 @@ function assert(cond: boolean, msg: string) {
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p: string) => readFileSync(join(root, p), 'utf8');
 
-const ORIGIN = 'https://plcc-vault.vercel.app';
+const ORIGIN = 'https://plcc-opal.vercel.app';
 
 console.log('Share flyer smoke — schema + helpers');
 

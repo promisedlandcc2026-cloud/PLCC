@@ -29,8 +29,8 @@ function assert(cond: unknown, label: string, detail?: unknown) {
 const REG = '0b9f2a3e-1c4d-4e5f-8a6b-7c8d9e0f1a2b';
 
 // Pay link carries everything Tithe needs to pre-fill and send the guest back.
-const back = rsvpReturnUrl('https://plcc-vault.vercel.app/', THANKSGIVING_2026_EVENT_ID, REG);
-assert(back === `https://plcc-vault.vercel.app/#/events/${THANKSGIVING_2026_EVENT_ID}/rsvp?r=${REG}`, 'return address is the RSVP page with r=', back);
+const back = rsvpReturnUrl('https://plcc-opal.vercel.app/', THANKSGIVING_2026_EVENT_ID, REG);
+assert(back === `https://plcc-opal.vercel.app/#/events/${THANKSGIVING_2026_EVENT_ID}/rsvp?r=${REG}`, 'return address is the RSVP page with r=', back);
 const url = new URL(
   buildTitheRsvpPayUrl({
     registrationId: REG,

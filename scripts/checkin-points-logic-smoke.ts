@@ -43,7 +43,7 @@ const otherSession = signed.token.replace(sessionId, '6f1c2b8e-1d2a-4c3b-9e8f-0a
 assert(!verifyQrToken(secret, otherSession, t0).ok, 'session swap rejected');
 assert(!verifyQrToken(secret, 'AWC1.deadbeef', t0).ok, 'membership card token rejected');
 
-const url = `https://plcc-vault.vercel.app/#/scan-in?c=${encodeURIComponent(signed.token)}`;
+const url = `https://plcc-opal.vercel.app/#/scan-in?c=${encodeURIComponent(signed.token)}`;
 assert(extractQrToken(url) === signed.token, 'token pulled from Vault link');
 assert(extractQrToken(signed.token) === signed.token, 'bare token accepted');
 assert(extractQrToken('https://example.com/?c=hello') === null, 'foreign link rejected');

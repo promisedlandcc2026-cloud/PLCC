@@ -63,7 +63,7 @@ function newsShareText(item: NewsItem): string {
     .filter(Boolean)
     .join(' · ');
   const home =
-    typeof window !== 'undefined' ? `${window.location.origin}/#/dashboard` : 'https://plcc-vault.vercel.app/#/dashboard';
+    typeof window !== 'undefined' ? `${window.location.origin}/#/dashboard` : 'https://plcc-opal.vercel.app/#/dashboard';
   const photo = String(item.image_url || '').trim();
   return [
     `Vault News · ${kind}`,

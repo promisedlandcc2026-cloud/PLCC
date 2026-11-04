@@ -37,7 +37,7 @@ loadEnv(join(root, '.env.local'));
 const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const service = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 const anon = process.env.VITE_SUPABASE_ANON_KEY;
-const PROD = process.env.VAULT_PROD_URL || 'https://plcc-vault.vercel.app';
+const PROD = process.env.VAULT_PROD_URL || 'https://plcc-opal.vercel.app';
 const admin = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
 const MARKER = 'TEST — Phase 2.6E.2';
 const created = { auth: [], users: [], members: [] };

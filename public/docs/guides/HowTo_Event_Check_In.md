@@ -25,7 +25,7 @@ That's it! The system handles the rest.
 ### Opening the Check-In Page
 
 **Step 1:** Log in to PLCC Connect
-- Go to https://plcc-vault.vercel.app
+- Go to https://plcc-opal.vercel.app
 - Enter your email and password
 - Click "Sign In"
 

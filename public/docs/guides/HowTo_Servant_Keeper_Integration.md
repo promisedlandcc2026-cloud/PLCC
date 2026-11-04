@@ -135,7 +135,7 @@ The Servant Keeper integration allows you to:
 ### Accessing the Integration
 
 **Step 1:** Log in to PLCC Connect
-- Go to https://plcc-vault.vercel.app
+- Go to https://plcc-opal.vercel.app
 - Enter your credentials
 - Click **Sign In**
 

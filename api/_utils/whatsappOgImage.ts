@@ -50,7 +50,7 @@ export function isAllowedOgImageSourceUrl(url: string, origin: string): boolean 
     const originHost = new URL(origin).hostname.toLowerCase();
     if (host === originHost) return true;
     if (host.endsWith('.supabase.co') && u.pathname.includes('/storage/')) return true;
-    if (host === 'plcc-vault.vercel.app') return true;
+    if (host === 'plcc-opal.vercel.app') return true;
     return false;
   } catch {
     return false;

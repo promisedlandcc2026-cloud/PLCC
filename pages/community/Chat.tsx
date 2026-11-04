@@ -945,7 +945,7 @@ const ChatPage: React.FC = () => {
     const origin =
       typeof window !== 'undefined' && window.location?.origin
         ? window.location.origin
-        : 'https://plcc-vault.vercel.app';
+        : 'https://plcc-opal.vercel.app';
     const base = buildHuddlePreviewShareUrl({ origin, channelId });
     if (!base) return null;
     // Bust WhatsApp's preview cache after uploading a new card.

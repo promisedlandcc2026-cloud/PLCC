@@ -27,7 +27,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p: string) => readFileSync(join(root, p), 'utf8');
 
 const CHANNEL = 'cdd9ed73-6cdc-45a0-a7e7-57beec6eea5e';
-const ORIGIN = 'https://plcc-vault.vercel.app';
+const ORIGIN = 'https://plcc-opal.vercel.app';
 
 console.log('Huddle share preview smoke — Mount Moriah card');
 

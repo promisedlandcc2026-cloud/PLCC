@@ -3,6 +3,17 @@
 
 <head>
   <meta charset="UTF-8" />
+  <script>
+    // The church website is the home page. A bare visit to this address (no #/page, no sign-in
+    // or hand-off parameters) goes there; PLCC ONE itself lives at /#/login and /#/.
+    (function () {
+      var l = window.location;
+      var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      if (l.pathname === '/' && !l.hash && !l.search && !standalone) {
+        l.replace('https://sanctum-live-nine.vercel.app/');
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>PLCC ONE</title>
   <link rel="icon" type="image/png" href="/favicon.png" />

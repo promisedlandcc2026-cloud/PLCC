@@ -758,7 +758,7 @@ const CookoutRsvpsPage: React.FC = () => {
         dateLabel: shortEventDate(eventCfg.date),
       }),
       // Always the live Vault, even when a staff member copies it from a preview.
-      returnUrl: rsvpReturnUrl('https://plcc-vault.vercel.app', eventCfg.eventId || eventId, r.id),
+      returnUrl: rsvpReturnUrl('https://plcc-opal.vercel.app', eventCfg.eventId || eventId, r.id),
     });
     const first = String(r.name || '').trim().split(' ')[0] || 'there';
     const text = `Hi ${first}, here is your link to give $${amount.toFixed(2)} for ${eventCfg.shortName || eventCfg.name} on PLCC Tithe:`;

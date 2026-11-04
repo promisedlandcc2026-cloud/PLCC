@@ -1,7 +1,7 @@
 {
   "name": "PLCC ONE",
   "short_name": "PLCC ONE",
-  "start_url": "/",
+  "start_url": "/#/",
   "display": "standalone",
   "background_color": "#15271f",
   "theme_color": "#1d372c",

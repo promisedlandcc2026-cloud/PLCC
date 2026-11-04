@@ -205,6 +205,6 @@ export function applyApproveTransition(
 }
 
 export function eventApprovalDeepLink(baseUrl?: string | null): string {
-  const root = (baseUrl || process.env.VITE_APP_URL || 'https://plcc-vault.vercel.app').replace(/\/$/, '');
+  const root = (baseUrl || process.env.VITE_APP_URL || 'https://plcc-opal.vercel.app').replace(/\/$/, '');
   return `${root}/#/events/overview?pending=1`;
 }

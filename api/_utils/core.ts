@@ -1193,7 +1193,7 @@ const handleEvents = async (req: any, res: any) => {
                 const host = String(req.headers?.['x-forwarded-host'] || req.headers?.host || '').split(',')[0].trim();
                 const origin = host
                     ? `${host.startsWith('localhost') || host.startsWith('127.0.0.1') ? 'http' : 'https'}://${host}`
-                    : 'https://plcc-vault.vercel.app';
+                    : 'https://plcc-opal.vercel.app';
                 payUrl = buildTitheRsvpPayUrl({
                     registrationId: reg.id,
                     amount,
@@ -8507,7 +8507,7 @@ const handleMinutes = async (req: any, res: any) => {
                                         ${deadlineStr}
                                     </div>
                                     <div style="text-align: center; margin: 28px 0;">
-                                        <a href="https://plcc-vault.vercel.app/#/communication/minutes/${data.id}" style="background: #0d1a14; color: #C9A35A; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 900; font-size: 13px; display: inline-block; letter-spacing: 2px;">VIEW, SIGN & DOWNLOAD PDF →</a>
+                                        <a href="https://plcc-opal.vercel.app/#/communication/minutes/${data.id}" style="background: #0d1a14; color: #C9A35A; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 900; font-size: 13px; display: inline-block; letter-spacing: 2px;">VIEW, SIGN & DOWNLOAD PDF →</a>
                                     </div>
                                 </div>
                             </div>

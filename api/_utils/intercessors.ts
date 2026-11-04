@@ -18,7 +18,7 @@ import {
 } from './prayerAccess.js';
 import { vaultFrom } from './emailFrom.js';
 
-const VAULT_ORIGIN = (process.env.VAULT_PUBLIC_ORIGIN || 'https://plcc-vault.vercel.app').replace(/\/+$/, '');
+const VAULT_ORIGIN = (process.env.VAULT_PUBLIC_ORIGIN || 'https://plcc-opal.vercel.app').replace(/\/+$/, '');
 
 function escapeHtml(s: string): string {
     return String(s || '')

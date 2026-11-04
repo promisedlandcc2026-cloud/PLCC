@@ -112,7 +112,7 @@ function publicEventRsvpShareUrl(eventId: string): string {
   if (typeof window !== 'undefined' && window.location?.origin) {
     return `${window.location.origin}/api/share-rsvp?id=${id}`;
   }
-  return `https://plcc-vault.vercel.app/api/share-rsvp?id=${id}`;
+  return `https://plcc-opal.vercel.app/api/share-rsvp?id=${id}`;
 }
 
 async function fileToCompressedDataUrl(file: File, maxWidth = 900, quality = 0.72): Promise<string> {

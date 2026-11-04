@@ -20,7 +20,7 @@ import { normalizeEventStatus } from './eventApprovalLogic.js';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ATTACH_WINDOW_MS = 10 * 60 * 1000;
 const MAX_LOOKUP = 100;
-const VAULT_PUBLIC_ORIGIN = String(process.env.VAULT_PUBLIC_ORIGIN || 'https://plcc-vault.vercel.app').replace(/\/+$/, '');
+const VAULT_PUBLIC_ORIGIN = String(process.env.VAULT_PUBLIC_ORIGIN || 'https://plcc-opal.vercel.app').replace(/\/+$/, '');
 const CHURCH_TZ = 'Africa/Kampala';
 const ACTIVE_SIGNUP = ['pending', 'confirmed'];
 
