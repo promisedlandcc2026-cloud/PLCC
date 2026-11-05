@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   ChevronDown,
+  Flame,
   HandHeart,
   HelpCircle,
   Landmark,
@@ -70,7 +71,7 @@ export const PlccLoginHeading: React.FC = () => (
     <h1 className="mt-3 text-[34px] sm:text-[40px] leading-[1.1] font-semibold" style={{ ...serif, color: PLCC_GREEN_DEEP }}>
       Welcome to PLCC ONE
     </h1>
-    <p className="mt-3 text-base text-[#16251f]/70">Sign in to access Chat, Canaan, Connect, and Tithe.</p>
+    <p className="mt-3 text-base text-[#16251f]/70">Sign in to access Chat, Canaan, Connect, Sanctum, and Tithe.</p>
   </div>
 );
 
@@ -193,6 +194,7 @@ const APP_CARDS: { id: AwcOneAppId; name: string; blurb: string; Icon: LucideIco
   { id: 'chat', name: 'PLCC Chat', blurb: 'Messages and live calls', Icon: MessageCircle },
   { id: 'vault', name: 'PLCC Canaan', blurb: 'Church administration', Icon: Landmark },
   { id: 'connect', name: 'PLCC Connect', blurb: 'Members and community', Icon: Users },
+  { id: 'sanctum', name: 'PLCC Sanctum', blurb: 'Corporate prayer rooms', Icon: Flame },
   { id: 'tithe', name: 'PLCC Tithe', blurb: 'Giving and contributions', Icon: HandHeart },
 ];
 
@@ -201,7 +203,7 @@ export const PlccAppCards: React.FC<{
   busyId?: AwcOneAppId | null;
   badges?: Partial<Record<AwcOneAppId, number>>;
 }> = ({ onOpen, busyId, badges }) => (
-  <nav aria-label="PLCC apps" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <nav aria-label="PLCC apps" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
     {APP_CARDS.map(({ id, name, blurb, Icon }) => {
       const busy = busyId === id;
       const badge = badges?.[id];

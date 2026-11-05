@@ -4,11 +4,12 @@
  * Connect (and PLCC Ark, which Connect serves at /ark) and PLCC Chat share the Vault's
  * Supabase tenant, so the launcher asks the Vault API for a single-use sign-in token
  * and the app finishes sign-in at its /auth/sso page. Tithe needs no sign-in to give.
+ * Sanctum (corporate prayer rooms) runs on its own stack and keeps its own sign-in.
  * The Digital Contribution Book is intentionally not on the launcher.
  */
 import { authedFetch } from './authedFetch';
 
-export type AwcOneAppId = 'chat' | 'vault' | 'connect' | 'tithe' | 'ark';
+export type AwcOneAppId = 'chat' | 'vault' | 'connect' | 'sanctum' | 'tithe' | 'ark';
 
 export interface AwcOneApp {
   id: AwcOneAppId;
@@ -25,6 +26,8 @@ const trimSlash = (s: string) => s.replace(/\/+$/, '');
 
 export const CONNECT_ORIGIN = trimSlash(env.VITE_CONNECT_ORIGIN || 'https://plcc-connect.vercel.app');
 export const CHAT_ORIGIN = trimSlash(env.VITE_CHAT_ORIGIN || 'https://plcc-chat.vercel.app');
+/** Sanctum Live — PLCC's corporate prayer rooms (its own sign-in for now). */
+export const SANCTUM_URL = env.VITE_SANCTUM_URL || 'https://zwbc2n34bbn0iic4rhoda4dq.ewr.prisma.build/';
 export const TITHE_URL = env.VITE_TITHE_URL || 'https://plcc-tithe.vercel.app/';
 /** Set VITE_AWC_ONE_SSO=false to open the apps without the sign-on handoff. */
 const SSO_ENABLED = env.VITE_AWC_ONE_SSO !== 'false';
@@ -33,6 +36,7 @@ export const AWC_ONE_APPS: AwcOneApp[] = [
   { id: 'chat', name: 'PLCC Chat', blurb: 'Communication & Live Calls', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
   { id: 'vault', name: 'PLCC Canaan', blurb: 'Church Administration', icon: '/images/awc-one/icon-vault.webp', iconH: 54 },
   { id: 'connect', name: 'PLCC Connect', blurb: 'Members & Community', icon: '/images/awc-one/icon-connect.webp', iconH: 46 },
+  { id: 'sanctum', name: 'PLCC Sanctum', blurb: 'Corporate Prayer Rooms', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
   { id: 'tithe', name: 'PLCC Tithe', blurb: 'Giving & Contributions', icon: '/images/awc-one/icon-tithe.webp', iconH: 52 },
 ];
 
@@ -42,6 +46,7 @@ export function plainAppUrl(id: AwcOneAppId): string {
     case 'chat': return `${CHAT_ORIGIN}/community/chat`;
     case 'connect': return `${CONNECT_ORIGIN}/`;
     case 'ark': return `${CONNECT_ORIGIN}/ark/`;
+    case 'sanctum': return SANCTUM_URL;
     case 'tithe': return TITHE_URL;
     case 'vault': return '/#/dashboard';
   }
