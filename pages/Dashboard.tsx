@@ -445,16 +445,6 @@ const DashboardPage: React.FC = () => {
 
   const archiveRows = useMemo(() => {
     const rows = [...archivedItems];
-    if (cookoutPast && !archivedItems.some((r) => r.key === COOKOUT_PROMO_KEY)) {
-      rows.push({
-        key: COOKOUT_PROMO_KEY,
-        entry: {
-          at: fellowship.date,
-          title: fellowship.name || 'Fellowship Cookout',
-          kind: 'promo',
-        },
-      });
-    }
     if (thanksgivingPast && !archivedItems.some((r) => r.key === THANKSGIVING_PROMO_KEY)) {
       rows.push({
         key: THANKSGIVING_PROMO_KEY,

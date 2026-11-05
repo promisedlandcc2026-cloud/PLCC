@@ -31,7 +31,6 @@ import {
   DEFAULT_FELLOWSHIP_EVENT_ID,
 } from '../api/_utils/fellowshipEventConfig';
 
-export const DCB_URL = 'https://awc-digital-contribution-book.onrender.com/';
 /** PLCC Tithe — the church's online giving site. Gifts made there are recorded in the DCB. */
 export const TITHE_URL = 'https://plcc-tithe.vercel.app/';
 
@@ -154,8 +153,7 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
       { label: 'Fundraisers', path: '/fundraisers', icon: <Coins size={18} />, section: Section.Giving },
       {
         label: 'Finance',
-        path: '/finance/contribution-manager',
-        href: DCB_URL,
+        path: '/finance/ledger',
         icon: <Landmark size={18} />,
         section: Section.Finance,
       },

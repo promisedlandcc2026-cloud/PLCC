@@ -542,7 +542,7 @@ const SystemSettingsPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-bold text-[#0d1a14] text-sm">Primary Domain</p>
-                  <p className="text-xs text-green-600 font-medium">portal-awc.org • Active & Verified</p>
+                  <p className="text-xs text-green-600 font-medium">plcc-opal.vercel.app • Active</p>
                 </div>
               </div>
               <button className="text-xs font-bold text-gray-400 hover:text-burgundy">Manage DNS</button>

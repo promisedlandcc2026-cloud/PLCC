@@ -870,7 +870,7 @@ const KidsKioskPage: React.FC = () => {
               type="text"
               inputMode="text"
               maxLength={80}
-              placeholder="4-digit code or paste AWC1…"
+              placeholder="4-digit code or paste card code…"
               className="flex-1 px-4 py-3.5 rounded-2xl bg-white text-[#0d1a14] font-black text-lg tracking-[0.08em] text-center outline-none min-h-[52px]"
               value={code}
               onChange={(e) => setCode(e.target.value)}

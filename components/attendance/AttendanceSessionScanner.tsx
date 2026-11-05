@@ -302,13 +302,13 @@ export default function AttendanceSessionScanner({
           spellCheck={false}
           value={manualCode}
           onChange={(e) => setManualCode(e.target.value)}
-          placeholder="AWC1.…"
+          placeholder="PLCC card code…"
           disabled={busy}
           className="w-full min-h-[48px] rounded-xl border border-gray-200 px-3 text-sm font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#0d1a14]/30"
           aria-describedby="session-awc-card-help"
         />
         <p id="session-awc-card-help" className="text-xs text-gray-500 leading-relaxed">
-          Paste the full AWC1 code from an adult or child PLCC digital card QR. After an adult scan,
+          Paste the full card code from an adult or child PLCC digital card QR. After an adult scan,
           you can check in their structured household without scanning each person.
         </p>
         <button

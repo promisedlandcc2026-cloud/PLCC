@@ -61,12 +61,6 @@ export const NAV_BY_SECTION: Record<string, NavItem[]> = {
   ],
   [Section.Finance]: [
     { label: 'Giving Insights', path: '/giving/insights', icon: <PieChart size={18} /> },
-    {
-      label: 'Digital Contribution Book',
-      path: '/finance/contribution-manager',
-      href: 'https://awc-digital-contribution-book.onrender.com/',
-      icon: <BookOpen size={18} />,
-    },
     { label: 'Treasury Ledger', path: '/finance/ledger', icon: <FileCheck size={18} /> },
     { label: 'Counting Session', path: '/finance/counting', icon: <Calculator size={18} /> },
     {
@@ -93,7 +87,6 @@ export const NAV_BY_SECTION: Record<string, NavItem[]> = {
     { label: 'Giving Form URL', path: '/giving-form-url', icon: <Link size={18} /> },
     { label: 'Give', path: '/giving', icon: <DollarSign size={18} /> },
     { label: 'Giving Form Designer', path: '/giving-form', icon: <FileEdit size={18} /> },
-    { label: 'Text-to-Give Config', path: '/text-giving', icon: <Inbox size={18} /> },
   ],
   [Section.Tags]: [
     { label: 'Tags', path: '/tags', icon: <Layers size={18} /> },

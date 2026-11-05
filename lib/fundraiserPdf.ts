@@ -69,7 +69,6 @@ export type ReminderOptions = {
 
 const DEFAULT_PAY = [
   'Cash or check at church (please write the fundraiser name in the memo).',
-  'Cash App: $awcgiveplus',
   'Online by card or bank at plcc-tithe.vercel.app',
 ];
 

@@ -22,48 +22,18 @@ const GivingFormPage: React.FC = () => {
       setTimeout(() => setCopied(null), 2000);
    };
 
-   const methods = [
-      {
-         id: 'text',
-         title: 'Text Giving',
-         icon: <Smartphone size={24} />,
-         value: '855 625 4703',
-         action: 'sms:8556254703',
-         description: 'Text any amount to this number to give instantly.',
-         color: 'bg-indigo-50 text-indigo-600',
-         qrValue: 'sms:8556254703'
-      },
-      {
-         id: 'cashapp',
-         title: 'Cash App',
-         icon: <DollarSign size={24} />,
-         value: '$AWCGIVEPLUS',
-         action: 'https://cash.app/$AWCGIVEPLUS',
-         description: 'Send directly via Cash App. Fast and secure.',
-         color: 'bg-green-50 text-green-600',
-         qrValue: 'https://cash.app/$AWCGIVEPLUS'
-      },
-      {
-         id: 'zelle',
-         title: 'Zelle',
-         icon: <Send size={24} />,
-         value: '508 933 1804',
-         description: 'Send directly from your bank app using this number.',
-         color: 'bg-purple-50 text-purple-600',
-         // Zelle doesn't have a standard URL scheme for direct payment, usually just the number
-         qrValue: '5089331804'
-      }
-   ];
+   // PLCC has no text, Cash App or Zelle giving yet; members give through PLCC Tithe.
+   const methods: Array<{ id: string; title: string; icon: React.ReactNode; value: string; action: string; description: string; color: string; qrValue: string }> = [];
 
    const onlineLinks = [
       {
          title: 'Tithes & Offerings',
-         url: 'https://secure.myvanco.com/YKB0/campaign/C-1218F?access=tile_direct',
+         url: 'https://plcc-tithe.vercel.app/',
          icon: <Heart size={20} />,
       },
       {
          title: 'Building Fund',
-         url: 'https://secure.myvanco.com/YKB0/campaign/C-1218F?access=tile_direct',
+         url: 'https://plcc-tithe.vercel.app/',
          icon: <Building2 size={20} />,
       }
    ];
@@ -73,7 +43,7 @@ const GivingFormPage: React.FC = () => {
          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
                <h1 className="text-4xl font-extrabold text-[#0d1a14] mb-2 tracking-tight">Giving Channels</h1>
-               <p className="text-gray-400 font-medium">Official donation methods for Abundant Worship Center.</p>
+               <p className="text-gray-400 font-medium">Official giving for Promised Land Christian Center.</p>
             </div>
          </div>
 
@@ -132,7 +102,7 @@ const GivingFormPage: React.FC = () => {
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/20 text-[#0d1a14] font-black text-[10px] uppercase tracking-widest mb-4">
                      <CreditCard size={12} /> Secure Portal
                   </div>
-                  <h2 className="text-3xl lg:text-4xl font-black text-[#0d1a14] mb-4">Online Giving via Vanco</h2>
+                  <h2 className="text-3xl lg:text-4xl font-black text-[#0d1a14] mb-4">Online Giving via PLCC Tithe</h2>
                   <p className="text-gray-500 font-medium text-lg leading-relaxed max-w-xl">
                      Manage your recurring gifts, tithes, and building fund contributions securely through our dedicated donor portal.
                   </p>

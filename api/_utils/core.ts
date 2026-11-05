@@ -3882,7 +3882,7 @@ const handleOps = async (req: any, res: any) => {
         if (!resendClient) return res.status(503).json({ error: 'Email service unavailable' });
         const { to, subject, body, from_name, from_email, message, category } = req.body || {};
 
-        let targetTo = to || 'admin@portal-awc.org'; // Default admin email
+        let targetTo = to || process.env.CONTACT_INBOX_EMAIL || 'promisedlandcc2026@gmail.com'; // Default church inbox
         let targetSubject = subject || `Contact Form: ${category || 'General'}`;
         let targetHtml = body || `
             <h3>New Contact Form Submission</h3>
@@ -8332,7 +8332,7 @@ const handleMinutes = async (req: any, res: any) => {
                                     <p style="margin: 0; font-size: 12px; color: ${isOverdue ? '#dc2626' : '#d97706'}; font-weight: 700;">⏱ Deadline: ${deadlineStr}</p>
                                 </div>
                                 <div style="text-align: center; margin: 28px 0;">
-                                    <a href="https://portal-awc.org/communication/minutes" style="background: #0d1a14; color: #C9A35A; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 900; font-size: 13px; display: inline-block; letter-spacing: 2px;">SIGN NOW →</a>
+                                    <a href="https://plcc-opal.vercel.app/#/communication/minutes" style="background: #0d1a14; color: #C9A35A; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 900; font-size: 13px; display: inline-block; letter-spacing: 2px;">SIGN NOW →</a>
                                 </div>
                                 <p style="color: #999; font-size: 11px; text-align: center;">This is an automated reminder from PLCC Vault Leadership System.</p>
                             </div>

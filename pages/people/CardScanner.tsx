@@ -191,13 +191,13 @@ const CardScannerPage: React.FC = () => {
               spellCheck={false}
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
-              placeholder="AWC1.…"
+              placeholder="PLCC card code…"
               disabled={busy}
               className="w-full min-h-[48px] rounded-xl border border-gray-200 px-3 text-sm font-mono text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#0d1a14]/30"
               aria-describedby="awc-card-code-help"
             />
             <p id="awc-card-code-help" className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-              Paste the full AWC1 card code from the QR. Card numbers and names are not accepted.
+              Paste the full card code from the QR. Card numbers and names are not accepted.
             </p>
           </div>
           <button

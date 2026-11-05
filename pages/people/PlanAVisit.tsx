@@ -85,7 +85,7 @@ const PlanAVisit: React.FC = () => {
             <InAppWelcomeModal
                 id="plan-a-visit"
                 title="Welcome to the Guest Experience Portal"
-                description="Securely manage incoming visit registrations and ensure every guest receives an Abundant welcome."
+                description="Securely manage incoming visit registrations and ensure every guest receives a warm PLCC welcome."
             />
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>

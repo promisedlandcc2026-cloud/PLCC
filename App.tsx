@@ -48,7 +48,6 @@ import TaxDocumentsPage from './pages/giving/TaxDocuments';
 import FundManagementPage from './pages/giving/FundManagement';
 import FundraisersPage from './pages/giving/Fundraisers';
 import GivingFormPage from './pages/giving/GivingForm';
-import TextGivingPage from './pages/giving/TextGiving';
 import GivingFormUrlPage from './pages/giving/GivingFormUrl';
 import GiveOnlinePage from './pages/giving/GiveOnline';
 import TagsManagerPage from './pages/tags/TagsManager';
@@ -129,18 +128,8 @@ import MinutesManagerPage from './pages/communication/MinutesManager';
 import MinutesViewPage from './pages/communication/MinutesView';
 import MorePage from './pages/More';
 
-const DCB_URL = 'https://awc-digital-contribution-book.onrender.com/';
-
-const RedirectToContributionBook: React.FC = () => {
-  useEffect(() => {
-    window.location.replace(DCB_URL);
-  }, []);
-  return (
-    <div className="min-h-[40vh] flex items-center justify-center text-sm text-gray-500">
-      Opening the Digital Contribution Book…
-    </div>
-  );
-};
+/** Old Contribution Book links now open PLCC's Treasury Ledger. */
+const RedirectToContributionBook: React.FC = () => <Navigate to="/finance/ledger" replace />;
 
 // Global Title Sync
 const TitleManager = () => {
@@ -686,7 +675,7 @@ const App: React.FC = () => {
           {/* Pledge Campaigns was replaced by Fundraisers (moved from DCB) */}
           <Route path="/pledge-campaigns" element={<Navigate to="/fundraisers" replace />} />
           <Route path="/giving-form" element={<ProtectedRoute><AppShell><GivingFormPage /></AppShell></ProtectedRoute>} />
-          <Route path="/text-giving" element={<ProtectedRoute><AppShell><TextGivingPage /></AppShell></ProtectedRoute>} />
+          <Route path="/text-giving" element={<Navigate to="/giving" replace />} />
           <Route path="/giving-form-url" element={<ProtectedRoute><AppShell><GivingFormUrlPage /></AppShell></ProtectedRoute>} />
           <Route path="/giving" element={<ProtectedRoute><AppShell><GiveOnlinePage /></AppShell></ProtectedRoute>} />
           {/* Old cash form retired; its link now opens the Give page */}

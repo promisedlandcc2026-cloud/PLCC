@@ -540,7 +540,7 @@ const DeskCheckInPage: React.FC = () => {
             busy
               ? 'Looking up…'
               : mode === 'in'
-                ? 'Scan adult or child AWC1'
+                ? 'Scan an adult or child PLCC card'
                 : 'Scan child Family Pass for pickup'
           }
         />
@@ -549,7 +549,7 @@ const DeskCheckInPage: React.FC = () => {
             type="text"
             value={manualCode}
             onChange={(e) => setManualCode(e.target.value)}
-            placeholder="AWC1 or backup code"
+            placeholder="Card code or backup code"
             className="flex-1 min-h-[48px] rounded-xl border border-gray-200 px-3 font-mono text-sm"
             disabled={scannerPaused}
           />

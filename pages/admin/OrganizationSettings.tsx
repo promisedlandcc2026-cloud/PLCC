@@ -17,7 +17,7 @@ import { logActivity } from '../../lib/logger';
 import { supabase } from '@/lib/supabase';
 
 const OrganizationSettingsPage: React.FC = () => {
-   const [name, setName] = React.useState("Abundant Worship Church");
+   const [name, setName] = React.useState("Promised Land Christian Center");
    const [address, setAddress] = React.useState("14025 Little Rd");
    const [city, setCity] = React.useState("Hudson");
    const [state, setState] = React.useState("Florida");
@@ -208,7 +208,7 @@ const OrganizationSettingsPage: React.FC = () => {
                         </div>
                         <div>
                            <h4 className="font-bold text-[#0d1a14] text-sm">Primary Domain</h4>
-                           <p className="text-xs text-gray-500">portal-awc.org (Verified)</p>
+                           <p className="text-xs text-gray-500">plcc-opal.vercel.app</p>
                         </div>
                      </div>
                      <div className="flex items-center gap-3 text-left">

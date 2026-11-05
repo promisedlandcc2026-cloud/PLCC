@@ -4,7 +4,7 @@ import { useNav } from '../../App';
 import { fetchWithTimeout, getAuthHeaders } from '../../lib/api';
 
 const SEND_ROLES = new Set(['SUPER_ADMIN', 'PASTOR', 'MINISTRY_LEADER']);
-const LIVE_URL = 'https://www.youtube.com/@khiireofficial/live';
+const LIVE_URL = 'https://www.youtube.com/@plccgracelove/live';
 
 type Preset = { key: string; label: string; icon: React.ReactNode; title: string; body: string; url: string; inbox: boolean };
 
