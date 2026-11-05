@@ -110,7 +110,6 @@ export const NAV_BY_SECTION: Record<string, NavItem[]> = {
     { label: 'Kids Kiosk', path: '/events/kids-kiosk', icon: <Baby size={18} /> },
     { label: 'Kids Plans', path: '/events/kids-plans', icon: <Image size={18} /> },
     { label: 'Kids Bucks', path: '/events/kids-bucks', icon: <Coins size={18} /> },
-    { label: 'PLCC Ark', path: '/events/ark', icon: <Gamepad2 size={18} /> },
     { label: 'Flyer share', path: '/events/flyer-share', icon: <Megaphone size={18} /> },
     { label: 'Consent Management', path: '/admin/consent-management', icon: <Shield size={18} /> },
     { label: 'Alerts', path: '/events/alerts', icon: <Bell size={18} /> },

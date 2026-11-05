@@ -41,6 +41,7 @@ import {
   THANKSGIVING_2026_EVENT_ID,
   getFellowshipEventConfig,
   isFellowshipRsvpClosed,
+  SHOW_BUILT_IN_EVENTS,
 } from '../api/_utils/fellowshipEventConfig';
 import {
   dismissHomeItem,
@@ -170,8 +171,8 @@ const DashboardPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, dismissalRevision]);
 
-  const showCookoutPromo = !cookoutPast && !cookoutDismissed;
-  const showThanksgivingPromo = !thanksgivingPast && !thanksgivingDismissed;
+  const showCookoutPromo = SHOW_BUILT_IN_EVENTS && !cookoutPast && !cookoutDismissed;
+  const showThanksgivingPromo = SHOW_BUILT_IN_EVENTS && !thanksgivingPast && !thanksgivingDismissed;
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -445,7 +446,7 @@ const DashboardPage: React.FC = () => {
 
   const archiveRows = useMemo(() => {
     const rows = [...archivedItems];
-    if (thanksgivingPast && !archivedItems.some((r) => r.key === THANKSGIVING_PROMO_KEY)) {
+    if (SHOW_BUILT_IN_EVENTS && thanksgivingPast && !archivedItems.some((r) => r.key === THANKSGIVING_PROMO_KEY)) {
       rows.push({
         key: THANKSGIVING_PROMO_KEY,
         entry: {

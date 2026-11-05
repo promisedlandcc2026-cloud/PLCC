@@ -273,7 +273,7 @@ const FormsManagerPage: React.FC = () => {
           <p className="text-base font-black text-[#0d1a14]">Submissions</p>
           <p className="text-xs text-gray-500 mt-1 font-medium">See answers people sent in</p>
         </button>
-        {String(userRole || '').toUpperCase() === 'SUPER_ADMIN' && (
+        {false && String(userRole || '').toUpperCase() === 'SUPER_ADMIN' && (
           <button
             type="button"
             onClick={() => navigate('/fellowship-cookout')}

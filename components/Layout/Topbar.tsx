@@ -127,11 +127,11 @@ const Topbar: React.FC = () => {
   }, [pollEnabled, triggerUnread]);
 
   return (
-    <header className="relative z-[110] w-full h-16 md:h-20 bg-white border-b border-gray-100 flex items-center px-4 md:px-8 shrink-0">
+    <header className="relative z-[110] w-full h-16 md:h-20 bg-white border-b border-gray-100 flex items-center px-3 sm:px-4 md:px-8 shrink-0">
       <div className="flex items-center">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-3 mr-3 text-gray-400 hover:bg-gray-50 hover:text-burgundy rounded-xl active:scale-90 transition-all min-h-[44px] min-w-[44px]"
+          className="p-2.5 mr-1 sm:p-3 sm:mr-3 text-gray-400 hover:bg-gray-50 hover:text-burgundy rounded-xl active:scale-90 transition-all min-h-[44px] min-w-[44px]"
           aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
           aria-controls="app-sidebar"
           aria-expanded={isSidebarOpen}
@@ -149,14 +149,14 @@ const Topbar: React.FC = () => {
             decoding="async"
           />
           <span className="font-black text-lg md:text-xl tracking-tighter text-[#0d1a14] whitespace-nowrap">
-            PLCC <span className="text-burgundy">VAULT</span>
+            PLCC <span className="text-burgundy max-[419px]:hidden">VAULT</span>
           </span>
         </div>
       </div>
 
       <VaultSearch />
 
-      <div className="flex items-center space-x-2 md:space-x-4 ml-auto">
+      <div className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-4 ml-auto">
         <div className="relative z-[120]">
           <button
             type="button"

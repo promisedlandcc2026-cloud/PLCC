@@ -85,6 +85,14 @@ export const THANKSGIVING_2026_EVENT_ID = '86ac9498-ee56-4c6a-baae-079832b0ea73'
 // (a1b2c3d4-…-202612121800) was deleted on Nov 1, 2026, so its id is no longer used.
 export const MARRIEDS_DINNER_2026_EVENT_ID = '8cd1c63d-e041-423d-bcd0-8c6a6b9c10bf';
 
+/**
+ * The three built-in events below (Cookout, Grand Family Celebration, Marrieds Dinner) came over
+ * from AWC and are not PLCC's. They stay defined so old links and code paths don't break,
+ * but every button, banner and staff list for them is hidden while this is false.
+ * PLCC events are created with "Add event" and get RSVP through /events/:id/rsvp.
+ */
+export const SHOW_BUILT_IN_EVENTS = false;
+
 export const FELLOWSHIP_EVENTS: Record<string, FellowshipEventConfig> = {
   [DEFAULT_FELLOWSHIP_EVENT_ID]: {
     eventId: DEFAULT_FELLOWSHIP_EVENT_ID,

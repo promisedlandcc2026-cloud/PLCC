@@ -37,7 +37,6 @@ import MyFamilyPage from './pages/family/MyFamily';
 import FamilyHuddleJoinPage from './pages/family/FamilyHuddleJoin';
 import KidsViewPage from './pages/family/KidsView';
 import KidsBucksPage from './pages/events/KidsBucks';
-import ArkScoresPage from './pages/events/ArkScores';
 import AttendanceSessionsPage from './pages/attendance/AttendanceSessions';
 import AttendanceSessionAttendancePage from './pages/attendance/AttendanceSessionAttendance';
 import AttendanceDashboardPage from './pages/attendance/AttendanceDashboard';
@@ -73,6 +72,7 @@ import RsvpArchivePage from './pages/events/RsvpArchive';
 import {
   MARRIEDS_DINNER_2026_EVENT_ID,
   THANKSGIVING_2026_EVENT_ID,
+  SHOW_BUILT_IN_EVENTS,
 } from './api/_utils/fellowshipEventConfig';
 import MemberSetupGuide from './pages/help/MemberSetupGuide';
 import HowToVideosPage from './pages/help/HowToVideos';
@@ -704,7 +704,7 @@ const App: React.FC = () => {
           <Route path="/events/kids-kiosk" element={<ProtectedRoute><AppShell><KidsKioskPage /></AppShell></ProtectedRoute>} />
           <Route path="/events/kids-plans" element={<ProtectedRoute><AppShell><KidsPlansPage /></AppShell></ProtectedRoute>} />
           <Route path="/events/kids-bucks" element={<ProtectedRoute><AppShell><KidsBucksPage /></AppShell></ProtectedRoute>} />
-          <Route path="/events/ark" element={<ProtectedRoute><AppShell><ArkScoresPage /></AppShell></ProtectedRoute>} />
+          <Route path="/events/ark" element={<Navigate to="/events/overview" replace />} />
           <Route path="/events/flyer-share" element={<ProtectedRoute><AppShell><FlyerSharePage /></AppShell></ProtectedRoute>} />
           <Route path="/events/alerts" element={<ProtectedRoute><AppShell><EventsAlerts /></AppShell></ProtectedRoute>} />
           <Route path="/events/volunteers" element={<ProtectedRoute><AppShell><EventsVolunteers /></AppShell></ProtectedRoute>} />
@@ -715,19 +715,19 @@ const App: React.FC = () => {
           <Route path="/elements/forms" element={<ProtectedRoute><AppShell><FormsManagerPage /></AppShell></ProtectedRoute>} />
           <Route path="/elements/forms/builder/:formId" element={<ProtectedRoute><FormBuilderPage /></ProtectedRoute>} />
           <Route path="/forms/public/:formId" element={<PublicFormPage />} />
-          <Route path="/fellowship-cookout" element={<FellowshipCookoutRsvp />} />
+          <Route path="/fellowship-cookout" element={SHOW_BUILT_IN_EVENTS ? <FellowshipCookoutRsvp /> : <Navigate to="/events" replace />} />
           {/* PLCC Grand Family Celebration 2026 (was Thanksgiving; old links keep working) */}
           <Route
             path="/thanksgiving-rsvp"
-            element={<Navigate to={`/events/${THANKSGIVING_2026_EVENT_ID}/rsvp`} replace />}
+            element={<Navigate to={SHOW_BUILT_IN_EVENTS ? `/events/${THANKSGIVING_2026_EVENT_ID}/rsvp` : '/events'} replace />}
           />
           <Route
             path="/grand-family-celebration-rsvp"
-            element={<Navigate to={`/events/${THANKSGIVING_2026_EVENT_ID}/rsvp`} replace />}
+            element={<Navigate to={SHOW_BUILT_IN_EVENTS ? `/events/${THANKSGIVING_2026_EVENT_ID}/rsvp` : '/events'} replace />}
           />
           <Route
             path="/marrieds-dinner-rsvp"
-            element={<Navigate to={`/events/${MARRIEDS_DINNER_2026_EVENT_ID}/rsvp`} replace />}
+            element={<Navigate to={SHOW_BUILT_IN_EVENTS ? `/events/${MARRIEDS_DINNER_2026_EVENT_ID}/rsvp` : '/events'} replace />}
           />
           <Route path="/events/:eventId/rsvp" element={<FellowshipCookoutRsvp />} />
           <Route path="/events/cookout-rsvps" element={<ProtectedRoute><AppShell><CookoutRsvpsPage /></AppShell></ProtectedRoute>} />

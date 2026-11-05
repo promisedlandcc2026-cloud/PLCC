@@ -48,6 +48,7 @@ import {
   getFellowshipEventConfig,
   isFellowshipRsvpClosed,
   listFellowshipEvents,
+  SHOW_BUILT_IN_EVENTS,
 } from '../../api/_utils/fellowshipEventConfig';
 import { fellowshipRsvpStaffPath } from '../../lib/simpleNav';
 import { buildStartsAtFromDateAndTime, toEventYmd } from '../../lib/eventDate';
@@ -892,7 +893,7 @@ const EventsOverview: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-500 pb-12 relative px-1">
+    <div className="space-y-5 animate-in fade-in duration-500 pb-12 relative px-4 md:px-6 pt-3">
       {toast && (
         <div className="fixed top-20 right-4 md:right-8 z-[110] animate-in slide-in-from-right-8 duration-300">
           <div
@@ -953,6 +954,8 @@ const EventsOverview: React.FC = () => {
             <p className="text-gray-500 text-sm mt-1.5">Church calendar and gathering tools</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {SHOW_BUILT_IN_EVENTS ? (
+              <>
             <button
               type="button"
               onClick={() => navigate('/thanksgiving-rsvp')}
@@ -969,7 +972,9 @@ const EventsOverview: React.FC = () => {
               <ClipboardCheck size={16} />
               {marriedsRsvpOpen ? 'Marrieds Dinner RSVP' : 'Marrieds Dinner details'}
             </button>
-            {isSuperAdmin && (
+              </>
+            ) : null}
+            {isSuperAdmin && SHOW_BUILT_IN_EVENTS && (
               <div className="relative" ref={holidayMenuRef}>
                 <button
                   type="button"
@@ -985,7 +990,7 @@ const EventsOverview: React.FC = () => {
                 {holidayMenuOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 mt-1.5 z-40 min-w-[220px] rounded-xl border border-gray-100 bg-white shadow-lg py-1.5"
+                    className="absolute left-0 sm:left-auto sm:right-0 mt-1.5 z-40 min-w-[220px] max-w-[calc(100vw-2rem)] rounded-xl border border-gray-100 bg-white shadow-lg py-1.5"
                   >
                     {holidayRsvpEvents.map((ev) => (
                       <button
@@ -1156,6 +1161,8 @@ const EventsOverview: React.FC = () => {
             ))}
           </div>
 
+          {SHOW_BUILT_IN_EVENTS ? (
+          <>
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-burgundy/5 text-burgundy flex items-center justify-center shrink-0">
@@ -1203,7 +1210,10 @@ const EventsOverview: React.FC = () => {
             </div>
           </div>
 
-          {isSuperAdmin && (
+          </>
+          ) : null}
+
+          {isSuperAdmin && SHOW_BUILT_IN_EVENTS && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:p-6">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 rounded-xl bg-burgundy/5 text-burgundy flex items-center justify-center shrink-0">

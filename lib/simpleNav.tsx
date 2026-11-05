@@ -129,12 +129,6 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
         section: Section.Events,
       },
       {
-        label: 'PLCC Ark',
-        path: '/events/ark',
-        icon: <Gamepad2 size={18} />,
-        section: Section.Events,
-      },
-      {
         label: 'Flyer share',
         path: '/events/flyer-share',
         icon: <Megaphone size={18} />,
