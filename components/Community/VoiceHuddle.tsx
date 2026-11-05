@@ -1176,7 +1176,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
   useEffect(() => {
     const bp = huddleGalleryBreakpointFromWidth(viewportWidth);
     const size = huddleGalleryPageSize(bp);
-    const stripCount = Math.max(0, roster.length - (roster.length > 0 ? 1 : 0));
+    const stripCount = roster.length;
     const pages = huddleGalleryPageCount(stripCount, size);
     setGalleryPage((prev) => clampHuddleGalleryPage(prev, pages));
   }, [roster.length, viewportWidth]);
@@ -3366,7 +3366,9 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
   const galleryBreakpoint = huddleGalleryBreakpointFromWidth(viewportWidth);
   const galleryPageSizeVal = huddleGalleryPageSize(galleryBreakpoint);
   const galleryColumns = huddleGalleryColumnCount(galleryBreakpoint);
-  const searchedStrip = filterHuddleRosterByName(stripRoster, gallerySearch);
+  // Everyone is a small square; the host just goes first (no big featured tile).
+  const galleryAll = featuredParticipant ? [featuredParticipant, ...stripRoster] : stripRoster;
+  const searchedStrip = filterHuddleRosterByName(galleryAll, gallerySearch);
   const galleryPages = huddleGalleryPageCount(searchedStrip.length, galleryPageSizeVal);
   const safeGalleryPage = clampHuddleGalleryPage(galleryPage, galleryPages);
   const galleryRoster = useGalleryPagination
@@ -3736,7 +3738,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 </div>
               ) : (
                 <div className="space-y-2" data-huddle-layout="mod-stage">
-                  {canModerate || stripRoster.length > 15 ? (
+                  {canModerate || galleryAll.length > 15 ? (
                     <div className="flex flex-wrap items-center gap-2" data-huddle-mod-toolbar="true">
                       <label className="relative flex-1 min-w-[10rem]">
                         <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden />
@@ -3774,22 +3776,6 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                         </>
                       ) : null}
                     </div>
-                  ) : null}
-                  {featuredParticipant ? (
-                    <HuddleTile
-                      key={`featured-${featuredParticipant.identity}`}
-                      row={featuredParticipant}
-                      room={roomRef.current}
-                      featured
-                      showModBadge={featuredParticipant.isModerator}
-                      showHostBadge={featuredParticipant.isHost}
-                      canModerateMute={canModerate}
-                      canManageMods={canModerate && !modActionBusy}
-                      canAddMod={canAddMod}
-                      onMuteRemote={muteRemote}
-                      onAddMod={addHuddleMod}
-                      onPassMod={passHuddleMod}
-                    />
                   ) : null}
                   {gallerySearch.trim() && galleryRoster.length === 0 ? (
                     <p className="text-sm text-gray-500 py-2">No one in the huddle matches “{gallerySearch.trim()}”.</p>
