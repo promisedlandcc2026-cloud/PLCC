@@ -1,3 +1,4 @@
+import { isUgandanE164, toE164Intl } from './ugPhone.js';
 /**
  * Text sign-in codes for the Vault and PLCC Connect, sent and checked by Twilio
  * Verify (Twilio's own pre-approved senders — the church's (855) text-to-give
@@ -15,11 +16,14 @@ export function phoneCodesEnabled(): boolean {
 }
 
 /**
- * Ordinary US numbers only, as E.164 (+15085551234). Rejects toll-free,
+ * Ugandan mobiles (+2567…) or ordinary US numbers, as E.164 (+15085551234). Rejects toll-free,
  * premium (900/976), N11 and malformed numbers — keeps cost and SMS-pumping
  * risk down.
  */
 export function normalizeUsPhone(raw: unknown): string | null {
+  // PLCC: Ugandan mobiles (+256 7…) are allowed for text codes too.
+  const ug = toE164Intl(raw);
+  if (ug && isUgandanE164(ug) && /^\+2567\d{8}$/.test(ug)) return ug;
   let digits = String(raw ?? '').replace(/\D/g, '');
   if (digits.length === 11 && digits.startsWith('1')) digits = digits.slice(1);
   if (digits.length !== 10) return null;

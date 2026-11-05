@@ -715,7 +715,7 @@ const MembersPage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Phone</label>
-                <input name="phone" type="tel" defaultValue={editingMember?.phone === 'No Phone' ? '' : editingMember?.phone} placeholder="(555) 123-4567" className="w-full p-3 bg-gray-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-gold" />
+                <input name="phone" type="tel" defaultValue={editingMember?.phone === 'No Phone' ? '' : editingMember?.phone} placeholder="0772 123456" className="w-full p-3 bg-gray-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-gold" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Household Name</label>

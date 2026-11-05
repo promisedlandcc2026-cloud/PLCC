@@ -1,5 +1,6 @@
 import { supabase as supabaseAuth } from './supabase';
 
+import { toE164Intl } from '../api/_utils/ugPhone.js';
 /**
  * URL embedded in auth emails — must be listed under Authentication → URL Configuration → Redirect URLs.
  * Defaults to origin + trailing slash (no hash): numeric OTP is verified in-app; a plain URL avoids rare
@@ -451,9 +452,11 @@ export function isPhoneNumber(value: string): boolean {
   return /^[+\d]/.test(v) && v.replace(/\D/g, '').length >= 7;
 }
 
-/** Normalise phone to E.164. US 10-digit numbers become +1… */
+/** Normalise phone to E.164. Ugandan numbers (0772 123456) become +256…; US 10-digit numbers +1… */
 export function normalisePhone(value: string): string {
   const trimmed = sanitizeAuthIdentifier(value);
+  const intl = toE164Intl(trimmed);
+  if (intl) return intl;
   const digits = trimmed.replace(/\D/g, '');
   if (digits.length === 10) return `+1${digits}`;
   if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;

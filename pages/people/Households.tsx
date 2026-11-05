@@ -744,7 +744,7 @@ const HouseholdsPage: React.FC = () => {
               type="tel"
               value={editForm.phone}
               onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-              placeholder="(555) 555-5555"
+              placeholder="0772 123456"
               autoComplete="tel"
               className={inputClass}
             />

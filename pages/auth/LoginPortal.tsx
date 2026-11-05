@@ -981,7 +981,7 @@ const LoginPortal: React.FC = () => {
                     <input 
                       type="tel" value={regData.phone} onChange={e => setRegData({...regData, phone: e.target.value})}
                       className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-gold/30 font-bold text-sm"
-                      placeholder="(555) 123-4567"
+                      placeholder="0772 123456"
                     />
                     <p className="text-white/30 text-[10px] font-medium leading-relaxed ml-1">You can sign in with this number and a password. Email is optional.</p>
                   </div>
@@ -1238,7 +1238,7 @@ const LoginPortal: React.FC = () => {
                       autoComplete="tel"
                       value={identifier}
                       onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder="(555) 555-0123"
+                      placeholder="0772 123456"
                       required
                       className="w-full pl-14 pr-5 py-5 bg-white text-[#0d1a14] caret-[#0d1a14] border border-white/20 rounded-2xl outline-none focus:ring-2 focus:ring-gold/60 font-bold placeholder:text-[#0d1a14]/35 [&:-webkit-autofill]:[-webkit-text-fill-color:#0d1a14]"
                     />

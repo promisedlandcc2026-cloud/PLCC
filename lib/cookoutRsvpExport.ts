@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 import { formatCurrency } from '../utils/formatters';
+import { formatPhoneForDisplay } from '../api/_utils/ugPhone.js';
 const BURGUNDY: [number, number, number] = [64, 0, 16];
 const AMBER_TEXT: [number, number, number] = [255, 248, 231];
 const ROW_ALT: [number, number, number] = [250, 247, 246];
@@ -84,14 +85,7 @@ function csvEscape(value: unknown): string {
 
 function formatPhone(phone: string | null | undefined, empty = ''): string {
   if (!phone?.trim()) return empty;
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length === 10) {
-    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
-  }
-  if (digits.length === 11 && digits.startsWith('1')) {
-    return `${digits.slice(1, 4)}-${digits.slice(4, 7)}-${digits.slice(7)}`;
-  }
-  return phone.trim();
+  return formatPhoneForDisplay(phone);
 }
 
 function formatFunds(amount: number | string | null | undefined, empty = ''): string {

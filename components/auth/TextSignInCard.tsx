@@ -123,7 +123,7 @@ export default function TextSignInCard({ defaultPhone }: { defaultPhone?: string
               autoComplete="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="(508) 555-1234"
+              placeholder="0772 123456"
               className="w-full rounded-xl border-2 border-stone-200 px-4 py-3 text-lg focus:border-[#1d372c] focus:outline-none"
             />
           </label>

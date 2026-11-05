@@ -52,7 +52,7 @@ const PersonalSection: React.FC<Props> = ({ fields, setField, phoneOnlyAccount, 
           type="tel"
           autoComplete="tel"
           inputMode="tel"
-          placeholder="+1 …"
+          placeholder="0772 123456"
           value={fields.phone}
           disabled={disabled}
           onChange={(e) => setField('phone', e.target.value)}

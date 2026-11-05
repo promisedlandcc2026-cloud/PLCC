@@ -23,7 +23,7 @@
  *   1. users.verified_phone — set only after a code to that number was approved;
  *   2. an account that signed up with this phone (internal @phone.awcvault.invalid email).
  *
- * Cost guard: US numbers only, per-number hourly limit and a church-wide daily
+ * Cost guard: Ugandan (+256 7…) and US mobiles only, per-number hourly limit and a church-wide daily
  * cap (table auth_sms_sends). If that table is missing, codes are refused rather
  * than sent unmetered.
  */
@@ -199,7 +199,7 @@ async function handleLinkAction(req: any, res: any, deps: PhoneCodeDeps, action:
   }
 
   const e164 = normalizeUsPhone(body.phone);
-  if (!e164) return res.status(400).json({ error: 'Enter a 10-digit US mobile number.' });
+  if (!e164) return res.status(400).json({ error: 'Enter a valid mobile number, e.g. 0772 123456.' });
   const owner = await findAccountForPhone(admin, e164, deps.authEmail);
   if (owner && owner.id !== userId) {
     return res.status(409).json({
@@ -302,7 +302,7 @@ export async function handleAuthPhoneCode(req: any, res: any, deps: PhoneCodeDep
   }
   const purpose = String(body.purpose || 'signin').toLowerCase() === 'signup' ? 'signup' : 'signin';
   const e164 = normalizeUsPhone(body.phone);
-  if (!e164) return res.status(400).json({ error: 'Enter a 10-digit US mobile number.' });
+  if (!e164) return res.status(400).json({ error: 'Enter a valid mobile number, e.g. 0772 123456.' });
   const { admin } = deps;
 
   try {

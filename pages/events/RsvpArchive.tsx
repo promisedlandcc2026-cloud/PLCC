@@ -17,6 +17,7 @@ import { useNav } from '../../App';
 import { Role } from '../../types';
 
 import { formatCurrency } from '../../utils/formatters';
+import { formatPhoneForDisplay } from '../../api/_utils/ugPhone.js';
 type ArchivedEvent = {
   id: string;
   name: string;
@@ -68,9 +69,7 @@ const shortDate = (iso?: string) =>
   iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
 
 const phone = (p?: string | null) => {
-  const d = String(p || '').replace(/\D/g, '');
-  if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
-  return p || '—';
+  return p ? formatPhoneForDisplay(p) || p : '—';
 };
 
 /**

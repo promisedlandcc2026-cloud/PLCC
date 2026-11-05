@@ -2,6 +2,7 @@ import { getSupabaseAdmin } from './auth.js';
 import { ensureMemberForUser } from './ensureMemberForUser.js';
 import { getBcrypt } from './deps.js';
 
+import { formatPhoneForDisplay, isUgandanE164, toE164Intl } from './ugPhone.js';
 /** Reserved IETF TLD — never receives mail. Internal Auth email for phone-only accounts. */
 export const PHONE_EMAIL_DOMAIN = 'phone.awcvault.invalid';
 const GENERIC_LOGIN_ERROR = 'That phone number or password is incorrect.';
@@ -29,11 +30,10 @@ function rateLimited(key: string): boolean {
 }
 
 export function toE164Phone(raw: string): string {
-  const digits = String(raw || '').replace(/\D/g, '');
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
-  if (digits.length >= 10 && digits.length <= 15) return `+${digits}`;
-  throw new Error('Enter a valid mobile number.');
+  // Ugandan numbers first (0772 557842 → +256772557842); US numbers still work.
+  const e164 = toE164Intl(raw);
+  if (!e164) throw new Error('Enter a valid mobile number, e.g. 0772 123456.');
+  return e164;
 }
 
 export function phoneEmailFor(e164: string): string {
@@ -46,15 +46,11 @@ export function isPhonePlaceholderEmail(email: string | null | undefined): boole
 }
 
 export function formatPhoneDigitsForDisplay(raw: string): string {
-  const d = String(raw || '').replace(/\D/g, '');
-  if (d.length === 11 && d.startsWith('1')) {
-    return `+1 (${d.slice(1, 4)}) ${d.slice(4, 7)}-${d.slice(7)}`;
-  }
-  if (d.length === 10) {
-    return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
-  }
-  if (d.length >= 8 && d.length <= 15) return `+${d}`;
-  return String(raw || '').trim();
+  const s = String(raw || '').trim();
+  const d = s.replace(/\D/g, '');
+  // Bare digits from a placeholder email already include the country code.
+  if (/^\d+$/.test(s) && d.length >= 11) return formatPhoneForDisplay(`+${d}`);
+  return formatPhoneForDisplay(s);
 }
 
 /**
@@ -79,6 +75,20 @@ export function formatAccountContact(
 
 export function phoneLookupValues(e164: string): string[] {
   const digits = e164.replace(/\D/g, '');
+  if (isUgandanE164(e164)) {
+    const n = digits.slice(3); // 772557842
+    return [
+      ...new Set([
+        e164,
+        digits,
+        `0${n}`,
+        n,
+        `+256 ${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}`,
+        `0${n.slice(0, 3)} ${n.slice(3)}`,
+        `0${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}`,
+      ]),
+    ];
+  }
   const last10 = digits.slice(-10);
   const unique = new Set<string>([
     e164,
@@ -162,6 +172,16 @@ async function findEmailsForPhone(e164: string): Promise<string[]> {
   if (error) console.warn('[auth-phone] member lookup failed:', error.message);
   for (const m of members || []) {
     if (samePhone((m as any).phone, e164)) add((m as any).email);
+  }
+
+  // Login accounts carrying this number (incl. phone-only accounts whose internal
+  // address was made from an older format of the number).
+  const { data: users } = await supabaseAdmin
+    .from('users')
+    .select('email, phone')
+    .in('phone', keys);
+  for (const u of users || []) {
+    if (samePhone((u as any).phone, e164)) add((u as any).email);
   }
 
   // Phone-only accounts (signed up without an email) use the internal address.

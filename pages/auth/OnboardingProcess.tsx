@@ -483,7 +483,7 @@ const OnboardingProcess: React.FC = () => {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="(555) 123-4567"
+                    placeholder="0772 123456"
                     className="w-full pl-14 pr-5 py-4 rounded-2xl bg-[#F9F9F7] border border-transparent outline-none focus:ring-4 focus:ring-burgundy/10 focus:bg-white focus:border-burgundy/20 font-bold text-lg text-[#0d1a14]"
                   />
                 </div>
@@ -584,7 +584,7 @@ const OnboardingProcess: React.FC = () => {
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="(555) 123-4567"
+                      placeholder="0772 123456"
                       className="w-full pl-14 pr-5 py-4 rounded-2xl bg-[#F9F9F7] border border-transparent outline-none focus:ring-4 focus:ring-burgundy/10 focus:bg-white focus:border-burgundy/20 font-bold text-lg text-[#0d1a14]"
                     />
                   </div>
