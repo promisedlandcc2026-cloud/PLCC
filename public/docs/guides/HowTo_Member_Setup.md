@@ -1,6 +1,6 @@
-# How to Create Your PLCC Vault Account
+# How to Create Your PLCC Canaan Account
 **Promised Land Christian Center (PLCC)**  
-**For:** People creating an PLCC Vault account for the first time  
+**For:** People creating an PLCC Canaan account for the first time  
 **Time:** About 5–7 minutes
 
 ---
@@ -23,7 +23,7 @@ Public walkthrough (no login required): `/#/help/member-setup`
 
 ## What you will do
 
-1. Open PLCC Vault and choose the Members portal  
+1. Open PLCC Canaan and choose the Members portal  
 2. Create an account (name, phone, email, password)  
 3. Choose New guest or Current member  
 4. Finish that short path, review, and enter the Vault  
@@ -35,14 +35,14 @@ Already have an account? Use **Sign in** (email code or passkey) — this guide 
 ## Part 1 · Create your login
 
 ### 1. Open the PLCC website
-Go to [sanctum-live-nine.vercel.app](https://sanctum-live-nine.vercel.app). In the top navigation, select **PLCC Vault**.
+Go to [sanctum-live-nine.vercel.app](https://sanctum-live-nine.vercel.app). In the top navigation, select **PLCC Canaan**.
 
 ![PLCC website home page](/docs/guides/member-setup/step-01.jpg)
 
 ### 2. Choose the Members portal
-On the PLCC Vault portal screen, select the **Members** card.
+On the PLCC Canaan portal screen, select the **Members** card.
 
-![PLCC Vault portal selection](/docs/guides/member-setup/step-02.jpg)
+![PLCC Canaan portal selection](/docs/guides/member-setup/step-02.jpg)
 
 ### 3. Select Create account
 On Member Access, choose **Create account** (not Sign in).
@@ -53,7 +53,7 @@ On Member Access, choose **Create account** (not Sign in).
 Fill in first name, last name, and phone, then continue.
 
 ### 5. Add email, password, and agree to terms
-Enter your email, choose a password, accept the terms, and create your account. PLCC Vault then opens the welcome setup wizard.
+Enter your email, choose a password, accept the terms, and create your account. PLCC Canaan then opens the welcome setup wizard.
 
 ---
 

@@ -3,7 +3,7 @@
  *
  * Members turn alerts on in PLCC Connect; Connect forwards the browser's push
  * subscription here (resource=push). Every member-facing inbox notification
- * (Vault News, announcements, prayer requests, mentions, huddles, PLCC Bucks)
+ * (Canaan News, announcements, prayer requests, mentions, huddles, PLCC Bucks)
  * is also pushed to that person's phones, and staff can send a one-off alert
  * ("We're live", "RSVP closes Friday") from the Vault home page.
  *

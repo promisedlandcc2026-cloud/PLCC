@@ -124,7 +124,7 @@ export const AddServeVolunteer: React.FC<{ opportunityId: string; onAdded: () =>
           })}
         </ul>
       ) : q.trim().length >= 2 && !searching ? (
-        <p className="text-xs text-gray-500">No one found. They need a Vault account to be added.</p>
+        <p className="text-xs text-gray-500">No one found. They need a PLCC Canaan account to be added.</p>
       ) : null}
       {people.some((p) => p.eligibility !== 'eligible' && !p.onRoster) ? (
         <p className="text-xs text-gray-500">

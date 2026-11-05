@@ -206,7 +206,7 @@ export function renderFlyerSharePreviewHtml(card: {
   <link rel="canonical" href="${previewShareUrl}" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="PLCC Vault" />
+  <meta property="og:site_name" content="PLCC Canaan" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta property="og:url" content="${previewShareUrl}" />

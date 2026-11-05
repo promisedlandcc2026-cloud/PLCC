@@ -66,7 +66,7 @@ const VaultRepairPage: React.FC = () => {
     return (
       <div className="max-w-xl mx-auto pt-16 px-4 text-center">
         <ShieldAlert className="mx-auto text-burgundy mb-4" size={36} />
-        <h1 className="text-2xl font-black text-[#0d1a14]">Vault Repair</h1>
+        <h1 className="text-2xl font-black text-[#0d1a14]">Canaan Repair</h1>
         <p className="text-gray-500 mt-2 font-medium">Only Super Admins can use this console.</p>
       </div>
     );

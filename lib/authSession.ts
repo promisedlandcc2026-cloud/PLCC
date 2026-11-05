@@ -1,5 +1,5 @@
 /**
- * PLCC Vault — live Supabase session is the single auth truth.
+ * PLCC Canaan — live Supabase session is the single auth truth.
  * App-only awc_* keys may mirror a live token/profile; they must never keep
  * the UI signed in after the Supabase session is gone.
  */

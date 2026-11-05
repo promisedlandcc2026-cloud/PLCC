@@ -57,7 +57,7 @@ const SMS_SIGNIN_ENABLED = import.meta.env.VITE_SMS_SIGNIN_ENABLED === 'true';
 
 /** Must match the opt-in shown at sanctum-live-nine.vercel.app/sms (carrier review). */
 const SMS_CONSENT_TEXT =
-  'I agree to receive one-time sign-in codes by text message from Promised Land Christian Center (PLCC Vault) at the mobile number above. Message frequency varies (one text per sign-in request). Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of membership.';
+  'I agree to receive one-time sign-in codes by text message from Promised Land Christian Center (PLCC Canaan) at the mobile number above. Message frequency varies (one text per sign-in request). Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of membership.';
 const SMS_TERMS_URL = 'https://sanctum-live-nine.vercel.app/terms';
 const SMS_PRIVACY_URL = 'https://sanctum-live-nine.vercel.app/privacy';
 type AuthMode = 'login' | 'signup';
@@ -1065,7 +1065,7 @@ const LoginPortal: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-gold/60 uppercase tracking-widest ml-1">Vault Password</label>
+                    <label className="text-[9px] font-black text-gold/60 uppercase tracking-widest ml-1">Password</label>
                     <input 
                       type="password" required value={regData.password} onChange={e => setRegData({...regData, password: e.target.value})}
                       className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-gold/40 font-bold text-sm"

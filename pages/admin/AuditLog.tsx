@@ -219,7 +219,7 @@ const AuditLogPage: React.FC = () => {
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-[#0d1a14] tracking-tight">Audit Log</h1>
           <p className="text-sm text-gray-600 font-medium mt-1">
-            Track important account, finance, events, chat, and admin changes across PLCC Vault.
+            Track important account, finance, events, chat, and admin changes across PLCC Canaan.
           </p>
         </div>
         <div className="flex items-center gap-2">

@@ -348,7 +348,7 @@ const DashboardPage: React.FC = () => {
           thumbnail_url: v.thumbnail_url ?? null,
           category: String(v.category || 'vault'),
         }));
-        // Home strip highlights PLCC Vault first; fall back to any visible videos.
+        // Home strip highlights PLCC Canaan first; fall back to any visible videos.
         const vaultFirst = [
           ...mapped.filter((v) => v.category === 'vault'),
           ...mapped.filter((v) => v.category !== 'vault'),

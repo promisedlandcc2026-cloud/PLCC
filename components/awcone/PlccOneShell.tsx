@@ -70,7 +70,7 @@ export const PlccLoginHeading: React.FC = () => (
     <h1 className="mt-3 text-[34px] sm:text-[40px] leading-[1.1] font-semibold" style={{ ...serif, color: PLCC_GREEN_DEEP }}>
       Welcome to PLCC ONE
     </h1>
-    <p className="mt-3 text-base text-[#16251f]/70">Sign in to access Chat, Vault, Connect, and Tithe.</p>
+    <p className="mt-3 text-base text-[#16251f]/70">Sign in to access Chat, Canaan, Connect, and Tithe.</p>
   </div>
 );
 
@@ -191,7 +191,7 @@ export const PlccWelcomeBanner: React.FC<{ first: string }> = ({ first }) => (
 
 const APP_CARDS: { id: AwcOneAppId; name: string; blurb: string; Icon: LucideIcon }[] = [
   { id: 'chat', name: 'PLCC Chat', blurb: 'Messages and live calls', Icon: MessageCircle },
-  { id: 'vault', name: 'PLCC Vault', blurb: 'Church administration', Icon: Landmark },
+  { id: 'vault', name: 'PLCC Canaan', blurb: 'Church administration', Icon: Landmark },
   { id: 'connect', name: 'PLCC Connect', blurb: 'Members and community', Icon: Users },
   { id: 'tithe', name: 'PLCC Tithe', blurb: 'Giving and contributions', Icon: HandHeart },
 ];

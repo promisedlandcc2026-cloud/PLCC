@@ -306,7 +306,7 @@ async function phoneCodeRequest(body: Record<string, unknown>): Promise<any> {
       body: JSON.stringify(body),
     });
   } catch {
-    throw new Error('Could not reach the Vault. Check your connection and try again.');
+    throw new Error('Could not reach PLCC Canaan. Check your connection and try again.');
   }
   const json: any = await res.json().catch(() => null);
   if (!res.ok) {

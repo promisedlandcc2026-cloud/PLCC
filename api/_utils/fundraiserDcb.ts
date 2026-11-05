@@ -66,7 +66,7 @@ function memoFor(fundraiser: any, entry: any): string {
         : entry.kind === 'charge'
           ? `Fun charge: ${entry.charge_label || 'charge'}`
           : 'Gift';
-  return `Fundraiser: ${String(fundraiser?.title || '').trim()} · ${what} · entered in PLCC Vault`.slice(0, 180);
+  return `Fundraiser: ${String(fundraiser?.title || '').trim()} · ${what} · entered in PLCC Canaan`.slice(0, 180);
 }
 
 /** True once phase 4 is run (the dcb_* columns exist). */
@@ -226,7 +226,7 @@ async function runVoids(db: Db, voids: any[], deps: FundraiserDcbDeps): Promise<
       try {
         r = await deps.voidInDcb(
           String(v.voucher_id || ''),
-          { transactionId: String(v.transaction_id), reason: String(v.reason || 'Removed in PLCC Vault fundraiser'), refundAmount: Number(v.amount_cents || 0) / 100 },
+          { transactionId: String(v.transaction_id), reason: String(v.reason || 'Removed in PLCC Canaan fundraiser'), refundAmount: Number(v.amount_cents || 0) / 100 },
           { timeoutMs: TIMEOUT_MS }
         );
       } catch (err: any) {

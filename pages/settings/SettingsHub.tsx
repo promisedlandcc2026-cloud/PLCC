@@ -48,7 +48,7 @@ const ALL_ITEMS: Record<string, SettingsNavItem> = {
     system: { id: 'system', label: 'Preferences', icon: Settings, description: 'Church-wide look, seasonal theme and feature switches' },
     'staff-roles': { id: 'staff-roles', label: 'Staff & Roles', icon: ShieldCheck, description: "Change a person's role without resetting their password" },
     'security-log': { id: 'security-log', label: 'Security Log', icon: Shield, description: 'Security officer reports and shift activity' },
-    audit: { id: 'audit', label: 'Audit Log', icon: ClipboardList, description: 'Who changed what across the Vault' },
+    audit: { id: 'audit', label: 'Audit Log', icon: ClipboardList, description: 'Who changed what across PLCC Canaan' },
 };
 
 const VAULT_REPAIR: SettingsNavItem = {

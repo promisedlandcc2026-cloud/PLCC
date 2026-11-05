@@ -39,7 +39,7 @@ const GivingInsightsPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#0d1a14] mb-1 tracking-tight">Giving Insights</h1>
-          <p className="text-gray-400 font-medium text-sm">Live giving data from all sources — Vault entries and home page giving.</p>
+          <p className="text-gray-400 font-medium text-sm">Live giving data from all sources — Canaan entries and home page giving.</p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -130,7 +130,7 @@ const GivingInsightsPage: React.FC = () => {
           <div className="p-12 text-center">
             <Users size={32} className="mx-auto text-gray-200 mb-3" />
             <p className="text-xs font-black text-gray-400 uppercase tracking-widest">No giving records yet</p>
-            <p className="text-xs text-gray-400 font-medium mt-1">Records appear here once someone gives via the home page or Vault.</p>
+            <p className="text-xs text-gray-400 font-medium mt-1">Records appear here once someone gives via the home page or PLCC Canaan.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

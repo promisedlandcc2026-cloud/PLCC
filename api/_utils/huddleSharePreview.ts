@@ -36,7 +36,7 @@ export const HUDDLE_SHARE_PREVIEWS: Record<string, HuddleSharePreview> = {
     slug: 'mount-moriah-channel',
     title: 'Mount Moriah Channel · Live Huddle',
     description:
-      'Join the Live Huddle on PLCC Vault — Discuss · Grow · Connect · Pray · Build Together',
+      'Join the Live Huddle on PLCC Canaan — Discuss · Grow · Connect · Pray · Build Together',
     ext: 'jpg',
   },
 };
@@ -196,7 +196,7 @@ if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})(
     <img src="${imageUrl}" alt="" width="120" height="120" style="width:120px;height:120px;border-radius:24px;object-fit:cover" />
     <p class="kicker">Live Huddle</p>
     <h1>${title.replace(/\s*·\s*Live Huddle$/, '')}</h1>
-    <p class="signin">Sign in to PLCC Connect or PLCC Vault, then tap the huddle link. It opens right into the prayer call.</p>
+    <p class="signin">Sign in to PLCC Connect or PLCC Canaan, then tap the huddle link. It opens right into the prayer call.</p>
     <p class="q" style="margin-top:20px">Join the huddle on:</p>
     <a class="btn gold" href="${connectUrl}">PLCC Connect<small>Most members</small></a>
     <a class="btn plain" href="${appInviteUrl}">The Vault<small>Church staff</small></a>
@@ -204,7 +204,7 @@ if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})(
   </main>`
     : `<main>
     <p>Opening Live Huddle…</p>
-    <p><a href="${appInviteUrl}">Continue to PLCC Vault</a></p>
+    <p><a href="${appInviteUrl}">Continue to PLCC Canaan</a></p>
     <p style="margin-top:16px"><img src="${imageUrl}" alt="" width="280" height="280" style="max-width:80vw;height:auto;border-radius:16px" /></p>
   </main>`;
 
@@ -218,7 +218,7 @@ if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})(
   <link rel="canonical" href="${previewShareUrl}" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="PLCC Vault" />
+  <meta property="og:site_name" content="PLCC Canaan" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta property="og:url" content="${previewShareUrl}" />

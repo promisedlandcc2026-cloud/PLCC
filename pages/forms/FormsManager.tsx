@@ -288,7 +288,7 @@ const FormsManagerPage: React.FC = () => {
 
       <div>
         <h2 className="text-lg font-black text-[#0d1a14] mb-1 tracking-tight">Custom forms</h2>
-        <p className="text-sm text-gray-500 font-medium mb-6">Registration and other forms you build in Vault.</p>
+        <p className="text-sm text-gray-500 font-medium mb-6">Registration and other forms you build in PLCC Canaan.</p>
       </div>
 
       {loading && (

@@ -97,7 +97,7 @@ const Farewell: React.FC = () => {
         </div>
 
         <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.25em] text-[#0d1a14]/35">
-          PLCC Vault · signed out
+          PLCC Canaan · signed out
         </p>
       </div>
     </div>

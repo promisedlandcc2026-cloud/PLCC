@@ -1,5 +1,5 @@
 /**
- * Home Vault News and a real database health check.
+ * Home Canaan News and a real database health check.
  * Health always answers HTTP 200 so the home page can render during an outage.
  */
 import { getSupabaseAdmin, requireAuth, withSupabaseTimeout } from './auth.js';
@@ -48,7 +48,7 @@ function canPostNews(auth: { role?: string }, res: any): boolean {
   if (NEWS_ROLES.has(role)) return true;
   res.status(403).json({
     ok: false,
-    error: 'Only Pastor, Ministry Leader, and Super Admin can post Vault News.',
+    error: 'Only Pastor, Ministry Leader, and Super Admin can post Canaan News.',
   });
   return false;
 }

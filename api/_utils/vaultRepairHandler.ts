@@ -1,5 +1,5 @@
 /**
- * Super Admin Vault Repair Desk — diagnose + allowlisted repairs only.
+ * Super Admin Canaan Repair Desk — diagnose + allowlisted repairs only.
  * No free-form SQL / code execution.
  */
 import { getSupabaseAdmin, requireAuth, resolveAppUser } from './auth.js';
@@ -433,7 +433,7 @@ async function runRepair(
 }
 
 function buildRepairSystemPrompt(diagnosis: any): string {
-  return `You are PLCC Vault Repair Assistant for Super Admins only.
+  return `You are PLCC Canaan Repair Assistant for Super Admins only.
 You diagnose member login/access issues and recommend ONE allowlisted repair action when helpful.
 
 Allowlisted actions ONLY:

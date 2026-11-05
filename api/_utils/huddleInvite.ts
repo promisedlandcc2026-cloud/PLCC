@@ -69,7 +69,7 @@ export function buildHuddleSharePayload(opts: {
   const label = raw.startsWith('#') ? raw.slice(1) : raw;
   return {
     title: 'PLCC Live Huddle',
-    text: `Join the Live Huddle in #${label}. Sign in to PLCC Connect or PLCC Vault, then tap the huddle link. It opens right into the prayer call:`,
+    text: `Join the Live Huddle in #${label}. Sign in to PLCC Connect or PLCC Canaan, then tap the huddle link. It opens right into the prayer call:`,
     url,
   };
 }

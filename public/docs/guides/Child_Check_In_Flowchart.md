@@ -223,4 +223,4 @@ last_updated: "2026-04-27"
 **Print this page and post it near check-in kiosks!**
 
 *Last Updated: April 27, 2026*
-*PLCC Vault System v2.0*
+*PLCC Canaan System v2.0*

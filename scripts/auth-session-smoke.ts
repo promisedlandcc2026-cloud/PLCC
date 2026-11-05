@@ -1,5 +1,5 @@
 /**
- * PLCC Vault — auth session desync smoke (pure helpers + source contracts).
+ * PLCC Canaan — auth session desync smoke (pure helpers + source contracts).
  * Run: npx tsx scripts/auth-session-smoke.ts
  */
 import { readFileSync } from 'node:fs';
@@ -210,7 +210,7 @@ async function main() {
 
   const onboardSrc = readFileSync(join(root, 'pages/auth/OnboardingProcess.tsx'), 'utf8');
   assert(
-    /Welcome to PLCC Vault/.test(onboardSrc) &&
+    /Welcome to PLCC Canaan/.test(onboardSrc) &&
       !/Church staff will welcome you and assign full access/.test(onboardSrc),
     'Onboarding: welcome copy without staff-approval gate messaging'
   );

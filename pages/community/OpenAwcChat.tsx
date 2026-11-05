@@ -44,7 +44,7 @@ const OpenAwcChat: React.FC = () => {
           Taking a while?{' '}
           <a href="https://plcc-chat.vercel.app/community/chat" className="font-bold text-burgundy underline">Open PLCC Chat</a>
           {' '}or use the{' '}
-          <Link to="/community/chat-classic" className="font-bold text-burgundy underline">older Vault chat</Link>.
+          <Link to="/community/chat-classic" className="font-bold text-burgundy underline">older Canaan chat</Link>.
         </p>
       ) : null}
     </div>

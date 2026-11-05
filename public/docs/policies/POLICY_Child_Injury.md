@@ -125,4 +125,4 @@ This policy is reviewed annually by the Children's Ministry Lead and Church Admi
 ---
 
 *For questions about this policy, contact the Children's Ministry Lead or the Church Office.*
-*PLCC Vault — Ministry Administration System*
+*PLCC Canaan — Ministry Administration System*

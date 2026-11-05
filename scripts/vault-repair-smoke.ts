@@ -1,5 +1,5 @@
 /**
- * Vault Repair Desk source contracts (no live API).
+ * Canaan Repair Desk source contracts (no live API).
  * Run: npx tsx scripts/vault-repair-smoke.ts
  */
 import { readFileSync } from 'fs';
@@ -59,7 +59,7 @@ const settings = read('pages/settings/SettingsHub.tsx');
 assert(/awc_vault_repair_unlocked/.test(settings) && /repair=1|repair'\) === '1'/.test(settings), 'Settings: ?repair=1 unlock');
 
 const staff = read('pages/admin/AdminUsers.tsx');
-assert(/Vault Repair Desk/.test(staff) && /awc_vault_repair_unlocked/.test(staff), 'Staff & Roles: card entry when unlocked');
+assert(/Canaan Repair Desk/.test(staff) && /awc_vault_repair_unlocked/.test(staff), 'Staff & Roles: card entry when unlocked');
 assert(/Vault Repair/.test(settings) && /repairUnlocked/.test(settings), 'Settings hub: Admin nav when unlocked');
 
 console.log('\nAll Vault Repair smoke tests passed.\n');

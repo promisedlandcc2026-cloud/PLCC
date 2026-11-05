@@ -147,7 +147,7 @@ export const Navigation: React.FC = () => {
               height={44}
             />
             <span className="font-black text-lg md:text-xl tracking-tighter text-ink whitespace-nowrap">
-              PLCC <span className="text-burgundy">VAULT</span>
+              PLCC <span className="text-burgundy">CANAAN</span>
             </span>
           </button>
         </div>

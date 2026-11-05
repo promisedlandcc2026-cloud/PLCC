@@ -141,7 +141,7 @@ export default function SelfCheckinQrPanel({ sessionId, onCountChange }: Props) 
           <p className="text-xs text-gray-500 mt-0.5">
             {isKids
               ? 'Show this at the classroom door. Parents scan it and check in their own children. Pickup is still done by a teacher at the Kids Kiosk.'
-              : 'Members scan this with the Vault.'}{' '}
+              : 'Members scan this with PLCC Canaan.'}{' '}
             It changes every 30 seconds, so a screenshot sent home won’t work.
           </p>
         </div>

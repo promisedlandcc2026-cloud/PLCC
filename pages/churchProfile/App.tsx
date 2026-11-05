@@ -100,7 +100,7 @@ function ChurchProfileApp() {
           </div>
 
           <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-widest text-gray-400">
-            <span>PLCC Vault</span>
+            <span>PLCC Canaan</span>
           </div>
         </div>
       </footer>

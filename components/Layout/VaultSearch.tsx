@@ -216,7 +216,7 @@ export const VaultSearch: React.FC = () => {
           window.setTimeout(() => inputRef.current?.focus(), 0);
         }}
         className={`${open ? 'hidden' : 'flex'} md:hidden ml-auto items-center justify-center w-11 h-11 rounded-2xl bg-white border border-gray-100 text-gray-500 hover:text-burgundy`}
-        aria-label="Search the Vault"
+        aria-label="Search PLCC Canaan"
       >
         <Search size={20} />
       </button>
@@ -238,7 +238,7 @@ export const VaultSearch: React.FC = () => {
             onFocus={() => setOpen(true)}
             onKeyDown={onKeyDown}
             placeholder="Search members, events, Serve, pages…"
-            aria-label="Search the Vault"
+            aria-label="Search PLCC Canaan"
             role="combobox"
             aria-expanded={open && term.length >= 2}
             aria-controls="vault-search-results"

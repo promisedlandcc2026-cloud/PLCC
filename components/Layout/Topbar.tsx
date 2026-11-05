@@ -149,7 +149,7 @@ const Topbar: React.FC = () => {
             decoding="async"
           />
           <span className="font-black text-lg md:text-xl tracking-tighter text-[#0d1a14] whitespace-nowrap">
-            PLCC <span className="text-burgundy max-[419px]:hidden">VAULT</span>
+            PLCC <span className="text-burgundy max-[419px]:hidden">CANAAN</span>
           </span>
         </div>
       </div>

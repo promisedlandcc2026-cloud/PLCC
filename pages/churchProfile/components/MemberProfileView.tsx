@@ -806,7 +806,7 @@ export const MemberProfileView: React.FC = () => {
           )}
 
           <div className="absolute top-14 left-4 sm:left-auto sm:top-4 sm:right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-xs text-[#E8D8B2] border border-[#C9A35A]/30">
-            PLCC Vault &middot; Promised Land Christian Center
+            PLCC Canaan &middot; Promised Land Christian Center
           </div>
           <div className="absolute bottom-4 right-6 hidden md:block text-right text-white/90 text-xs">
             <span className="italic font-sans tracking-wide">&ldquo;Changing Hearts. Transforming Lives.&rdquo;</span>

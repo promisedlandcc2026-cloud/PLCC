@@ -36,7 +36,7 @@ How to create a giving batch for a service date, enter gifts (name → amount �
 
 ## Accessing Contribution Manager
 
-1. Log in to **PLCC Vault**  
+1. Log in to **PLCC Canaan**  
 2. Top nav → **Treasury**  
 3. Sidebar → **Contribution Manager**  
 
@@ -157,7 +157,7 @@ Posted batches move to the **Posted** filter and are locked.
 
 ## Typical Flow (Mapped to Servant Keeper)
 
-| Servant Keeper | PLCC Vault |
+| Servant Keeper | PLCC Canaan |
 |----------------|-----------|
 | Batches → Add → Save for that date | Contribution Manager → **New Batch** → Save & Open |
 | Unposted Batch Manager → Open by date | Batches → select date → **Open** |

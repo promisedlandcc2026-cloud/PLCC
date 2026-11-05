@@ -95,11 +95,11 @@ export async function notifyEventApproversOfSubmit(
         <li><strong>Location:</strong> ${escapeHtml(event.location || '—')}</li>
         <li><strong>Department:</strong> ${escapeHtml(dept)}</li>
       </ul>
-      <p><a href="${escapeHtml(link)}">Open pending requests in PLCC Vault</a></p>
+      <p><a href="${escapeHtml(link)}">Open pending requests in PLCC Canaan</a></p>
     `;
     await sendEventEmails({
       to: emails,
-      subject: `PLCC Vault: approve “${name}” (${date})`,
+      subject: `PLCC Canaan: approve “${name}” (${date})`,
       html,
     });
   } catch (err: any) {
@@ -156,8 +156,8 @@ export async function notifyEventSubmitterOfDecision(
     await sendEventEmails({
       to: [email],
       subject: approved
-        ? `PLCC Vault: “${name}” approved`
-        : `PLCC Vault: “${name}” not approved`,
+        ? `PLCC Canaan: “${name}” approved`
+        : `PLCC Canaan: “${name}” not approved`,
       html,
     });
   } catch (err: any) {

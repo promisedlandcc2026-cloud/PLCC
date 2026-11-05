@@ -2,7 +2,7 @@
  * Sender address for every Vault email (Resend).
  * Set VAULT_EMAIL_FROM in Vercel to an address on a domain verified at
  * https://resend.com/domains (e.g. updates@plcc.church).
- * The display name ("Promised Land Christian Center", "PLCC Vault") is kept per email.
+ * The display name ("Promised Land Christian Center", "PLCC Canaan") is kept per email.
  */
 const FALLBACK = 'updates@plcc.church';
 

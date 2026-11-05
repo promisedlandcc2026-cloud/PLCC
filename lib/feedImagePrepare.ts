@@ -4,7 +4,7 @@
  */
 export const FEED_CLIENT_IMAGE_MAX_SOURCE_BYTES = 20 * 1024 * 1024;
 export const FEED_CLIENT_IMAGE_MAX_EDGE = 1800;
-/** Vault News card photos. Smaller than Feed so a flyer stays a banner. */
+/** Canaan News card photos. Smaller than Feed so a flyer stays a banner. */
 export const VAULT_NEWS_IMAGE_MAX_EDGE = 1200;
 export const FEED_CLIENT_IMAGE_JPEG_QUALITY = 0.82;
 /** Practical binary target after compression (under Vercel JSON/base64 body limits). */

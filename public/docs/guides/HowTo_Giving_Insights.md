@@ -5,7 +5,7 @@
 ---
 
 ## 1. Accessing the Dashboard
-1. Log in to the **PLCC Vault**.
+1. Log in to the **PLCC Canaan**.
 2. From the main navigation, select **Giving**.
 3. Click on **Giving Insights** from the sub-menu.
 

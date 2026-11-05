@@ -23,21 +23,21 @@ type GuideStep = {
 const CREATE_STEPS: GuideStep[] = [
   {
     title: 'Open the PLCC website',
-    body: 'Go to sanctum-live-nine.vercel.app. In the top navigation, select PLCC Vault.',
+    body: 'Go to sanctum-live-nine.vercel.app. In the top navigation, select PLCC Canaan.',
     image: '/docs/guides/member-setup/step-01.jpg',
-    imageAlt: 'PLCC website home page with PLCC Vault in the navigation',
+    imageAlt: 'PLCC website home page with PLCC Canaan in the navigation',
   },
   {
     title: 'Choose the Members portal',
-    body: 'On the PLCC Vault portal screen, select the Members card.',
+    body: 'On the PLCC Canaan portal screen, select the Members card.',
     image: '/docs/guides/member-setup/step-02.jpg',
-    imageAlt: 'PLCC Vault portal selection showing Members',
+    imageAlt: 'PLCC Canaan portal selection showing Members',
   },
   {
     title: 'Select Create account',
     body: 'On Member Access, choose Create account (not Sign in). Use an email address whose inbox you can open.',
     image: '/docs/guides/member-setup/step-03.jpg',
-    imageAlt: 'PLCC Vault member access Create account screen',
+    imageAlt: 'PLCC Canaan member access Create account screen',
   },
   {
     title: 'Enter your name and phone',
@@ -45,7 +45,7 @@ const CREATE_STEPS: GuideStep[] = [
   },
   {
     title: 'Add email, password, and agree to terms',
-    body: 'Enter your email, choose a password, accept the terms, and create your account. After this, PLCC Vault opens the welcome setup wizard.',
+    body: 'Enter your email, choose a password, accept the terms, and create your account. After this, PLCC Canaan opens the welcome setup wizard.',
   },
 ];
 
@@ -84,7 +84,7 @@ const NEW_PATH_STEPS: GuideStep[] = [
 const CURRENT_PATH_STEPS: GuideStep[] = [
   {
     title: 'Confirm your preferred name',
-    body: 'Enter the name you want on your PLCC Vault profile.',
+    body: 'Enter the name you want on your PLCC Canaan profile.',
   },
   {
     title: 'Phone and birthday',
@@ -165,7 +165,7 @@ const MemberSetupGuide: React.FC = () => {
           How to create your account
         </h1>
         <p className="mt-3 text-gray-600 font-medium leading-relaxed max-w-2xl">
-          Create your PLCC Vault login, then choose whether you are <strong className="font-bold text-[#0d1a14]">new to PLCC</strong> or{' '}
+          Create your PLCC Canaan login, then choose whether you are <strong className="font-bold text-[#0d1a14]">new to PLCC</strong> or{' '}
           <strong className="font-bold text-[#0d1a14]">already a member</strong>. Each path has a short setup made for you.
         </p>
 
@@ -186,10 +186,10 @@ const MemberSetupGuide: React.FC = () => {
         <section className="mt-10 rounded-2xl border border-[#0d1a14]/8 bg-white p-5 md:p-7">
           <h2 className="text-lg font-black mb-3">What you will do</h2>
           <ol className="space-y-2 text-sm text-gray-600 font-medium list-decimal list-inside">
-            <li>Open PLCC Vault and choose the Members portal</li>
+            <li>Open PLCC Canaan and choose the Members portal</li>
             <li>Create an account with name, phone, email, and password</li>
             <li>Choose New guest or Current member</li>
-            <li>Finish that short path, review, and enter the Vault</li>
+            <li>Finish that short path, review, and enter PLCC Canaan</li>
           </ol>
           <p className="mt-4 text-xs text-gray-500 font-medium leading-relaxed flex items-start gap-2">
             <ShieldAlert size={14} className="shrink-0 mt-0.5 text-burgundy/60" />

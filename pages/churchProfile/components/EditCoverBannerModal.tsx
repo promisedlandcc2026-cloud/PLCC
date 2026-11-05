@@ -112,7 +112,7 @@ export const EditCoverBannerModal: React.FC<EditCoverBannerModalProps> = ({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
               <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] text-[#E8D8B2] border border-[#C9A35A]/30">
-                PLCC Vault &middot; Promised Land Christian Center
+                PLCC Canaan &middot; Promised Land Christian Center
               </div>
               <div className="absolute bottom-3 left-4 text-white text-xs">
                 <span className="font-sans italic">&ldquo;Changing Hearts. Transforming Lives.&rdquo;</span>

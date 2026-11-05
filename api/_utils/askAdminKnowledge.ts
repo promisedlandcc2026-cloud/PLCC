@@ -14,7 +14,7 @@ export const CHURCH_DOC_CATALOG: Array<{ name: string; type: string; path: strin
   { name: 'Member Onboarding SOP', type: 'SOP', path: '/docs/sop/SOP_Member_Onboarding.md' },
   { name: 'Meeting Minutes Workflow SOP', type: 'SOP', path: '/docs/sop/SOP_Meeting_Minutes.md' },
   { name: 'How to Add a Member', type: 'Guide', path: '/docs/guides/HowTo_Add_Member.md' },
-  { name: 'How to Create Your PLCC Vault Account', type: 'Guide', path: '/docs/guides/HowTo_Member_Setup.md' },
+  { name: 'How to Create Your PLCC Canaan Account', type: 'Guide', path: '/docs/guides/HowTo_Member_Setup.md' },
   { name: 'How to Enable Connect Child Cards', type: 'Guide', path: '/docs/guides/HowTo_Connect_Child_Cards.md' },
   { name: 'Child Check-In SOP', type: 'SOP', path: '/docs/sop/SOP_Child_Check_In.md' },
   { name: 'Child Check-In For Dummies', type: 'Guide', path: '/docs/guides/HowTo_Child_Check_In_Visual.md' },
@@ -130,7 +130,7 @@ export function formatChurchKnowledgeBlock(docs: ChurchKnowledgeDoc[]): string {
     (d) => `### ${d.name} [${d.type}] (${d.path})
 ${d.excerpt}`
   );
-  return `CHURCH KNOWLEDGE (excerpts from PLCC Vault docs — cite the path in parentheses when you use them):
+  return `CHURCH KNOWLEDGE (excerpts from PLCC Canaan docs — cite the path in parentheses when you use them):
 ${blocks.join('\n\n')}
 When answering from these excerpts, mention the path like (${docs[0].path}) so the member can open Policies.`;
 }

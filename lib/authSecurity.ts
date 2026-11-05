@@ -138,7 +138,7 @@ function buildTotpUri(secret: string, email: string): string {
 }
 
 /** Start authenticator-app enrollment; show QR then call confirmMfaEnroll. */
-export async function startMfaEnroll(friendlyName = 'PLCC Vault'): Promise<MfaEnrollStart> {
+export async function startMfaEnroll(friendlyName = 'PLCC Canaan'): Promise<MfaEnrollStart> {
   const client = requireClient();
 
   // Clear unfinished enrollments so a fresh QR/secret is issued
@@ -160,7 +160,7 @@ export async function startMfaEnroll(friendlyName = 'PLCC Vault'): Promise<MfaEn
   const { data, error } = await client.auth.mfa.enroll({
     factorType: 'totp',
     // No spaces — friendlier for authenticator apps that embed this in the URI
-    friendlyName: String(friendlyName || 'PLCC Vault').replace(/\s+/g, '-'),
+    friendlyName: String(friendlyName || 'PLCC Canaan').replace(/\s+/g, '-'),
   } as any);
 
   if (error) throw new Error(error.message || 'Could not start 2-step setup');

@@ -149,7 +149,7 @@ const MorePage: React.FC = () => {
                <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">System Status</span>
              </div>
              <h3 className="text-3xl font-black tracking-tight mb-2 leading-none">All Protocols Operational</h3>
-             <p className="text-white/60 font-medium text-sm max-w-sm">The PLCC Vault is synchronized with high-availability nodes. All administrative channels are secured.</p>
+             <p className="text-white/60 font-medium text-sm max-w-sm">The PLCC Canaan is synchronized with high-availability nodes. All administrative channels are secured.</p>
            </div>
         </div>
       </div>

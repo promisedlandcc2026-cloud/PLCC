@@ -8311,13 +8311,13 @@ const handleMinutes = async (req: any, res: any) => {
                 const deadlineStr = doc.deadline ? new Date(doc.deadline).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) : 'No deadline set';
 
                 await Promise.all(pendingLeaders.map((l: any) => resendClient.emails.send({
-                    from: vaultFrom('PLCC Vault'),
+                    from: vaultFrom('PLCC Canaan'),
                     to: l.email,
                     subject: `${subjectPrefix}: Sign Meeting Minutes — ${doc.title}`,
                     html: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f9f9f7; padding: 0; border-radius: 16px; overflow: hidden;">
                             <div style="background: #0d1a14; padding: 32px; text-align: center;">
-                                <h1 style="color: #C9A35A; font-size: 20px; margin: 0 0 4px 0; font-weight: 900; letter-spacing: 2px;">PLCC VAULT</h1>
+                                <h1 style="color: #C9A35A; font-size: 20px; margin: 0 0 4px 0; font-weight: 900; letter-spacing: 2px;">PLCC CANAAN</h1>
                                 <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 0; text-transform: uppercase; letter-spacing: 3px;">Meeting Minutes</p>
                             </div>
                             <div style="padding: 32px;">
@@ -8334,7 +8334,7 @@ const handleMinutes = async (req: any, res: any) => {
                                 <div style="text-align: center; margin: 28px 0;">
                                     <a href="https://plcc-opal.vercel.app/#/communication/minutes" style="background: #0d1a14; color: #C9A35A; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 900; font-size: 13px; display: inline-block; letter-spacing: 2px;">SIGN NOW →</a>
                                 </div>
-                                <p style="color: #999; font-size: 11px; text-align: center;">This is an automated reminder from PLCC Vault Leadership System.</p>
+                                <p style="color: #999; font-size: 11px; text-align: center;">This is an automated reminder from PLCC Canaan Leadership System.</p>
                             </div>
                         </div>
                     `
@@ -8491,7 +8491,7 @@ const handleMinutes = async (req: any, res: any) => {
                         : '';
                     const kindLabel = data.department === 'Policy' ? 'policy acknowledgement' : 'meeting minutes';
                     await Promise.all(leaders.map((l: any) => resendClient.emails.send({
-                        from: vaultFrom('PLCC Vault'),
+                        from: vaultFrom('PLCC Canaan'),
                         to: l.email,
                         subject: data.department === 'Policy'
                             ? `📋 Policy acknowledgement required — ${data.title}`

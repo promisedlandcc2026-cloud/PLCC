@@ -419,7 +419,7 @@ const DeskCheckInPage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 pb-28 space-y-5">
       <header className="space-y-2">
-        <p className="text-xs font-black uppercase tracking-widest text-burgundy">PLCC Vault</p>
+        <p className="text-xs font-black uppercase tracking-widest text-burgundy">PLCC Canaan</p>
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-3xl font-black text-burgundy tracking-tight flex items-center gap-2">
             <ScanLine size={28} aria-hidden />

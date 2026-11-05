@@ -785,7 +785,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
         return fail(res, 400, `Type the fundraiser name "${fundraiser.title}" to confirm.`);
       }
       const snapshot = await loadFull(db, fundraiserId);
-      for (const e of snapshot?.entries || []) await outOfDcb(e.payments, e, 'Fundraiser deleted in PLCC Vault');
+      for (const e of snapshot?.entries || []) await outOfDcb(e.payments, e, 'Fundraiser deleted in PLCC Canaan');
       const { error } = await db.from('fundraisers').delete().eq('id', fundraiserId); // cascades
       if (error) throw error;
       await audit(req, userId, 'FUNDRAISER_DELETED', fundraiserId, {
@@ -1056,7 +1056,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
             String(old[0].payment_method) === method &&
             String(old[0].payment_date) === String(newDate);
           if (!unchanged) {
-            await outOfDcb(old, entry, 'Gift amount changed in PLCC Vault fundraiser');
+            await outOfDcb(old, entry, 'Gift amount changed in PLCC Canaan fundraiser');
             await db.from('fundraiser_payments').delete().eq('entry_id', entryId);
             const { data: pay, error } = await db
               .from('fundraiser_payments')
@@ -1100,7 +1100,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
       if (action === 'delete-entry') {
         if (!canDelete) return fail(res, 403, 'Only the Super Admin, Pastor or First Lady can delete an entry.', 'forbidden');
         const { data: payments } = await db.from('fundraiser_payments').select('*').eq('entry_id', entryId);
-        await outOfDcb(payments || [], entry, 'Entry deleted in PLCC Vault fundraiser');
+        await outOfDcb(payments || [], entry, 'Entry deleted in PLCC Canaan fundraiser');
         const { error } = await db.from('fundraiser_entries').delete().eq('id', entryId); // cascades payments
         if (error) throw error;
         await audit(req, userId, 'FUNDRAISER_ENTRY_DELETED', fundraiserId, { entry, payments: payments || [] }, 'warning');
@@ -1153,7 +1153,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
         if (payment.external_ref) {
           return fail(res, 400, 'This payment came from PLCC Tithe. Refund it in Tithe and it comes off here automatically.');
         }
-        await outOfDcb([payment], entry, 'Payment removed in PLCC Vault fundraiser');
+        await outOfDcb([payment], entry, 'Payment removed in PLCC Canaan fundraiser');
         const { error } = await db.from('fundraiser_payments').delete().eq('id', paymentId);
         if (error) throw error;
         await recomputeReceived(db, entryId);

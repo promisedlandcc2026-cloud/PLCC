@@ -4,7 +4,7 @@ import { Award, Palette, Sparkles, Star, X } from 'lucide-react';
 import { useNav } from '../../App';
 
 /**
- * "New in the Vault" spotlight on Home. Bump RELEASE_KEY for the next launch so
+ * "New in Canaan" spotlight on Home. Bump RELEASE_KEY for the next launch so
  * people who dismissed this one see the new card. Dismissal is per browser.
  */
 const RELEASE_KEY = 'awc.whatsnew.2026-10-kids-view';
@@ -68,7 +68,7 @@ const WhatsNewCard: React.FC = () => {
       <div className="relative p-5 sm:p-7 space-y-5">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1.5">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gold">New in the Vault</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gold">New in Canaan</p>
             <h2 id="whats-new-title" className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
               Meet Kids View
             </h2>

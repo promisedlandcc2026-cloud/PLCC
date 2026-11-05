@@ -141,7 +141,7 @@ const TitleManager = () => {
       return;
     }
     const pageName = path.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    document.title = `PLCC Vault | ${pageName}`;
+    document.title = `PLCC Canaan | ${pageName}`;
   }, [location]);
   return null;
 };

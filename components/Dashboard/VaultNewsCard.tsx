@@ -66,7 +66,7 @@ function newsShareText(item: NewsItem): string {
     typeof window !== 'undefined' ? `${window.location.origin}/#/dashboard` : 'https://plcc-opal.vercel.app/#/dashboard';
   const photo = String(item.image_url || '').trim();
   return [
-    `Vault News · ${kind}`,
+    `Canaan News · ${kind}`,
     item.title,
     '',
     item.body,
@@ -99,7 +99,7 @@ function newsImageUrl(item: NewsItem): string {
 }
 
 function emailShareHref(item: NewsItem): string {
-  const subject = `Vault News: ${item.title}`;
+  const subject = `Canaan News: ${item.title}`;
   return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(newsShareText(item))}`;
 }
 
@@ -400,7 +400,7 @@ const VaultNewsCard: React.FC = () => {
             <Megaphone size={18} />
           </div>
           <div className="min-w-0">
-            <h2 className="text-sm font-black text-[#0d1a14] tracking-tight">Vault News</h2>
+            <h2 className="text-sm font-black text-[#0d1a14] tracking-tight">Canaan News</h2>
             <p className="text-[11px] text-gray-500 font-medium">
               Church life, celebrations, sympathy, and database notes
             </p>

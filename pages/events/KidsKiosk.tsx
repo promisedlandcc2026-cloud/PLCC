@@ -688,7 +688,7 @@ const KidsKioskPage: React.FC = () => {
           Exit
         </Link>
         <div className="text-center min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold/80">PLCC Vault</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold/80">PLCC Canaan</p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <h1 className="text-lg sm:text-xl font-black tracking-tight truncate">Kids Kiosk Scanner</h1>
             <AskAdminTitleLink className="text-gold/90 hover:text-gold border-white/10 hover:bg-white/10" />

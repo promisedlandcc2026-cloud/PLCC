@@ -10,7 +10,7 @@ const primaryBtn =
 const PasskeyPanel: React.FC<{ security: AccountSecurity }> = ({ security }) => (
   <>
     <p className="text-sm text-gray-600 font-medium leading-relaxed">
-      Passkeys let you unlock PLCC Vault with this device. Add one while signed in, then use Passkey on the sign-in page.
+      Passkeys let you unlock PLCC Canaan with this device. Add one while signed in, then use Passkey on the sign-in page.
     </p>
     {security.passkeys.length === 0 ? (
       <EmptyState>No passkeys yet.</EmptyState>

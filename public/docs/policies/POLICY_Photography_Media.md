@@ -124,4 +124,4 @@ This policy is reviewed annually. Questions should be directed to the Lead Pasto
 ---
 
 *PLCC is committed to honoring the dignity and privacy of every person in our congregation.*
-*PLCC Vault — Ministry Administration System*
+*PLCC Canaan — Ministry Administration System*

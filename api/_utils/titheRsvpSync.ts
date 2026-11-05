@@ -1,5 +1,5 @@
 /**
- * PLCC Vault ⇄ PLCC Tithe — event RSVP "Pay Now" gifts.
+ * PLCC Canaan ⇄ PLCC Tithe — event RSVP "Pay Now" gifts.
  *
  * The RSVP form sends donors to Tithe with ref=rsvp:<registration id>. When an
  * admin opens the RSVP list, the Vault asks Tithe (HMAC-signed) which of the

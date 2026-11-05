@@ -69,7 +69,7 @@ export async function notifyStoreOrderEmails(order: StoreOrderNotifyPayload): Pr
       <li><strong>Total:</strong> ${total}</li>
       <li><strong>Status:</strong> ${order.status || 'pending_payment'}</li>
     </ul>
-    <p><a href="${ordersLink}">Open Store Orders in PLCC Vault</a></p>
+    <p><a href="${ordersLink}">Open Store Orders in PLCC Canaan</a></p>
   `;
 
   const { data, error } = await resend.emails.send({

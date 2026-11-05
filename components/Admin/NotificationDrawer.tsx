@@ -293,7 +293,7 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose
                     <Bell size={22} className="mx-auto mb-2 opacity-35" />
                     <p className="text-sm font-semibold text-[#0d1a14]">You&apos;re all caught up</p>
                     <p className="text-xs mt-1 text-gray-400 leading-relaxed">
-                        Mentions, replies, and Vault News will show here.
+                        Mentions, replies, and Canaan News will show here.
                     </p>
                 </div>
             ) : (
@@ -330,7 +330,7 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between gap-2 mb-0.5">
                                             <span className={`text-[9px] font-bold uppercase tracking-wider ${typeAccent(item.type)}`}>
-                                                {item.link === '/dashboard' ? 'Vault News' : typeLabel(item.type)}
+                                                {item.link === '/dashboard' ? 'Canaan News' : typeLabel(item.type)}
                                             </span>
                                             <span className="text-[10px] text-gray-400 font-medium flex items-center gap-1.5 shrink-0">
                                                 {unread && (

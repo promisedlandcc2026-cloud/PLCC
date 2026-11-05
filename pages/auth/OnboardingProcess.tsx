@@ -205,7 +205,7 @@ const OnboardingProcess: React.FC = () => {
         return `Adding you to ${t?.name || 'your team'}...`;
       }),
       'Activating your member access...',
-      'Welcome to PLCC Vault — thank you for joining us.',
+      'Welcome to PLCC Canaan — thank you for joining us.',
     ];
 
     sequence.forEach((msg, i) => {
@@ -701,8 +701,8 @@ const OnboardingProcess: React.FC = () => {
                 </h2>
                 <p className="text-gray-500 font-medium text-sm md:text-lg max-w-xl mx-auto">
                   {path === 'current'
-                    ? 'You’re all set. Finish below to open PLCC Vault — you can update ministries anytime in Settings.'
-                    : 'You’re all set. Finish below to open PLCC Vault — welcome to the family. You can update your profile anytime in Settings.'}
+                    ? 'You’re all set. Finish below to open PLCC Canaan — you can update ministries anytime in Settings.'
+                    : 'You’re all set. Finish below to open PLCC Canaan — welcome to the family. You can update your profile anytime in Settings.'}
                 </p>
               </div>
               <div className="max-w-md mx-auto rounded-[2rem] bg-white border border-gray-100 shadow-xl p-8 space-y-4">

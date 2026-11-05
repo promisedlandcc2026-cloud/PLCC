@@ -31,7 +31,7 @@ const SSO_ENABLED = env.VITE_AWC_ONE_SSO !== 'false';
 
 export const AWC_ONE_APPS: AwcOneApp[] = [
   { id: 'chat', name: 'PLCC Chat', blurb: 'Communication & Live Calls', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
-  { id: 'vault', name: 'PLCC Vault', blurb: 'Church Administration', icon: '/images/awc-one/icon-vault.webp', iconH: 54 },
+  { id: 'vault', name: 'PLCC Canaan', blurb: 'Church Administration', icon: '/images/awc-one/icon-vault.webp', iconH: 54 },
   { id: 'connect', name: 'PLCC Connect', blurb: 'Members & Community', icon: '/images/awc-one/icon-connect.webp', iconH: 46 },
   { id: 'tithe', name: 'PLCC Tithe', blurb: 'Giving & Contributions', icon: '/images/awc-one/icon-tithe.webp', iconH: 52 },
 ];

@@ -301,7 +301,7 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
               <Wrench size={18} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-black text-[#0d1a14]">Vault Repair Desk</p>
+              <p className="text-sm font-black text-[#0d1a14]">Canaan Repair Desk</p>
               <p className="text-xs text-gray-500 font-medium mt-0.5 leading-snug">
                 Diagnose login and access issues, then run allowlisted fixes.
               </p>

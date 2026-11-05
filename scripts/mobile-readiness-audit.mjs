@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PLCC Vault — Mobile readiness audit (static + optional authenticated live).
+ * PLCC Canaan — Mobile readiness audit (static + optional authenticated live).
  *
  * Static (default): README Mobile Responsiveness Contract coverage in source.
  * Live: Playwright at 320/390 — overflow + sub-44px targets.
@@ -120,7 +120,7 @@ const criticalWithoutWrapper = withoutResponsive.filter((r) =>
   )
 );
 
-console.log('\n=== PLCC Vault mobile readiness audit (static) ===\n');
+console.log('\n=== PLCC Canaan mobile readiness audit (static) ===\n');
 console.log(`Pages scanned:              ${pages.length}`);
 console.log(
   `ResponsivePage used:        ${withResponsive.length} (${Math.round((withResponsive.length / pages.length) * 100)}%)`

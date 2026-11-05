@@ -131,10 +131,10 @@ const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, initialTab = '
                                 <p className="lead">Effective Date: February 2026</p>
 
                                 <h4>1. Acceptance of Terms</h4>
-                                <p>By accessing or using the PLCC Vault (the "Service"), you agree to be bound by these Terms. If you disagree with any part of the terms, you may not access the Service.</p>
+                                <p>By accessing or using the PLCC Canaan (the "Service"), you agree to be bound by these Terms. If you disagree with any part of the terms, you may not access the Service.</p>
 
                                 <h4>2. User Responsibilities</h4>
-                                <p>As a user of the Vault, you agree to:</p>
+                                <p>As a user of PLCC Canaan, you agree to:</p>
                                 <ul>
                                     <li>Maintain the confidentiality of your login credentials.</li>
                                     <li>Use the system only for authorized church-related activities.</li>

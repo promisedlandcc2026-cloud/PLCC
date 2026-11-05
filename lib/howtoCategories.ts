@@ -17,7 +17,7 @@ export type HowToCategoryMeta = {
 export const HOWTO_CATEGORIES: HowToCategoryMeta[] = [
   {
     key: 'vault',
-    label: 'PLCC Vault',
+    label: 'PLCC Canaan',
     blurb: 'Church operating system walkthroughs',
   },
   {

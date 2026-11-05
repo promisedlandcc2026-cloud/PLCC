@@ -132,4 +132,4 @@ If a member was added before a household was created:
 ---
 
 *For technical issues, contact your system admin.*
-*PLCC Vault — Ministry Administration System*
+*PLCC Canaan — Ministry Administration System*

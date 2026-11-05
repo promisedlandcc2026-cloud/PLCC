@@ -37,7 +37,7 @@ const PoliciesPage: React.FC = () => {
         { name: 'Member Onboarding SOP', type: 'SOP', path: '/docs/sop/SOP_Member_Onboarding.md' },
         { name: 'Meeting Minutes Workflow SOP', type: 'SOP', path: '/docs/sop/SOP_Meeting_Minutes.md' },
         { name: 'How to Add a Member', type: 'Guide', path: '/docs/guides/HowTo_Add_Member.md' },
-        { name: 'How to Create Your PLCC Vault Account', type: 'Guide', path: '/docs/guides/HowTo_Member_Setup.md' },
+        { name: 'How to Create Your PLCC Canaan Account', type: 'Guide', path: '/docs/guides/HowTo_Member_Setup.md' },
         { name: 'How to Enable Connect Child Cards', type: 'Guide', path: '/docs/guides/HowTo_Connect_Child_Cards.md' },
       ]
     },

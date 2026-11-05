@@ -34,7 +34,7 @@ export type DcbContributionPayload = {
   eventKey?: string;
   /** Event fund: its earlier names, so DCB finds the right fund after a rename. */
   previousFundNames?: string[];
-  /** PLCC Vault fundraiser payment: DCB creates the fundraiser's fund (fundName) if it has never had it. */
+  /** PLCC Canaan fundraiser payment: DCB creates the fundraiser's fund (fundName) if it has never had it. */
   fundraiserFund?: boolean;
 };
 

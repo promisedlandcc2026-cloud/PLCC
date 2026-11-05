@@ -1891,7 +1891,7 @@ const ChatPage: React.FC = () => {
                 <Loader2 className="animate-spin" size={16} />
               </div>
               <div className="bg-gray-50 border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-none">
-                <span className="text-xs font-bold text-gray-400 italic">Vault AI is indexing…</span>
+                <span className="text-xs font-bold text-gray-400 italic">Canaan AI is indexing…</span>
               </div>
             </div>
           )}
