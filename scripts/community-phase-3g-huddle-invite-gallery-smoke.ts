@@ -182,10 +182,10 @@ assert(canUseNavigatorShare({ share: undefined }) === false, 'S: share unsupport
 assert(/canUseNavigatorShare|Copy Huddle Link/.test(ui), 'S: UI has copy fallback path');
 assert(/buildHuddlePreviewShareUrl/.test(ui), 'S: Copy uses preview share URL for WhatsApp');
 
-assert(huddleGalleryPageSize('desktop') === 9, 'T: gallery pagination remains unchanged (desktop=9)');
-assert(huddleGalleryPageSize('medium') === 6, 'T: gallery medium=6');
-assert(huddleGalleryPageSize('mobile') === 4, 'T: gallery mobile=4');
-assert(huddleGalleryPageSize('narrow') === 2, 'T: gallery narrow=2');
+assert(huddleGalleryPageSize('desktop') === 32, 'T: gallery desktop=32 small squares');
+assert(huddleGalleryPageSize('medium') === 15, 'T: gallery medium=15');
+assert(huddleGalleryPageSize('mobile') === 9, 'T: gallery mobile=9');
+assert(huddleGalleryPageSize('narrow') === 6, 'T: gallery narrow=6');
 assert(/shouldUseHuddleGalleryPagination/.test(ui), 'T: gallery helpers still wired in UI');
 
 console.log('\nPhase 3G smoke — gallery regression');
@@ -201,12 +201,12 @@ const page2 = sliceHuddleGalleryPage(seventeen, 2, 9);
 assert(page1.length === 9 && page1[0].id === 'p1' && page1[8].id === 'p9', 'gallery: slice 1 = 1–9');
 assert(page2.length === 8 && page2[0].id === 'p10', 'gallery: slice 2 = remaining');
 
-assert(huddleGalleryColumnCount('medium') === 3, 'gallery: medium columns');
-assert(huddleGalleryColumnCount('mobile') === 2, 'gallery: mobile columns');
+assert(huddleGalleryColumnCount('medium') === 5, 'gallery: medium columns');
+assert(huddleGalleryColumnCount('mobile') === 3, 'gallery: mobile columns');
 assert(clampHuddleGalleryPage(5, 2) === 2, 'gallery: clamp after leave');
 assert(huddleGalleryBreakpointFromWidth(500) === 'mobile', 'gallery: resize mobile');
 assert(
-  clampHuddleGalleryPage(3, huddleGalleryPageCount(5, huddleGalleryPageSize('mobile'))) === 2,
+  clampHuddleGalleryPage(3, huddleGalleryPageCount(12, huddleGalleryPageSize('mobile'))) === 2,
   'gallery: clamp after resize'
 );
 assert(huddleGalleryParticipantCount(17, 9) === 17, 'gallery: total roster count');

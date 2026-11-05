@@ -7,6 +7,7 @@ export default {
         "./components/**/*.{js,ts,jsx,tsx}",
         "./lib/**/*.{js,ts,jsx,tsx}",
         "./App.tsx",
+        "./api/_utils/huddleGallery.ts",
     ],
     theme: {
         extend: {

@@ -172,4 +172,17 @@ assert(/pickFeaturedHuddleIdentity|splitFeaturedHuddleRoster/.test(ui), 'UI uses
 assert(/voice-huddle-mod/.test(ui), 'UI calls voice-huddle-mod');
 assert(/HUDDLE_ROOM_ROLES_VERSION|applyHuddleModAction/.test(modHelper), 'pure helper module present');
 
+
+// Moderator limit: host + 2 co-hosts.
+{
+  const three = { v: 1 as const, hostId: 'h', coHostIds: ['c1', 'c2'] };
+  const fourth = applyHuddleModAction(three, { action: 'add', actorId: 'h', targetId: 'm4' });
+  assert(fourth.ok === false, 'cap: a 4th moderator is refused');
+  const passToMod = applyHuddleModAction(three, { action: 'pass', actorId: 'h', targetId: 'c1' });
+  assert(passToMod.ok === true, 'cap: passing host to an existing mod still works');
+  const passToMember = applyHuddleModAction(three, { action: 'pass', actorId: 'h', targetId: 'm4' });
+  assert(passToMember.ok === false, 'cap: passing host to a non-mod is refused when full');
+  const two = { v: 1 as const, hostId: 'h', coHostIds: ['c1'] };
+  assert(applyHuddleModAction(two, { action: 'add', actorId: 'h', targetId: 'c2' }).ok === true, 'cap: a 3rd moderator is allowed');
+}
 console.log('\nAll Huddle MOD smoke tests passed.');

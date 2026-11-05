@@ -13,6 +13,18 @@ export type HuddleRoomRoles = {
 
 export type HuddleModAction = 'claim' | 'add' | 'pass';
 
+/** Most moderators one huddle may have: the host plus two co-hosts. */
+export const MAX_HUDDLE_MODERATORS = 3;
+
+/** Host + co-hosts, counted once each. */
+export function huddleModeratorCount(roles: HuddleRoomRoles): number {
+  const ids = new Set(roles.coHostIds);
+  if (roles.hostId) ids.add(roles.hostId);
+  return ids.size;
+}
+
+const TOO_MANY_MODS = `This huddle already has ${MAX_HUDDLE_MODERATORS} moderators. That is the most allowed.`;
+
 export function emptyHuddleRoomRoles(): HuddleRoomRoles {
   return { v: HUDDLE_ROOM_ROLES_VERSION, hostId: null, coHostIds: [] };
 }
@@ -130,14 +142,13 @@ export function applyHuddleModAction(
     const coHostIds = [...new Set([...roles.coHostIds, targetId])].filter(
       (id) => id !== roles.hostId
     );
-    return {
-      ok: true,
-      roles: {
-        v: HUDDLE_ROOM_ROLES_VERSION,
-        hostId: roles.hostId || actorId,
-        coHostIds,
-      },
+    const next: HuddleRoomRoles = {
+      v: HUDDLE_ROOM_ROLES_VERSION,
+      hostId: roles.hostId || actorId,
+      coHostIds,
     };
+    if (huddleModeratorCount(next) > MAX_HUDDLE_MODERATORS) return { ok: false, error: TOO_MANY_MODS };
+    return { ok: true, roles: next };
   }
 
   if (opts.action === 'pass') {
@@ -146,14 +157,13 @@ export function applyHuddleModAction(
     if (prevHost && prevHost !== targetId) coHostIds.add(prevHost);
     coHostIds.add(actorId);
     coHostIds.delete(targetId);
-    return {
-      ok: true,
-      roles: {
-        v: HUDDLE_ROOM_ROLES_VERSION,
-        hostId: targetId,
-        coHostIds: [...coHostIds],
-      },
+    const next: HuddleRoomRoles = {
+      v: HUDDLE_ROOM_ROLES_VERSION,
+      hostId: targetId,
+      coHostIds: [...coHostIds],
     };
+    if (huddleModeratorCount(next) > MAX_HUDDLE_MODERATORS) return { ok: false, error: TOO_MANY_MODS };
+    return { ok: true, roles: next };
   }
 
   return { ok: false, error: 'Invalid action' };

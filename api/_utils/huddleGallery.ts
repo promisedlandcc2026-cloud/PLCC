@@ -16,32 +16,33 @@ export function huddleGalleryBreakpointFromWidth(width: number): HuddleGalleryBr
 }
 
 export function huddleGalleryPageSize(breakpoint: HuddleGalleryBreakpoint): number {
+  // Small square tiles (like the phone huddle) so big rooms stay tidy.
   switch (breakpoint) {
     case 'desktop':
-      return 9;
+      return 32; // 8 across × 4 rows
     case 'medium':
-      return 6;
+      return 15; // 5 × 3
     case 'mobile':
-      return 4;
+      return 9; // 3 × 3
     case 'narrow':
-      return 2;
+      return 6; // 3 × 2
     default:
-      return 9;
+      return 32;
   }
 }
 
 export function huddleGalleryColumnCount(breakpoint: HuddleGalleryBreakpoint): number {
   switch (breakpoint) {
     case 'desktop':
-      return 3;
+      return 8;
     case 'medium':
-      return 3;
+      return 5;
     case 'mobile':
-      return 2;
-    case 'narrow':
-      return 2;
-    default:
       return 3;
+    case 'narrow':
+      return 3;
+    default:
+      return 8;
   }
 }
 
@@ -78,10 +79,27 @@ export function sliceHuddleGalleryPage<T>(
 }
 
 export function huddleGalleryGridClass(columnCount: number): string {
-  const cols = Math.max(1, Math.min(3, Number(columnCount) || 1));
-  if (cols <= 1) return 'grid-cols-1';
-  if (cols === 2) return 'grid-cols-2';
-  return 'grid-cols-3';
+  const cols = Math.max(1, Math.min(8, Number(columnCount) || 1));
+  // Literal class names so Tailwind keeps them.
+  const map: Record<number, string> = {
+    1: 'grid-cols-1',
+    2: 'grid-cols-2',
+    3: 'grid-cols-3',
+    4: 'grid-cols-4',
+    5: 'grid-cols-5',
+    6: 'grid-cols-6',
+    7: 'grid-cols-7',
+    8: 'grid-cols-8',
+  };
+  return map[cols];
+}
+
+/** Case-insensitive name filter so moderators can find one person in a big room. */
+export function filterHuddleRosterByName<T extends { name?: string | null }>(items: T[], query: string): T[] {
+  const q = String(query || '').trim().toLowerCase();
+  const list = Array.isArray(items) ? items : [];
+  if (!q) return list;
+  return list.filter((p) => String(p?.name || '').toLowerCase().includes(q));
 }
 
 /** Total room membership — never use visible page length. */

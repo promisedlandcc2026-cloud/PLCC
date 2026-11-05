@@ -25,6 +25,9 @@ import {
   ChevronRight,
   ClipboardList,
   Music,
+  MoreVertical,
+  Search,
+  VolumeX,
 } from 'lucide-react';
 import {
   ConnectionState,
@@ -103,10 +106,13 @@ import {
   huddleGalleryPageSize,
   shouldUseHuddleGalleryPagination,
   sliceHuddleGalleryPage,
+  filterHuddleRosterByName,
 } from '../../api/_utils/huddleGallery.js';
 import {
   emptyHuddleRoomRoles,
+  huddleModeratorCount,
   isHuddleSessionModerator,
+  MAX_HUDDLE_MODERATORS,
   parseHuddleModFromParticipantMetadata,
   parseHuddleRoomRoles,
   pickFeaturedHuddleIdentity,
@@ -435,6 +441,8 @@ const HuddleTile: React.FC<{
   showHostBadge?: boolean;
   canModerateMute?: boolean;
   canManageMods?: boolean;
+  /** False once the huddle has the most moderators allowed. */
+  canAddMod?: boolean;
   onMuteRemote?: (identity: string, muted: boolean) => void;
   onAddMod?: (identity: string, name: string) => void;
   onPassMod?: (identity: string, name: string) => void;
@@ -448,11 +456,13 @@ const HuddleTile: React.FC<{
   showHostBadge,
   canModerateMute,
   canManageMods,
+  canAddMod = true,
   onMuteRemote,
   onAddMod,
   onPassMod,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -494,9 +504,148 @@ const HuddleTile: React.FC<{
   }, [room, row.identity, row.isLocal, row.cameraOn, row.videoTrack]);
 
   const showAddMod =
-    canManageMods && !row.isLocal && !row.isModerator && Boolean(onAddMod);
+    canManageMods && canAddMod && !row.isLocal && !row.isModerator && Boolean(onAddMod);
   const showPassMod =
-    canManageMods && !row.isLocal && !row.isHost && Boolean(onPassMod);
+    canManageMods && !row.isLocal && !row.isHost && (row.isModerator || canAddMod) && Boolean(onPassMod);
+  const showMuteControl = Boolean(canModerateMute && !row.isLocal && onMuteRemote);
+
+  // Gallery: small tidy squares, like the phone huddle. Moderator tools sit behind one button.
+  if (!featured && !compact) {
+    return (
+      <div
+        className={`relative aspect-square rounded-xl overflow-hidden border bg-[#0c110f] ${
+          row.isSpeaking ? 'border-gold ring-2 ring-gold/50' : 'border-white/10'
+        }`}
+        data-huddle-tile="gallery"
+        data-huddle-host={row.isHost ? 'true' : undefined}
+        data-huddle-mod={row.isModerator ? 'true' : undefined}
+      >
+        {row.cameraOn ? (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted={row.isLocal}
+            className={`absolute inset-0 w-full h-full object-cover ${row.isLocal ? 'scale-x-[-1]' : ''}`}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-burgundy to-[#101814]">
+            <span
+              className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-sm sm:text-base font-black ${
+                row.isSpeaking ? 'bg-gold text-burgundy' : 'bg-gold-cream/20 text-gold border border-gold/30'
+              }`}
+              aria-hidden
+            >
+              {initialFromName(row.name)}
+            </span>
+          </div>
+        )}
+
+        {showHostBadge || showModBadge ? (
+          <span
+            className={`absolute top-1.5 left-1.5 z-10 inline-flex items-center gap-0.5 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${
+              showHostBadge ? 'bg-gold text-burgundy' : 'bg-burgundy/85 text-gold'
+            }`}
+          >
+            <ShieldCheck size={9} aria-hidden /> {showHostBadge ? 'Host' : 'Mod'}
+          </span>
+        ) : null}
+
+        {showMuteControl || showAddMod || showPassMod ? (
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className="absolute top-1 right-1 z-10 w-7 h-7 rounded-full bg-black/55 text-white flex items-center justify-center hover:bg-black/75 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            aria-label={`Moderator options for ${row.name}`}
+            data-huddle-tile-menu="true"
+          >
+            <MoreVertical size={14} aria-hidden />
+          </button>
+        ) : row.handRaised ? (
+          <span className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-gold text-burgundy flex items-center justify-center" aria-label="Hand raised">
+            <Hand size={14} aria-hidden />
+          </span>
+        ) : null}
+
+        <div className="absolute inset-x-0 bottom-0 z-10 px-1.5 pb-1.5 pt-4 bg-gradient-to-t from-black/80 to-transparent">
+          <div className="flex items-center gap-1">
+            {row.isMuted ? (
+              <MicOff size={11} className="shrink-0 text-red-300" aria-label="Muted" />
+            ) : (
+              <Mic size={11} className={`shrink-0 ${row.isSpeaking ? 'text-gold' : 'text-white/80'}`} aria-label="Mic on" />
+            )}
+            {row.handRaised ? <Hand size={11} className="shrink-0 text-gold" aria-label="Hand raised" /> : null}
+            <span className="text-[11px] font-bold text-white truncate">{row.isLocal ? 'You' : row.name}</span>
+          </div>
+        </div>
+
+        {menuOpen ? (
+          <div
+            className="absolute inset-0 z-20 bg-black/85 backdrop-blur-sm p-1.5 flex flex-col justify-center gap-1"
+            role="menu"
+            aria-label={`Options for ${row.name}`}
+          >
+            <button
+              type="button"
+              onClick={() => setMenuOpen(false)}
+              className="absolute top-1 right-1 w-6 h-6 rounded-full text-white/70 hover:text-white flex items-center justify-center"
+              aria-label="Close options"
+            >
+              <X size={13} aria-hidden />
+            </button>
+            <p className="px-1 pr-6 text-[10px] font-bold text-white/70 truncate">{row.name}</p>
+            {showMuteControl ? (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onMuteRemote?.(row.identity, !row.isMuted);
+                }}
+                className={`h-7 rounded-lg text-[9px] font-black uppercase tracking-widest inline-flex items-center justify-center gap-1 ${
+                  row.isMuted ? 'bg-white text-[#0d1a14]' : 'bg-red-500 text-white'
+                }`}
+                aria-label={row.isMuted ? `Unmute ${row.name}` : `Mute ${row.name}`}
+              >
+                {row.isMuted ? <Mic size={11} aria-hidden /> : <MicOff size={11} aria-hidden />}
+                {row.isMuted ? 'Unmute' : 'Mute'}
+              </button>
+            ) : null}
+            {showAddMod ? (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onAddMod?.(row.identity, row.name);
+                }}
+                className="h-7 rounded-lg bg-gold text-burgundy text-[9px] font-black uppercase tracking-widest"
+                aria-label={`Add ${row.name} as Mod`}
+                data-huddle-mod-action="add"
+              >
+                Make Mod
+              </button>
+            ) : null}
+            {showPassMod ? (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onPassMod?.(row.identity, row.name);
+                }}
+                className="h-7 rounded-lg bg-white/15 text-white text-[9px] font-black uppercase tracking-widest"
+                aria-label={`Pass Host to ${row.name}`}
+                data-huddle-mod-action="pass"
+              >
+                Make Host
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -809,6 +958,8 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
   const [reactionError, setReactionError] = useState<string | null>(null);
   const [lastReactionSentAt, setLastReactionSentAt] = useState<number | null>(null);
   const [galleryPage, setGalleryPage] = useState(1);
+  const [gallerySearch, setGallerySearch] = useState('');
+  const [muteAllBusy, setMuteAllBusy] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth : 1280
   );
@@ -2750,6 +2901,28 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
     }
   };
 
+  /** Moderators: mute every listener whose mic is on (hosts and mods keep theirs). */
+  const muteEveryone = async () => {
+    if (!canModerate || muteAllBusy) return;
+    const targets = roster.filter((p) => !p.isLocal && !p.isMuted && !p.isHost && !p.isModerator);
+    if (targets.length === 0) return;
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(`Mute ${targets.length} ${targets.length === 1 ? 'person' : 'people'}? Hosts and moderators stay unmuted.`)
+    ) {
+      return;
+    }
+    setMuteAllBusy(true);
+    try {
+      // Small batches so a big room doesn't flood the server.
+      for (let i = 0; i < targets.length; i += 10) {
+        await Promise.all(targets.slice(i, i + 10).map((p) => muteRemote(p.identity, true)));
+      }
+    } finally {
+      setMuteAllBusy(false);
+    }
+  };
+
   const runHuddleModAction = async (
     action: 'add' | 'pass',
     identity: string,
@@ -3193,11 +3366,15 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
   const galleryBreakpoint = huddleGalleryBreakpointFromWidth(viewportWidth);
   const galleryPageSizeVal = huddleGalleryPageSize(galleryBreakpoint);
   const galleryColumns = huddleGalleryColumnCount(galleryBreakpoint);
-  const galleryPages = huddleGalleryPageCount(stripRoster.length, galleryPageSizeVal);
+  const searchedStrip = filterHuddleRosterByName(stripRoster, gallerySearch);
+  const galleryPages = huddleGalleryPageCount(searchedStrip.length, galleryPageSizeVal);
   const safeGalleryPage = clampHuddleGalleryPage(galleryPage, galleryPages);
   const galleryRoster = useGalleryPagination
-    ? sliceHuddleGalleryPage(stripRoster, safeGalleryPage, galleryPageSizeVal)
-    : stripRoster;
+    ? sliceHuddleGalleryPage(searchedStrip, safeGalleryPage, galleryPageSizeVal)
+    : searchedStrip;
+  const modCount = huddleModeratorCount(roomRoles);
+  const canAddMod = modCount < MAX_HUDDLE_MODERATORS;
+  const unmutedListeners = roster.filter((p) => !p.isLocal && !p.isMuted && !p.isHost && !p.isModerator);
   const galleryGridClass = huddleGalleryGridClass(galleryColumns);
   const railRoster = presenting ? roster : stripRoster;
   const controlBtnClass =
@@ -3547,6 +3724,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                             showHostBadge={p.isHost}
                             canModerateMute={canModerate}
                             canManageMods={canModerate && !modActionBusy}
+                            canAddMod={canAddMod}
                             onMuteRemote={muteRemote}
                             onAddMod={addHuddleMod}
                             onPassMod={passHuddleMod}
@@ -3558,6 +3736,45 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 </div>
               ) : (
                 <div className="space-y-2" data-huddle-layout="mod-stage">
+                  {canModerate || stripRoster.length > 15 ? (
+                    <div className="flex flex-wrap items-center gap-2" data-huddle-mod-toolbar="true">
+                      <label className="relative flex-1 min-w-[10rem]">
+                        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden />
+                        <input
+                          type="search"
+                          value={gallerySearch}
+                          onChange={(e) => {
+                            setGallerySearch(e.target.value);
+                            setGalleryPage(1);
+                          }}
+                          placeholder="Find someone"
+                          aria-label="Find someone in the huddle"
+                          className="w-full h-9 pl-8 pr-3 rounded-lg border border-gray-200 bg-white text-sm text-[#0d1a14] outline-none focus:border-gold focus:ring-2 focus:ring-gold/30"
+                        />
+                      </label>
+                      {canModerate ? (
+                        <>
+                          <span
+                            className="inline-flex items-center gap-1 h-9 px-2.5 rounded-lg bg-gold-cream/50 text-burgundy text-[9px] font-black uppercase tracking-widest"
+                            title={`Up to ${MAX_HUDDLE_MODERATORS} moderators, including the host`}
+                          >
+                            <ShieldCheck size={12} aria-hidden /> Mods {modCount}/{MAX_HUDDLE_MODERATORS}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => void muteEveryone()}
+                            disabled={muteAllBusy || unmutedListeners.length === 0}
+                            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-red-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-red-700 disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                            aria-label="Mute everyone except hosts and moderators"
+                            data-huddle-mute-all="true"
+                          >
+                            {muteAllBusy ? <Loader2 size={13} className="animate-spin" aria-hidden /> : <VolumeX size={13} aria-hidden />}
+                            Mute everyone{unmutedListeners.length ? ` (${unmutedListeners.length})` : ''}
+                          </button>
+                        </>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {featuredParticipant ? (
                     <HuddleTile
                       key={`featured-${featuredParticipant.identity}`}
@@ -3568,14 +3785,18 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                       showHostBadge={featuredParticipant.isHost}
                       canModerateMute={canModerate}
                       canManageMods={canModerate && !modActionBusy}
+                      canAddMod={canAddMod}
                       onMuteRemote={muteRemote}
                       onAddMod={addHuddleMod}
                       onPassMod={passHuddleMod}
                     />
                   ) : null}
+                  {gallerySearch.trim() && galleryRoster.length === 0 ? (
+                    <p className="text-sm text-gray-500 py-2">No one in the huddle matches “{gallerySearch.trim()}”.</p>
+                  ) : null}
                   {galleryRoster.length > 0 ? (
                     <div
-                      className={`grid gap-2 sm:gap-3 ${galleryGridClass} max-h-[40dvh] sm:max-h-[46dvh] overflow-y-auto overflow-x-hidden pr-0.5`}
+                      className={`grid gap-2 ${galleryGridClass} max-h-[44dvh] lg:max-h-[58dvh] overflow-y-auto overflow-x-hidden pr-0.5`}
                       data-huddle-gallery="paginated"
                       data-huddle-gallery-page={safeGalleryPage}
                       data-huddle-gallery-pages={galleryPages}
@@ -3589,6 +3810,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                           showHostBadge={p.isHost}
                           canModerateMute={canModerate}
                           canManageMods={canModerate && !modActionBusy}
+                          canAddMod={canAddMod}
                           onMuteRemote={muteRemote}
                           onAddMod={addHuddleMod}
                           onPassMod={passHuddleMod}
