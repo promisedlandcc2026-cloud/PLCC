@@ -568,14 +568,17 @@ const HuddleTile: React.FC<{
         ) : null}
 
         <div className="absolute inset-x-0 bottom-0 z-10 px-1.5 pb-1.5 pt-4 bg-gradient-to-t from-black/80 to-transparent">
-          <div className="flex items-center gap-1">
+          <p className="text-[11px] leading-tight font-bold text-white line-clamp-2 break-words" title={row.name}>
+            {row.name}
+            {row.isLocal && row.name !== 'You' ? ' (you)' : ''}
+          </p>
+          <div className="mt-0.5 flex items-center gap-1.5">
             {row.isMuted ? (
               <MicOff size={11} className="shrink-0 text-red-300" aria-label="Muted" />
             ) : (
               <Mic size={11} className={`shrink-0 ${row.isSpeaking ? 'text-gold' : 'text-white/80'}`} aria-label="Mic on" />
             )}
             {row.handRaised ? <Hand size={11} className="shrink-0 text-gold" aria-label="Hand raised" /> : null}
-            <span className="text-[11px] font-bold text-white truncate">{row.isLocal ? 'You' : row.name}</span>
           </div>
         </div>
 
@@ -700,7 +703,8 @@ const HuddleTile: React.FC<{
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] sm:text-[12px] font-bold text-white truncate">
-                {row.isLocal ? 'You' : row.name}
+                {row.name}
+                {row.isLocal && row.name !== 'You' ? ' (you)' : ''}
               </span>
               {showHostBadge ? (
                 <span className="inline-flex items-center gap-0.5 text-[8px] font-black uppercase tracking-widest text-burgundy bg-gold px-1.5 py-0.5 rounded">
