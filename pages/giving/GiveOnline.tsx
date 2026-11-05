@@ -49,7 +49,7 @@ const GiveOnlinePage: React.FC = () => {
         className="relative overflow-hidden rounded-[2rem] text-white shadow-2xl"
         style={{
           background:
-            'radial-gradient(120% 90% at 85% 10%, rgba(201,162,39,0.18) 0%, rgba(201,162,39,0) 55%), linear-gradient(160deg, #112019 0%, #2a0202 55%, #0b1024 100%)',
+            'radial-gradient(120% 90% at 85% 10%, rgba(201,162,39,0.18) 0%, rgba(201,162,39,0) 55%), linear-gradient(160deg, #112019 0%, #101814 55%, #0b1024 100%)',
         }}
       >
         <div className="px-6 py-10 sm:px-10 sm:py-14">
@@ -83,7 +83,7 @@ const GiveOnlinePage: React.FC = () => {
               href={TITHE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 min-h-[52px] px-8 rounded-xl bg-[#C9A35A] text-[#2a0202] font-bold text-base shadow-lg hover:bg-[#d8b33a] active:scale-[0.98] transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e6c766]/50"
+              className="inline-flex items-center justify-center gap-2 min-h-[52px] px-8 rounded-xl bg-[#C9A35A] text-[#101814] font-bold text-base shadow-lg hover:bg-[#d8b33a] active:scale-[0.98] transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e6c766]/50"
             >
               Give now
               <ArrowUpRight size={18} />

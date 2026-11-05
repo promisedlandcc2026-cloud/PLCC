@@ -46,7 +46,7 @@ const HomeEventsCarousel: React.FC<Props> = ({ events, loading }) => {
         <button
           type="button"
           onClick={() => navigate(seeAllPath)}
-          className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-burgundy hover:text-[#2a0610] shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded"
+          className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-burgundy hover:text-[#101814] shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded"
         >
           See all
         </button>
@@ -72,7 +72,7 @@ const HomeEventsCarousel: React.FC<Props> = ({ events, loading }) => {
               onClick={() => navigate(eventsOverviewPath(eventCalendarYmd(e)))}
               className="w-full min-w-0 rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md hover:border-burgundy/20 transition-all text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
-              <div className="relative h-24 sm:h-28 bg-gradient-to-br from-burgundy to-[#2a0610]">
+              <div className="relative h-24 sm:h-28 bg-gradient-to-br from-burgundy to-[#101814]">
                 {e.image_url ? (
                   <img
                     src={e.image_url}

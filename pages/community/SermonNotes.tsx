@@ -240,7 +240,7 @@ const SermonNotesPage: React.FC = () => {
 function FeaturedGuide({ guide, opening, onOpen }: { guide: GuideCard; opening: boolean; onOpen: () => void }) {
   const published = formatPublished(guide.publishedAt);
   return (
-    <section aria-labelledby="featured-guide" className="rounded-3xl overflow-hidden bg-[#0d1914] text-white shadow-[0_18px_40px_-20px_rgba(58,10,20,0.6)]">
+    <section aria-labelledby="featured-guide" className="rounded-3xl overflow-hidden bg-[#0d1914] text-white shadow-[0_18px_40px_-20px_rgba(13, 25, 20,0.6)]">
       <div className="px-6 py-8 md:px-10 md:py-10">
         <p className="text-[15px] text-[#E8CF7E]">This week's study{published ? `, ${published}` : ''}</p>
         <h2 id="featured-guide" className="mt-3 text-3xl md:text-[2.6rem] leading-[1.1] font-semibold" style={SERIF}>

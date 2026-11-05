@@ -500,7 +500,7 @@ const HuddleTile: React.FC<{
 
   return (
     <div
-      className={`relative rounded-2xl overflow-hidden border bg-[#1a0508] ${
+      className={`relative rounded-2xl overflow-hidden border bg-[#0c110f] ${
         featured ? 'aspect-video sm:aspect-[21/9] min-h-[180px] sm:min-h-[220px]' : 'aspect-video'
       } ${
         compact
@@ -528,7 +528,7 @@ const HuddleTile: React.FC<{
           }`}
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-burgundy to-[#2a0a12]">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-burgundy to-[#101814]">
           <div
             className={`rounded-2xl flex items-center justify-center font-black ${
               featured
@@ -713,7 +713,7 @@ const ScreenShareStage: React.FC<{
     <div className="relative w-full h-full min-h-[12rem] overflow-hidden bg-[#0b1410]">
       {usePlaceholder ? (
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center bg-[#1a0610]"
+          className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center bg-[#0c110f]"
           data-huddle-local-share-placeholder="true"
         >
           <MonitorOff size={40} className="text-gold" aria-hidden />
@@ -3268,7 +3268,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 key={rxn.id}
                 className="flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 shadow-lg border animate-in fade-in zoom-in-95 duration-200"
                 style={{
-                  background: focusActive ? 'rgba(83,14,34,0.88)' : 'rgba(255,255,255,0.95)',
+                  background: focusActive ? 'rgba(19, 36, 28,0.88)' : 'rgba(255,255,255,0.95)',
                   borderColor: focusActive ? 'rgba(201, 163, 90,0.35)' : 'rgba(201, 163, 90,0.35)',
                   color: focusActive ? '#f5d76e' : '#0d1a14',
                 }}
@@ -3371,7 +3371,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
           <aside
             className={`flex flex-col shrink-0 min-h-0 self-stretch border-t min-h-[14rem] overflow-hidden ${
               focusActive
-                ? 'border-white/10 bg-[#14060a]'
+                ? 'border-white/10 bg-[#0b0f0d]'
                 : 'border-gray-200 bg-white'
             } max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[60] max-sm:max-h-[min(58dvh,26rem)] max-sm:rounded-t-2xl max-sm:border max-sm:border-b-0 max-sm:shadow-[0_-12px_40px_rgba(13, 26, 20,0.25)] sm:static sm:relative sm:w-[min(18rem,30%)] sm:min-h-0 sm:max-h-none sm:rounded-none sm:shadow-none sm:border-t-0 sm:border-r sm:order-1`}
             data-huddle-attendance-dock="true"
@@ -3689,7 +3689,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         <div
           className={`px-3 sm:px-4 pt-3 border-t flex flex-col gap-2.5 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3 ${
             focusActive
-              ? 'border-white/10 bg-[#1a0508]'
+              ? 'border-white/10 bg-[#0c110f]'
               : 'border-gray-200/80 bg-white'
           }`}
           data-huddle-controls-footer="true"
@@ -3873,7 +3873,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                     aria-label="Huddle reactions"
                     className={`absolute bottom-[calc(100%+0.5rem)] left-0 right-0 sm:left-auto sm:right-0 sm:w-52 z-[50] rounded-2xl border shadow-xl p-2 ${
                       focusActive
-                        ? 'bg-[#1a0508] border-white/15'
+                        ? 'bg-[#0c110f] border-white/15'
                         : 'bg-white border-gray-200'
                     }`}
                   >
@@ -4145,7 +4145,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
           <aside
             className={`flex flex-col shrink-0 min-h-0 self-stretch border-t min-h-[14rem] overflow-hidden ${
               focusActive
-                ? 'border-white/10 bg-[#14060a]'
+                ? 'border-white/10 bg-[#0b0f0d]'
                 : 'border-gray-200 bg-white'
             } max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[60] max-sm:max-h-[min(58dvh,26rem)] max-sm:rounded-t-2xl max-sm:border max-sm:border-b-0 max-sm:shadow-[0_-12px_40px_rgba(13, 26, 20,0.25)] sm:static sm:relative sm:w-[min(18rem,30%)] sm:min-h-0 sm:max-h-none sm:rounded-none sm:shadow-none sm:border-t-0 sm:border-l sm:order-3`}
             data-huddle-hands-panel="true"
@@ -4154,7 +4154,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
             <div
               className={`px-3 py-2.5 border-b flex items-center justify-between gap-2 shrink-0 ${
                 focusActive
-                  ? 'border-white/10 bg-[#1a0508] text-white'
+                  ? 'border-white/10 bg-[#0c110f] text-white'
                   : 'border-gray-200 bg-white text-[#0d1a14]'
               }`}
             >
@@ -4255,7 +4255,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
             <aside
               className={`flex flex-col shrink-0 min-h-0 self-stretch border-t min-h-[14rem] ${
                 focusActive
-                  ? 'border-white/10 bg-[#14060a]'
+                  ? 'border-white/10 bg-[#0b0f0d]'
                   : 'border-gray-200 bg-white'
               } max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[60] max-sm:max-h-[min(58dvh,26rem)] max-sm:rounded-t-2xl max-sm:border max-sm:border-b-0 max-sm:shadow-[0_-12px_40px_rgba(13, 26, 20,0.25)] sm:static sm:relative sm:w-[min(20rem,34%)] sm:min-h-0 sm:max-h-none sm:rounded-none sm:shadow-none sm:border-t-0 sm:border-l sm:order-3`}
               data-huddle-chat-panel="true"
@@ -4264,7 +4264,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
               <div
                 className={`px-3 py-2.5 border-b flex items-center justify-between gap-2 shrink-0 ${
                   focusActive
-                    ? 'border-white/10 bg-[#1a0508] text-white'
+                    ? 'border-white/10 bg-[#0c110f] text-white'
                     : 'border-gray-200 bg-white text-[#0d1a14]'
                 }`}
               >
@@ -4394,7 +4394,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
 
               <form
                 className={`shrink-0 border-t p-2.5 space-y-1.5 ${
-                  focusActive ? 'border-white/10 bg-[#1a0508]' : 'border-gray-100 bg-white'
+                  focusActive ? 'border-white/10 bg-[#0c110f]' : 'border-gray-100 bg-white'
                 }`}
                 onSubmit={(e) => {
                   e.preventDefault();

@@ -663,7 +663,7 @@ const LoginPortal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => { setAuthMode('signup'); openMemberPortal(); }}
-                className="min-h-[56px] rounded-2xl border-2 border-[#E4C98F] bg-[rgba(40,2,10,0.55)] text-white text-base font-extrabold hover:bg-white/10 transition-colors"
+                className="min-h-[56px] rounded-2xl border-2 border-[#E4C98F] bg-[rgba(9, 17, 14,0.55)] text-white text-base font-extrabold hover:bg-white/10 transition-colors"
               >
                 New here? Create your account
               </button>

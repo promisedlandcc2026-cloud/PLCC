@@ -86,7 +86,7 @@ const HomeHeroBanner: React.FC<Props> = ({
           />
         </picture>
       ) : (
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-burgundy via-[#15271f] to-[#1a0408]" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-burgundy via-[#15271f] to-[#0c110f]" />
       )}
 
       {/* Mobile: lighter diagonal wash so square art shows; md+: strong left wash for greeting */}
@@ -175,7 +175,7 @@ const HomeHeroBanner: React.FC<Props> = ({
 
       {/* Next Service — desktop/tablet only; hidden on phones to keep the mobile hero clean */}
       <div className="hidden md:block absolute z-20 right-6 bottom-6 w-[270px]">
-        <div className="rounded-2xl bg-[#1a0408]/92 backdrop-blur-md border border-gold/30 p-5 shadow-2xl">
+        <div className="rounded-2xl bg-[#0c110f]/92 backdrop-blur-md border border-gold/30 p-5 shadow-2xl">
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gold mb-2">
             Next service
           </p>

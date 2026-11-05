@@ -111,7 +111,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // True kiosk: no top bar, sidebar, or bottom nav — camera fills the screen
   if (isKioskMode) {
     return (
-      <div className="h-[100dvh] w-full bg-[#1a0008] text-white overflow-hidden">
+      <div className="h-[100dvh] w-full bg-[#0c110f] text-white overflow-hidden">
         {children}
       </div>
     );

@@ -143,7 +143,7 @@ export default function CardScannerCamera({
             components={{ finder: true, torch: true }}
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center bg-[#1a0010]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center bg-[#0c110f]">
             <CameraOff size={36} className="text-white/35" aria-hidden />
             <p className="text-white/80 text-sm font-semibold max-w-sm leading-relaxed">
               {cameraError || 'Camera is off. Tap Start Camera when you are ready to scan.'}

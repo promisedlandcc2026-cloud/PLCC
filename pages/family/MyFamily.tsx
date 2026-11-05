@@ -533,7 +533,7 @@ export default function MyFamilyPage() {
           className="relative overflow-hidden rounded-3xl text-white p-6 sm:p-7 shadow-lg"
           style={{
             background:
-              'radial-gradient(110% 90% at 90% 0%, rgba(201,162,39,0.22) 0%, rgba(201,162,39,0) 55%), linear-gradient(160deg, #112019 0%, #2a0208 100%)',
+              'radial-gradient(110% 90% at 90% 0%, rgba(201,162,39,0.22) 0%, rgba(201,162,39,0) 55%), linear-gradient(160deg, #112019 0%, #101814 100%)',
           }}
         >
           <div className="flex items-start justify-between gap-3">
@@ -562,7 +562,7 @@ export default function MyFamilyPage() {
               <button
                 type="button"
                 onClick={() => setHuddleMode(huddleLive ? 'join' : 'start')}
-                className="h-12 px-6 rounded-xl bg-[#C9A35A] text-[#2a0208] font-bold text-[15px] inline-flex items-center justify-center gap-2 hover:bg-[#d8b33a] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e6c766]/50"
+                className="h-12 px-6 rounded-xl bg-[#C9A35A] text-[#101814] font-bold text-[15px] inline-flex items-center justify-center gap-2 hover:bg-[#d8b33a] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e6c766]/50"
               >
                 {huddleLive ? <Users size={18} aria-hidden /> : <Radio size={18} aria-hidden />}
                 {huddleLive ? 'Join the huddle' : 'Start a huddle'}

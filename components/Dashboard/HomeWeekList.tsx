@@ -53,7 +53,7 @@ const HomeWeekList: React.FC<Props> = ({ events, loading }) => {
         <button
           type="button"
           onClick={() => navigate(seeAllPath)}
-          className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-burgundy hover:text-[#2a0610] shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded"
+          className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-burgundy hover:text-[#101814] shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold rounded"
         >
           Calendar
         </button>

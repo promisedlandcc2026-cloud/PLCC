@@ -19,7 +19,7 @@ const DailyWordCard: React.FC<Props> = ({ inspiration, loading, isFallback }) =>
   const navigate = useNavigate();
 
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-burgundy/15 bg-gradient-to-br from-burgundy via-[#15271f] to-[#2a0610] text-white shadow-lg shadow-burgundy/20">
+    <section className="relative overflow-hidden rounded-[2rem] border border-burgundy/15 bg-gradient-to-br from-burgundy via-[#15271f] to-[#101814] text-white shadow-lg shadow-burgundy/20">
       <div
         className="pointer-events-none absolute inset-0 opacity-30"
         style={{

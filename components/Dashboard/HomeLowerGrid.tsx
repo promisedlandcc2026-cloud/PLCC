@@ -211,7 +211,7 @@ const HomeLowerGrid: React.FC<Props> = ({
         </section>
 
         <section className="relative overflow-hidden rounded-2xl border border-burgundy/20 min-h-[140px] shadow-sm">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#15271f] via-burgundy to-[#1a0408]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#15271f] via-burgundy to-[#0c110f]" />
           <div
             className="absolute inset-0 opacity-40"
             style={{

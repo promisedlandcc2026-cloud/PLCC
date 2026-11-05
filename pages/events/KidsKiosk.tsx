@@ -677,7 +677,7 @@ const KidsKioskPage: React.FC = () => {
   const hereCount = sessionId ? custodyOpenCount : todayInCount;
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-[#1a0008] text-white flex flex-col">
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-[#0c110f] text-white flex flex-col">
       {/* Top bar */}
       <header className="relative z-20 flex items-center justify-between gap-3 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3">
         <Link

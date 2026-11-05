@@ -115,7 +115,7 @@ const AwcOneLauncherPage: React.FC = () => {
           <p role="alert" className="mt-4 text-center text-sm font-bold text-[#FFE08A]">{note}</p>
         ) : null}
 
-        <div className="mt-5 md:mt-8 flex flex-col md:flex-row md:items-center gap-3 md:gap-5 rounded-[30px] border-2 border-[#E4C98F] bg-[rgba(40,2,10,0.55)] shadow-[0_0_14px_rgba(255,190,70,0.4)] px-4 py-3 md:px-7 md:py-5">
+        <div className="mt-5 md:mt-8 flex flex-col md:flex-row md:items-center gap-3 md:gap-5 rounded-[30px] border-2 border-[#E4C98F] bg-[rgba(9, 17, 14,0.55)] shadow-[0_0_14px_rgba(255,190,70,0.4)] px-4 py-3 md:px-7 md:py-5">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <span className="relative w-11 h-11 shrink-0 text-[#E4C98F]">
               <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
