@@ -17,6 +17,7 @@ import {
   Calendar
 } from 'lucide-react';
 
+import { formatCurrency } from '../../utils/formatters';
 const TaxDocumentsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [taxYear, setTaxYear] = useState('2024');
@@ -151,7 +152,7 @@ const TaxDocumentsPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-8 py-6 text-[14px] font-bold text-gray-400">{st.year}</td>
-                  <td className="px-8 py-6 text-[15px] font-black text-[#0d1a14]">${st.total.toLocaleString()}</td>
+                  <td className="px-8 py-6 text-[15px] font-black text-[#0d1a14]">{formatCurrency(st.total)}</td>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-2">
                       {st.delivery.includes('Email') ? <Mail size={14} className="text-gold" /> : <Printer size={14} className="text-burgundy" />}
@@ -191,7 +192,7 @@ const TaxDocumentsPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[15px] font-black text-burgundy">${st.total.toLocaleString()}</p>
+                  <p className="text-[15px] font-black text-burgundy">{formatCurrency(st.total)}</p>
                   <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">TY {st.year}</p>
                 </div>
               </div>

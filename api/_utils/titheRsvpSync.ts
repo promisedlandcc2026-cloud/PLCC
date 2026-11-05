@@ -18,6 +18,7 @@
 import crypto from 'crypto';
 import { postRsvpGiftToGivingTransactions, rsvpGiftReferenceId } from './rsvpGiftPayment.js';
 
+import { formatCurrency } from '../../utils/formatters.js';
 type SupabaseLike = { from: (table: string) => any };
 
 export type TitheRefStatus = {
@@ -285,7 +286,7 @@ export async function repairTitheRsvpGiftFunds(
       if (Array.isArray(out?.alreadyInDcb)) inDcb.push(...out.alreadyInDcb);
     }
     if (!inDcb.length) return { moved };
-    const list = inDcb.map((g) => `${g.receiptOrMemo} ($${Number(g.amount).toFixed(2)})`).join(', ');
+    const list = inDcb.map((g) => `${g.receiptOrMemo} (${formatCurrency(Number(g.amount))})`).join(', ');
     return {
       moved,
       warning: `${inDcb.length} paid RSVP gift(s) reached DCB under the wrong fund (${inDcb[0].fundName}): ${list}. Move them to "${name}" in DCB.`,

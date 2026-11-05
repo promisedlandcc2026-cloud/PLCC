@@ -23,12 +23,13 @@ import {
   type BucksRequestRow,
 } from '../../lib/kidsBucksClient';
 
+import { formatCurrency } from '../../utils/formatters';
 const card = 'rounded-3xl border border-burgundy/10 bg-white p-5 space-y-4';
 const h2 = 'text-sm font-black text-[#1A1A1A] inline-flex items-center gap-2';
 
 function money(cents: number | null | undefined) {
   if (cents == null) return 'cost not set';
-  return `$${(cents / 100).toFixed(2)}`;
+  return formatCurrency(cents / 100);
 }
 
 export function PrizeDesk({ me }: { me: BucksMe }) {
@@ -169,7 +170,7 @@ function PrizeAdmin({ prizes, onSaved }: { prizes: BucksPrize[]; onSaved: () => 
           <input type="date" value={month} onChange={(e) => setMonth(e.target.value)} className="h-11 px-3 rounded-xl border border-gray-100 bg-gray-50 text-sm" />
         </label>
         <label className="space-y-1">
-          <span className="block text-[11px] font-bold text-gray-500">Budget dollars</span>
+          <span className="block text-[11px] font-bold text-gray-500">Budget (UGX)</span>
           <input value={budget} onChange={(e) => setBudget(e.target.value)} className="h-11 w-28 px-3 rounded-xl border border-gray-100 bg-gray-50 text-sm" />
         </label>
         <button
@@ -192,7 +193,7 @@ function PrizeCostRow({ prize, onSave }: { prize: BucksPrize; onSave: (p: BucksP
     <li className="rounded-2xl border border-gray-100 p-3 space-y-2">
       <p className="text-sm font-bold text-[#0d1a14]">{prize.name} · {prize.price} Bucks · {money(prize.unitCostCents)} · on hand {prize.onHand ?? 0}</p>
       <div className="flex flex-wrap gap-2">
-        <input value={dollars} onChange={(e) => setDollars(e.target.value)} placeholder="Church cost $" className="h-10 w-28 px-3 rounded-xl border border-gray-100 text-sm" aria-label={`Church cost for ${prize.name}`} />
+        <input value={dollars} onChange={(e) => setDollars(e.target.value)} placeholder="Church cost UGX" className="h-10 w-28 px-3 rounded-xl border border-gray-100 text-sm" aria-label={`Church cost for ${prize.name}`} />
         <button type="button" onClick={() => void onSave(prize, dollars)} className="h-10 px-3 rounded-xl text-xs font-bold text-burgundy">Save cost</button>
         <input value={delta} onChange={(e) => setDelta(e.target.value)} className="h-10 w-16 px-3 rounded-xl border border-gray-100 text-sm" aria-label="Stock change" />
         <input value={stockNote} onChange={(e) => setStockNote(e.target.value)} placeholder="Why the stock changed" className="h-10 flex-1 min-w-[140px] px-3 rounded-xl border border-gray-100 text-sm" />

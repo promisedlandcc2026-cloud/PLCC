@@ -22,7 +22,7 @@ const GivingFormPage: React.FC = () => {
       setTimeout(() => setCopied(null), 2000);
    };
 
-   // PLCC has no text, Cash App or Zelle giving yet; members give through PLCC Tithe.
+   // PLCC has no text giving; MTN, Airtel and Sendwave gifts go; members give through PLCC Tithe.
    const methods: Array<{ id: string; title: string; icon: React.ReactNode; value: string; action: string; description: string; color: string; qrValue: string }> = [];
 
    const onlineLinks = [

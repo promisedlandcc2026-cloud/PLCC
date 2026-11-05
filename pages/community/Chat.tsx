@@ -32,6 +32,7 @@ import {
 } from '../../api/_utils/huddleInvite.js';
 import { shouldAutoScrollHuddleChat } from '../../api/_utils/huddleChat.js';
 
+import { formatCurrency } from '../../utils/formatters';
 const CHANNEL_CREATE_ROLES = new Set([
   'SUPER_ADMIN',
   'PASTOR',
@@ -670,7 +671,7 @@ const ChatPage: React.FC = () => {
         });
         const statsData = await statsRes.json();
         if (statsData.ok) {
-          statsContext = `\nLIVE SYSTEM METRICS:\n- Total Members: ${statsData.stats.members}\n- MTD Giving: $${statsData.stats.mtdGiving.toLocaleString()}\n- Recent Attendance: ${statsData.stats.recentAttendance}`;
+          statsContext = `\nLIVE SYSTEM METRICS:\n- Total Members: ${statsData.stats.members}\n- MTD Giving: ${formatCurrency(statsData.stats.mtdGiving)}\n- Recent Attendance: ${statsData.stats.recentAttendance}`;
         }
       } catch (e) {
         console.error('Chat AI Sync Error:', e);

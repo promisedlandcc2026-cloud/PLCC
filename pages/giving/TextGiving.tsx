@@ -67,7 +67,7 @@ const TextGivingPage: React.FC = () => {
             </div>
             <h3 className="text-4xl font-black text-[#0d1a14]">How it works</h3>
             <p className="text-xl text-gray-400 font-medium leading-relaxed">
-              Simply text the amount you'd like to give (e.g. <span className="text-burgundy font-bold">$100</span>) to the number.
+              Simply text the amount you'd like to give (e.g. <span className="text-burgundy font-bold">50000</span>) to the number.
               First time givers will receive a quick setup link to link their card safely.
               Future gifts happen in seconds!
             </p>

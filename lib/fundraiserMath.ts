@@ -1,3 +1,4 @@
+import { formatCurrency } from '../utils/formatters.js';
 /**
  * Fundraiser calculator — pure functions shared by the Vault API and the page.
  *
@@ -201,14 +202,14 @@ export function chargeBreakdown(entries: FundraiserEntryLike[]): ChargeBreakdown
 }
 
 export function formatCents(cents: number | null | undefined): string {
-  const v = n(cents) / 100;
-  return v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  // Amounts are stored ×100 ("cents") for the database; PLCC shows whole shillings.
+  return formatCurrency(n(cents) / 100);
 }
 
-/** "$1,234.50" / "1234.5" / "20" → cents; NaN when not a valid amount. */
+/** "UGX 50,000" / "50000" / "20" → stored ×100 units; NaN when not a valid amount. */
 export function dollarsToCents(input: string | number | null | undefined): number {
   if (typeof input === 'number') return Number.isFinite(input) ? Math.round(input * 100) : NaN;
-  const cleaned = String(input ?? '').replace(/[$,\s]/g, '');
+  const cleaned = String(input ?? '').replace(/UGX|USh|Ushs?|shs?|[$,\s]/gi, '');
   if (!cleaned || !/^\d*(\.\d{0,2})?$/.test(cleaned)) return NaN;
   const v = Number(cleaned);
   return Number.isFinite(v) ? Math.round(v * 100) : NaN;
@@ -217,9 +218,9 @@ export function dollarsToCents(input: string | number | null | undefined): numbe
 export const FUNDRAISER_PAYMENT_METHODS: Array<{ value: string; label: string }> = [
   { value: 'cash', label: 'Cash' },
   { value: 'check', label: 'Check' },
-  { value: 'cashapp', label: 'Cash App' },
-  { value: 'zelle', label: 'Zelle' },
-  { value: 'venmo', label: 'Venmo' },
+  { value: 'mtn', label: 'MTN Mobile Money' },
+  { value: 'airtel', label: 'Airtel Money' },
+  { value: 'sendwave', label: 'Sendwave' },
   { value: 'card', label: 'Card' },
   { value: 'other', label: 'Other' },
 ];

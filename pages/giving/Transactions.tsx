@@ -30,6 +30,7 @@ import {
 import { useNav } from '../../App';
 import { apiFetch } from '../../lib/api';
 
+import { formatCurrency } from '../../utils/formatters';
 interface TransactionsPageProps {
   title: string;
 }
@@ -124,27 +125,27 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ title }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {isFailed ? (
           <>
-            <StatCard label="Total Failed" value="$0.00" sub="0 Transactions" icon={<XCircle className="text-red-500" />} color="bg-red-50" />
+            <StatCard label="Total Failed" value={formatCurrency(0)} sub="0 Transactions" icon={<XCircle className="text-red-500" />} color="bg-red-50" />
             <StatCard label="Recovery Rate" value="0%" sub="Successful Retries" icon={<RefreshCw className="text-burgundy" />} color="bg-burgundy/5" />
             <StatCard label="Critical Issues" value="0" sub="Manual resolution needed" icon={<AlertCircle className="text-red-400" />} color="bg-red-50/50" />
           </>
         ) : isDisputes ? (
           <>
-            <StatCard label="Open Disputes" value="$0.00" sub="0 Active" icon={<ShieldAlert className="text-orange-500" />} color="bg-orange-50" />
+            <StatCard label="Open Disputes" value={formatCurrency(0)} sub="0 Active" icon={<ShieldAlert className="text-orange-500" />} color="bg-orange-50" />
             <StatCard label="Win Rate" value="100%" sub="Last 12 Months" icon={<TrendingDown className="text-green-500 rotate-180" />} color="bg-green-50" />
             <StatCard label="Next Deadline" value="None" sub="Bank response due" icon={<Clock className="text-orange-400" />} color="bg-white" />
           </>
         ) : isRefunds ? (
           <>
-            <StatCard label="Refunded Today" value="$0.00" sub="0 Actions" icon={<Undo2 className="text-gray-400" />} color="bg-gray-50" />
+            <StatCard label="Refunded Today" value={formatCurrency(0)} sub="0 Actions" icon={<Undo2 className="text-gray-400" />} color="bg-gray-50" />
             <StatCard label="Avg Processing" value="0 Days" sub="Settlement speed" icon={<Clock className="text-gold" />} color="bg-gold-cream/30" />
             <StatCard label="Refund Ratio" value="0%" sub="of gross giving" icon={<ArrowRight className="text-gray-400" />} color="bg-white" />
           </>
         ) : (
           <>
-            <StatCard label="Gross Volume" value={`$${transactions.reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}`} sub="Successful gifts" icon={<ArrowUpRight className="text-green-500" />} color="bg-green-50" />
+            <StatCard label="Gross Volume" value={formatCurrency(transactions.reduce((acc, curr) => acc + curr.amount, 0))} sub="Successful gifts" icon={<ArrowUpRight className="text-green-500" />} color="bg-green-50" />
             <StatCard label="Total Donors" value={new Set(transactions.map(t => t.donor)).size.toString()} sub="Unique contributors" icon={<Sparkles className="text-gold" />} color="bg-gold-cream/40" />
-            <StatCard label="Avg Gift" value={`$${transactions.length ? (transactions.reduce((acc, curr) => acc + curr.amount, 0) / transactions.length).toFixed(2) : '0.00'}`} sub="per transaction" icon={<RefreshCw className="text-burgundy" />} color="bg-burgundy/5" />
+            <StatCard label="Avg Gift" value={formatCurrency(transactions.length ? transactions.reduce((acc, curr) => acc + curr.amount, 0) / transactions.length : 0)} sub="per transaction" icon={<RefreshCw className="text-burgundy" />} color="bg-burgundy/5" />
           </>
         )}
       </div>
@@ -206,7 +207,7 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ title }) => {
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <p className={`text-[15px] font-bold ${isFailed ? 'text-red-500' : 'text-burgundy'}`}>${tx.amount.toFixed(2)}</p>
+                        <p className={`text-[15px] font-bold ${isFailed ? 'text-red-500' : 'text-burgundy'}`}>{formatCurrency(tx.amount)}</p>
                         <p className="text-[10px] text-gray-400 font-medium mt-0.5">{tx.method}</p>
                       </td>
                       <td className="px-8 py-6">
@@ -266,15 +267,15 @@ const TransactionsPage: React.FC<TransactionsPageProps> = ({ title }) => {
                                 <div className="bg-white p-5 rounded-[1.5rem] border border-gray-50 shadow-sm space-y-3">
                                   <div className="flex justify-between items-center text-xs">
                                     <span className="text-gray-400">Gross Amount</span>
-                                    <span className="font-bold text-[#0d1a14]">${tx.amount.toFixed(2)}</span>
+                                    <span className="font-bold text-[#0d1a14]">{formatCurrency(tx.amount)}</span>
                                   </div>
                                   <div className="flex justify-between items-center text-xs">
                                     <span className="text-gray-400">Processing Fee</span>
-                                    <span className="font-bold text-red-400">-${tx.fee.toFixed(2)}</span>
+                                    <span className="font-bold text-red-400">-{formatCurrency(tx.fee)}</span>
                                   </div>
                                   <div className="pt-2 border-t border-gray-50 flex justify-between items-center text-sm">
                                     <span className="font-black text-gold uppercase text-[10px]">Net Ministry</span>
-                                    <span className="font-black text-burgundy">${(tx.amount - tx.fee).toFixed(2)}</span>
+                                    <span className="font-black text-burgundy">{formatCurrency(tx.amount - tx.fee)}</span>
                                   </div>
                                 </div>
                               </div>

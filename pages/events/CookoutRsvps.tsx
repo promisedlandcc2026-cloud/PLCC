@@ -31,6 +31,7 @@ import {
 } from '../../api/_utils/rsvpGiftPayment';
 import AskAdminTitleLink from '../../components/common/AskAdminTitleLink';
 
+import { formatCurrency } from '../../utils/formatters';
 type StaffRsvpEventOption = {
   id: string;
   name: string;
@@ -134,7 +135,7 @@ function formatFunds(amount: number | string | null | undefined): string {
   if (amount == null || amount === '') return '—';
   const n = Number(amount);
   if (!Number.isFinite(n)) return String(amount);
-  return `$${n.toFixed(2)}`;
+  return formatCurrency(n);
 }
 
 function parseMoneyInput(raw: string): { ok: true; value: number } | { ok: false; error: string } {
@@ -761,7 +762,7 @@ const CookoutRsvpsPage: React.FC = () => {
       returnUrl: rsvpReturnUrl('https://plcc-opal.vercel.app', eventCfg.eventId || eventId, r.id),
     });
     const first = String(r.name || '').trim().split(' ')[0] || 'there';
-    const text = `Hi ${first}, here is your link to give $${amount.toFixed(2)} for ${eventCfg.shortName || eventCfg.name} on PLCC Tithe:`;
+    const text = `Hi ${first}, here is your link to give ${formatCurrency(amount)} for ${eventCfg.shortName || eventCfg.name} on PLCC Tithe:`;
     try {
       if (typeof navigator !== 'undefined' && typeof (navigator as any).share === 'function') {
         await (navigator as any).share({ title: 'PLCC Tithe', text, url });
@@ -1525,7 +1526,7 @@ const CookoutRsvpsPage: React.FC = () => {
                       onChange={(e) => setField('food_contribution_amount', e.target.value)}
                       placeholder="Example: 20"
                       className="w-full min-h-[44px] pl-9 pr-3 rounded-xl border border-gray-200 text-sm font-medium outline-none focus:border-burgundy"
-                      aria-label="Food contribution amount in dollars"
+                      aria-label="Food contribution amount in UGX"
                       list="cookout-gift-amounts"
                     />
                     <datalist id="cookout-gift-amounts">

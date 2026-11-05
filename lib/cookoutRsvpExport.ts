@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import { formatCurrency } from '../utils/formatters';
 const BURGUNDY: [number, number, number] = [64, 0, 16];
 const AMBER_TEXT: [number, number, number] = [255, 248, 231];
 const ROW_ALT: [number, number, number] = [250, 247, 246];
@@ -60,9 +61,10 @@ function formatGiftIntent(intent: string | null | undefined): string {
 }
 
 function formatGiftMethod(method: string | null | undefined): string {
-  if (method === 'zelle') return 'Zelle';
-  if (method === 'cashapp') return 'Cash App';
-  if (method === 'venmo') return 'Venmo';
+  // Stored codes are kept for the database; PLCC shows them as its own providers.
+  if (method === 'zelle') return 'MTN Mobile Money';
+  if (method === 'cashapp') return 'Airtel Money';
+  if (method === 'venmo') return 'Sendwave';
   return method?.trim() || '';
 }
 
@@ -96,7 +98,7 @@ function formatFunds(amount: number | string | null | undefined, empty = ''): st
   if (amount == null || amount === '') return empty;
   const n = Number(amount);
   if (!Number.isFinite(n)) return String(amount);
-  return `$${n.toFixed(2)}`;
+  return formatCurrency(n);
 }
 
 function adultsFor(row: CookoutRsvpExportRow): number {
@@ -220,8 +222,8 @@ function drawSummary(doc: jsPDF, totals: CookoutRsvpExportTotals) {
     { label: 'ADULTS', value: String(totals.adults) },
     { label: 'CHILDREN', value: String(totals.children) },
     { label: 'GUESTS', value: String(totals.guests) },
-    { label: 'STILL DUE', value: formatFunds(totals.funds, '$0.00') },
-    { label: 'PAID SO FAR', value: formatFunds(totals.fundsPaid, '$0.00') },
+    { label: 'STILL DUE', value: formatFunds(totals.funds, formatCurrency(0)) },
+    { label: 'PAID SO FAR', value: formatFunds(totals.fundsPaid, formatCurrency(0)) },
   ];
   const gap = 8;
   const left = 36;

@@ -267,6 +267,7 @@ import {
 } from './communityFeedMentions.js';
 import { vaultFrom } from './emailFrom.js';
 
+import { formatCurrency } from '../../utils/formatters.js';
 const COMMUNITY_ALLOWED_MIME = new Set([
     'image/jpeg',
     'image/png',
@@ -1606,7 +1607,7 @@ const handleEvents = async (req: any, res: any) => {
                         } else {
                             const n = Number(String(rawContribution).replace(/[$,\s]/g, ''));
                             if (!Number.isFinite(n) || n < 0) {
-                                return res.status(400).json({ ok: false, error: 'Food funds must be a dollar amount.' });
+                                return res.status(400).json({ ok: false, error: 'Food funds must be an amount in UGX.' });
                             }
                             foodContributionAmount = Math.round(n * 100) / 100;
                         }
@@ -1656,7 +1657,7 @@ const handleEvents = async (req: any, res: any) => {
                         if (foodContributionAmount < needed) {
                             return res.status(400).json({
                                 ok: false,
-                                error: `The contribution is $${cfg.giftMin} per person — $${needed} for ${adultsFromHome} adults.`,
+                                error: `The contribution is ${formatCurrency(cfg.giftMin)} per person — ${formatCurrency(needed)} for ${adultsFromHome} adults.`,
                             });
                         }
                     }
@@ -1819,7 +1820,7 @@ const handleEvents = async (req: any, res: any) => {
                         const noteBits = [
                             withoutNew.notes,
                             guests_invited ? `Guests invited: ${guests_invited}` : null,
-                            food_contribution_amount != null ? `Food funds: $${food_contribution_amount}` : null,
+                            food_contribution_amount != null ? `Food funds: ${formatCurrency(food_contribution_amount)}` : null,
                         ].filter(Boolean);
                         const retryRow = { ...withoutNew, notes: noteBits.join(' | ') || null };
                         const { data: retryNew, error: retryNewErr } = await supabaseAdmin
@@ -2256,7 +2257,7 @@ const handleEvents = async (req: any, res: any) => {
                         } = patchUpdates;
                         const noteBits = [
                             guests_invited ? `Guests invited: ${guests_invited}` : null,
-                            food_contribution_amount != null ? `Food funds: $${food_contribution_amount}` : null,
+                            food_contribution_amount != null ? `Food funds: ${formatCurrency(food_contribution_amount)}` : null,
                             food_contribution_paid != null
                                 ? `Gift paid: ${food_contribution_paid ? 'yes' : 'no'}`
                                 : null,

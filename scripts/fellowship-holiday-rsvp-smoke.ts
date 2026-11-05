@@ -92,8 +92,8 @@ assert(
   'L: thanksgiving Cash App goes through PLCC Tithe'
 );
 assert(
-  tg.paymentMethods!.some((m) => m.id === 'venmo' && !m.live),
-  'L: thanksgiving Venmo placeholder'
+  tg.paymentMethods!.some((m) => m.id === 'venmo' && m.live),
+  'L: thanksgiving Sendwave live'
 );
 assert(tg.location === '2nd Floor Sanctuary', 'L: thanksgiving location');
 assert(tg.maxAdultsFromHome >= 3, 'L: thanksgiving allows adult children in adults count');
@@ -147,8 +147,8 @@ assert(
   'L: marrieds Zelle goes through PLCC Tithe'
 );
 assert(
-  marrieds.paymentMethods!.some((m) => m.id === 'venmo' && !m.live),
-  'L: marrieds Venmo placeholder'
+  marrieds.paymentMethods!.some((m) => m.id === 'venmo' && m.live),
+  'L: marrieds Sendwave live'
 );
 assert(
   !isFellowshipRsvpClosed(marrieds, Date.parse('2026-12-15T18:00:00Z')),

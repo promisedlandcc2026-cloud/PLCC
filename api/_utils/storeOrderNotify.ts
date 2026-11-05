@@ -1,6 +1,7 @@
 import { getResend } from './deps.js';
 import { vaultFrom } from './emailFrom.js';
 
+import { formatCurrency } from '../../utils/formatters.js';
 export type StoreOrderNotifyPayload = {
   id?: string;
   customer_name?: string;
@@ -23,7 +24,7 @@ function parseNotifyEmails(): string[] {
 
 function formatMoney(cents?: number) {
   if (typeof cents !== 'number' || Number.isNaN(cents)) return '—';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
+  return formatCurrency(cents / 100);
 }
 
 /**

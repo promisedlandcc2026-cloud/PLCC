@@ -16,6 +16,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 
+import { formatCurrency } from '../utils/formatters';
 interface MockItem {
   id: number;
   entity: string;
@@ -138,7 +139,7 @@ const GenericPage: React.FC<GenericPageProps> = ({ title }) => {
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard 
           label="Total Giving" 
-          value="$128,430" 
+          value="UGX 128,430,000" 
           change="+12.5%" 
           trend="up" 
           icon={<DollarSign size={20} className="text-gold" />} 
@@ -226,7 +227,7 @@ const GenericPage: React.FC<GenericPageProps> = ({ title }) => {
                     </span>
                   </td>
                   <td className="px-6 py-5 text-sm text-gray-400 font-medium">{formatDate(item.date)}</td>
-                  <td className="px-6 py-5 text-sm font-bold text-burgundy">${item.amount.toFixed(2)}</td>
+                  <td className="px-6 py-5 text-sm font-bold text-burgundy">{formatCurrency(item.amount)}</td>
                   <td className="px-6 py-5 text-right">
                     <button className="text-gray-300 hover:text-gold transition-colors p-2">
                       <MoreVertical size={18} />

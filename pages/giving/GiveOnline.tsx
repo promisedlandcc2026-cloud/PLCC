@@ -127,7 +127,7 @@ const GiveOnlinePage: React.FC = () => {
           <div>
             <p className="font-bold text-[#0d1a14] text-sm">Receipt for every gift</p>
             <p className="text-gray-500 text-sm leading-snug">
-              Emailed after each gift, with a year-end statement by January 31.
+              Emailed after each gift, with a giving statement for the year.
             </p>
           </div>
         </div>
@@ -136,7 +136,7 @@ const GiveOnlinePage: React.FC = () => {
           <div>
             <p className="font-bold text-[#0d1a14] text-sm">Private and secure</p>
             <p className="text-gray-500 text-sm leading-snug">
-              Payments are processed by Stripe. Your giving history is visible only to you and the church's finance team.
+              Payments are processed securely by Flutterwave. Your giving history is visible only to you and the church's finance team.
             </p>
           </div>
         </div>

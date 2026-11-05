@@ -16,6 +16,7 @@ import { downloadCookoutRsvpCsv, downloadCookoutRsvpPdf } from '../../lib/cookou
 import { useNav } from '../../App';
 import { Role } from '../../types';
 
+import { formatCurrency } from '../../utils/formatters';
 type ArchivedEvent = {
   id: string;
   name: string;
@@ -50,7 +51,7 @@ type Totals = { adults: number; children: number; guests: number; funds: number;
 
 const money = (n: number | string | null | undefined) => {
   const v = Number(n);
-  return Number.isFinite(v) ? `$${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
+  return Number.isFinite(v) ? formatCurrency(v) : '—';
 };
 
 const prettyDate = (ymd: string) => {

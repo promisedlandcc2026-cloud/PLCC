@@ -93,7 +93,7 @@ const CountingSessionPage: React.FC = () => {
    const [cashOpen, setCashOpen] = useState(false);
    const [form, setForm] = useState(emptyForm());
    const [cashCounts, setCashCounts] = useState<DenominationCount>({
-      '100': 0, '50': 0, '20': 0, '10': 0, '5': 0, '1': 0, 'coins': 0
+      '50000': 0, '20000': 0, '10000': 0, '5000': 0, '2000': 0, '1000': 0, 'coins': 0
    });
    const [notes, setNotes] = useState('');
    const [loading, setLoading] = useState(true);
@@ -176,7 +176,7 @@ const CountingSessionPage: React.FC = () => {
             setGiftEntries(decoded.entries);
 
             if (s.counts) {
-               const newCounts = { '100': 0, '50': 0, '20': 0, '10': 0, '5': 0, '1': 0, 'coins': 0 };
+               const newCounts = { '50000': 0, '20000': 0, '10000': 0, '5000': 0, '2000': 0, '1000': 0, 'coins': 0 };
                Object.entries(s.counts).forEach(([k, v]) => {
                   newCounts[k] = Number(v);
                });
@@ -430,7 +430,7 @@ const CountingSessionPage: React.FC = () => {
       if (!window.confirm('Start a FRESH session? This will clear the current form.')) return;
       setSessionId(null);
       setIsLocked(false);
-      setCashCounts({ '100': 0, '50': 0, '20': 0, '10': 0, '5': 0, '1': 0, 'coins': 0 });
+      setCashCounts({ '50000': 0, '20000': 0, '10000': 0, '5000': 0, '2000': 0, '1000': 0, 'coins': 0 });
       setGiftEntries([]);
       setNotes('');
       setBatchDate(new Date().toISOString().slice(0, 10));
@@ -806,9 +806,9 @@ const CountingSessionPage: React.FC = () => {
                            Count bills here for reconciliation. Use <strong>Loose Plate</strong> or Gift Entry to record cash gifts with an account.
                         </p>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                           {['100', '50', '20', '10', '5', '1'].map((denom) => (
+                           {['50000', '20000', '10000', '5000', '2000', '1000'].map((denom) => (
                               <label key={denom} className="block space-y-1.5">
-                                 <span className="text-xs font-bold text-gray-400">${denom} bills</span>
+                                 <span className="text-xs font-bold text-gray-400">UGX {Number(denom).toLocaleString('en-US')} notes</span>
                                  <input
                                     type="number"
                                     disabled={isLocked}
@@ -820,7 +820,7 @@ const CountingSessionPage: React.FC = () => {
                               </label>
                            ))}
                            <label className="block space-y-1.5 col-span-2">
-                              <span className="text-xs font-bold text-gray-400">Loose coins & other</span>
+                              <span className="text-xs font-bold text-gray-400">Coins & other (UGX)</span>
                               <div className="relative">
                                  <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" />
                                  <input

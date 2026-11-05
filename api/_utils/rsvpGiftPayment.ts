@@ -44,25 +44,27 @@ export const FELLOWSHIP_RSVP_PAYMENT_METHODS: RsvpPaymentMethodPublic[] = [
     live: true,
   },
   {
+    // Stored codes (zelle/cashapp/venmo) are kept so existing database checks
+    // still pass; PLCC shows them as MTN, Airtel and Sendwave.
     id: 'zelle',
-    title: 'Zelle',
+    title: 'MTN Mobile Money',
     value: 'PLCC Tithe',
-    description: 'PLCC Tithe shows the church Zelle details and a memo code to include.',
+    description: 'PLCC Tithe shows the church MTN number and a reference code to include.',
     live: true,
   },
   {
     id: 'cashapp',
-    title: 'Cash App',
+    title: 'Airtel Money',
     value: 'PLCC Tithe',
-    description: 'PLCC Tithe shows the church $cashtag and a memo code to include.',
+    description: 'PLCC Tithe shows the church Airtel number and a reference code to include.',
     live: true,
   },
   {
     id: 'venmo',
-    title: 'Venmo',
-    value: 'Coming soon',
-    description: 'Venmo is not set up yet. Please choose another option.',
-    live: false,
+    title: 'Sendwave',
+    value: 'PLCC Tithe',
+    description: 'Giving from abroad? PLCC Tithe shows who to send to on Sendwave and a reference code.',
+    live: true,
   },
 ];
 

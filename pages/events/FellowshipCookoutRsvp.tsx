@@ -41,6 +41,7 @@ import {
   type RsvpPayStatus,
 } from '../../api/_utils/rsvpGiftPayment';
 
+import { formatCurrency } from '../../utils/formatters';
 /** Display serif (Fraunces, loaded in index.html) — matches PLCC Tithe's amounts. */
 const SERIF: React.CSSProperties = { fontFamily: "'Fraunces', Georgia, serif" };
 
@@ -544,7 +545,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
             guests_invited: Math.floor(guests),
             food_contribution_amount: contributionAmount,
             food_contribution_intent: eventCfg.paymentChoiceEnabled ? giftIntent || null : null,
-            // Card, bank, Zelle, Cash App or Venmo is chosen on PLCC Tithe.
+            // Card, bank, MTN, Airtel or Sendwave is chosen on PLCC Tithe.
             food_contribution_payment_method: null,
             allergies: allergiesValue,
             tshirt_sizes: !isSimple && eventCfg.tshirtsEnabled ? tshirtSummary : null,
@@ -644,7 +645,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                 <Loader2 className="mx-auto animate-spin text-[#1d372c]" size={30} />
                 <h2 className="text-2xl font-black tracking-tight">You’re signed up</h2>
                 <p className="text-gray-600 font-medium leading-relaxed max-w-sm mx-auto">
-                  Taking you to PLCC Tithe to pay ${Number(foodContribution || 0).toFixed(2)}…
+                  Taking you to PLCC Tithe to pay {formatCurrency(Number(foodContribution || 0))}…
                 </p>
                 <a
                   href={redirectingToTithe}
@@ -665,7 +666,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                 {eventCfg.paymentChoiceEnabled && giftIntent === 'pledge' && (
                   <div className="mx-auto max-w-sm space-y-3">
                     <p className="text-sm text-gray-500 font-medium">
-                      You pledged {foodContribution ? `$${Number(foodContribution).toFixed(2)}` : 'a contribution'}. Pay at
+                      You pledged {foodContribution ? formatCurrency(Number(foodContribution)) : 'a contribution'}. Pay at
                       the event, or online anytime before then.
                     </p>
                     {registrationId ? (
@@ -879,7 +880,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                               placeholder={String(effectiveGiftMin)}
                               value={foodContribution}
                               onChange={(e) => setFoodContribution(e.target.value)}
-                              aria-label="Your amount in dollars"
+                              aria-label="Your amount in UGX"
                               style={SERIF}
                               className="w-full min-w-0 flex-1 border-0 bg-transparent p-0 text-6xl leading-none text-[#16251f] outline-none placeholder:text-[#D9CFC0]"
                             />
@@ -934,10 +935,10 @@ const FellowshipCookoutRsvp: React.FC = () => {
                         ) : null}
                         <p className="text-xs text-gray-500">
                           {eventCfg.giftPerPerson
-                            ? `$${eventCfg.giftMin} per person (required)${
-                                giftPeople > 1 ? ` · ${giftPeople} adults = $${effectiveGiftMin}` : ''
+                            ? `${formatCurrency(eventCfg.giftMin)} per person (required)${
+                                giftPeople > 1 ? ` · ${giftPeople} adults = ${formatCurrency(effectiveGiftMin)}` : ''
                               }.`
-                            : eventCfg.giftHint || `$${eventCfg.giftMin} minimum per household. Helps cover the food.`}
+                            : eventCfg.giftHint || `${formatCurrency(eventCfg.giftMin)} minimum per household. Helps cover the food.`}
                         </p>
                       </fieldset>
 
@@ -951,7 +952,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                               {
                                 id: 'pay_now' as const,
                                 title: 'Pay now',
-                                blurb: 'Card, Apple Pay, bank, Zelle, Cash App or Venmo, on PLCC Tithe',
+                                blurb: 'Card, bank, MTN, Airtel or Sendwave, on PLCC Tithe',
                               },
                               ...(eventCfg.allowPledge
                                 ? [
@@ -1240,7 +1241,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                     ? 'Saving…'
                     : !isSimple && eventCfg.paymentChoiceEnabled && giftIntent === 'pay_now'
                       ? Number(foodContribution) > 0
-                        ? `Sign up & pay $${Number(foodContribution).toFixed(0)}`
+                        ? `Sign up & pay ${formatCurrency(Number(foodContribution))}`
                         : 'Sign up & pay'
                       : eventCfg.submitLabel || 'Sign up'}
                   {!submitting && !isSimple && eventCfg.paymentChoiceEnabled && giftIntent === 'pay_now' ? (
@@ -1249,7 +1250,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                 </button>
                 {!isSimple && eventCfg.paymentChoiceEnabled && giftIntent === 'pay_now' ? (
                   <p className="-mt-2 flex items-center justify-center gap-1.5 text-xs text-gray-500">
-                    <Lock size={12} aria-hidden /> Secure checkout by Stripe on PLCC Tithe
+                    <Lock size={12} aria-hidden /> Secure checkout on PLCC Tithe
                   </p>
                 ) : null}
               </form>
@@ -1285,7 +1286,7 @@ const STATUS_PILL: Record<RsvpPayStatus, { label: string; className: string; lin
   waiting: {
     label: 'Waiting',
     className: 'bg-[#FCEFD6] text-[#7A4A00]',
-    line: 'Payment sent. The church confirms Zelle, Cash App and Venmo payments, usually within 2 business days, then this shows Paid.',
+    line: 'Payment sent. The church confirms MTN, Airtel and Sendwave payments, usually within 2 business days, then this shows Paid.',
   },
   processing: {
     label: 'Processing',
@@ -1401,7 +1402,7 @@ const RsvpStatusPanel: React.FC<{ registrationId: string }> = ({ registrationId 
             <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${pill.className}`}>{pill.label}</span>
           </div>
           <p style={SERIF} className="text-[40px] font-semibold leading-none text-[#16251f] tabular-nums">
-            ${data.amount.toFixed(2)}
+            {formatCurrency(data.amount)}
           </p>
           <p className="text-[13px] leading-relaxed text-gray-600">
             {paid && data.paidVia ? `${data.paidVia} · ` : ''}
@@ -1422,7 +1423,7 @@ const RsvpStatusPanel: React.FC<{ registrationId: string }> = ({ registrationId 
             href={data.payUrl}
             className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-[#0d1a14] px-4 text-[15px] font-bold text-amber-50 hover:bg-[#12231c]"
           >
-            Pay ${data.amount.toFixed(2)} on PLCC Tithe <ArrowRight size={16} />
+            Pay {formatCurrency(data.amount)} on PLCC Tithe <ArrowRight size={16} />
           </a>
         ) : null}
         {data.status === 'waiting' || data.status === 'processing' || data.status === 'due' ? (

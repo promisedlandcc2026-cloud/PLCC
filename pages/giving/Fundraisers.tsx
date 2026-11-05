@@ -136,7 +136,7 @@ const btnGhost =
 function MoneyInput(props: { value: string; onChange: (v: string) => void; placeholder?: string; id?: string }) {
   return (
     <span className="relative block">
-      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">UGX</span>
       <input
         id={props.id}
         type="text"
@@ -145,7 +145,7 @@ function MoneyInput(props: { value: string; onChange: (v: string) => void; place
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
         placeholder={props.placeholder || '0.00'}
-        className={`${fieldCls} pl-7 font-bold tabular-nums`}
+        className={`${fieldCls} pl-12 font-bold tabular-nums`}
       />
     </span>
   );
@@ -1074,7 +1074,7 @@ function AddEntry(props: { full: Full; busy: boolean; onRun: RunFn; onError: (m:
         </label>
         <label className={labelCls}>
           Note (optional)
-          <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Check #, Cash App name…" className={fieldCls} />
+          <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Receipt #, MTN / Airtel / Sendwave name…" className={fieldCls} />
         </label>
       </div>
 
@@ -1143,7 +1143,7 @@ function payLinkFor(full: Full, p: PersonBalance): string | null {
 /** Share (phone share sheet) or copy a person's "Pay my balance" link. */
 async function sharePayLink(name: string, title: string, amountCents: number, url: string): Promise<'shared' | 'copied' | 'cancelled'> {
   const first = String(name || '').trim().split(' ')[0] || 'there';
-  const text = `Hi ${first}, here is your link to pay your ${formatCents(amountCents)} balance for ${title} (card, bank, Cash App or Zelle):`;
+  const text = `Hi ${first}, here is your link to pay your ${formatCents(amountCents)} balance for ${title} (card, bank, MTN, Airtel or Sendwave):`;
   const nav: any = typeof navigator !== 'undefined' ? navigator : null;
   try {
     if (nav && typeof nav.share === 'function') {
@@ -1828,7 +1828,7 @@ function SettingsTab(props: { full: Full; perms: Full['permissions']; busy: bool
         <h3 className="text-xl font-black text-[#16251f]">Online gifts from PLCC Tithe</h3>
         <p className="text-sm text-gray-500 max-w-2xl">
           Pick the PLCC Tithe fund for this fundraiser (for example, 2nd Floor Building Fund). Gifts to that fund appear here as
-          <b> Online · PLCC Tithe</b> once they are confirmed — card and bank by Stripe, Cash App and Zelle after Finance verifies them in
+          <b> Online · PLCC Tithe</b> once they are confirmed — card and bank by Flutterwave, MTN, Airtel and Sendwave after Finance verifies them in
           Tithe. They are read-only here and also go to the DCB as usual. Cash and check recorded here go to the DCB from the Vault.
         </p>
       </div>

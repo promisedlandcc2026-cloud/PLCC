@@ -6,6 +6,7 @@ import { hasPermission } from '../../lib/permissions';
 import { useStoreOrderCue } from '../../lib/useStoreOrderCue';
 import AccessDenied from '../../components/Layout/AccessDenied';
 
+import { formatCurrency } from '../../utils/formatters';
 type StoreOrderItem = {
   id?: string;
   product_id: string;
@@ -34,7 +35,7 @@ type StoreOrder = {
 type StatusFilter = 'pending_payment' | 'paid' | 'all';
 
 function formatMoney(cents: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
+  return formatCurrency(cents / 100);
 }
 
 function formatDate(iso: string) {
@@ -124,7 +125,7 @@ const StoreOrdersPage: React.FC = () => {
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Store Orders</h1>
           </div>
           <p className="text-base text-slate-500 mt-2">
-            Confirm Cash App / Zelle payments and mark orders paid.
+            Confirm MTN / Airtel / Sendwave payments and mark orders paid.
           </p>
         </div>
         <button

@@ -53,6 +53,7 @@ import {
 import { fellowshipRsvpStaffPath } from '../../lib/simpleNav';
 import { buildStartsAtFromDateAndTime, toEventYmd } from '../../lib/eventDate';
 
+import { formatCurrency } from '../../utils/formatters';
 interface ChurchEvent {
   id: string;
   title: string;
@@ -1196,7 +1197,7 @@ const EventsOverview: React.FC = () => {
                   {marriedsDinner.date} · {marriedsDinner.timeLabel} · {marriedsDinner.location}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  Pledge or Pay Now (Cash App, Zelle, Venmo) — Mark Paid posts to DCB
+                  Pledge or Pay Now (MTN, Airtel, Sendwave) — Mark Paid posts to DCB
                 </p>
               </div>
               <button
@@ -1844,7 +1845,7 @@ const EventsOverview: React.FC = () => {
                                     Minimum per household
                                   </span>
                                   <span className="relative mt-1.5 flex items-center">
-                                    <span className="absolute left-3 text-sm font-bold text-gray-400">$</span>
+                                    <span className="absolute left-3 text-xs font-bold text-gray-400">UGX</span>
                                     <input
                                       type="number"
                                       inputMode="numeric"
@@ -1854,7 +1855,7 @@ const EventsOverview: React.FC = () => {
                                       onChange={(e) =>
                                         setFormData({ ...formData, rsvpGiftMin: Math.max(1, Math.floor(Number(e.target.value) || 1)) })
                                       }
-                                      className="w-full pl-7 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-100 outline-none font-semibold text-[#0d1a14] text-sm"
+                                      className="w-full pl-12 pr-3 py-2.5 rounded-xl bg-gray-50 border border-gray-100 outline-none font-semibold text-[#0d1a14] text-sm"
                                     />
                                   </span>
                                 </label>
@@ -1872,7 +1873,7 @@ const EventsOverview: React.FC = () => {
                                         {payments.options.length > 1 && (
                                           <button
                                             type="button"
-                                            aria-label={`Remove $${n}`}
+                                            aria-label={`Remove ${formatCurrency(n)}`}
                                             onClick={() =>
                                               setFormData({ ...formData, rsvpGiftOptions: payments.options.filter((x) => x !== n) })
                                             }
@@ -1892,7 +1893,7 @@ const EventsOverview: React.FC = () => {
                                           max={1000}
                                           value={newGiftOption}
                                           onChange={(e) => setNewGiftOption(e.target.value)}
-                                          placeholder="$"
+                                          placeholder="UGX"
                                           aria-label="Add an amount button"
                                           className="w-16 px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-100 text-xs font-semibold text-[#0d1a14] outline-none"
                                         />
@@ -1933,8 +1934,8 @@ const EventsOverview: React.FC = () => {
                                 <span className="font-bold text-[#0d1a14]">
                                   {eventFundName(editingEvent?.event.id, formData.title) || 'the event name'}
                                 </span>
-                                , set up automatically when you save. Members pay by card, bank, Zelle, Cash App or
-                                Venmo on Tithe.
+                                , set up automatically when you save. Members pay by card, bank, MTN, Airtel or
+                                Sendwave on Tithe.
                               </p>
                             </>
                           )}

@@ -63,7 +63,7 @@ const ReconcileConfirmModal: React.FC<ReconcileConfirmModalProps> = ({
             <div className={`p-6 rounded-[1.75rem] border ${variance === 0 ? 'bg-green-50 border-green-100' : 'bg-orange-50 border-orange-100'}`}>
               <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Net Variance</p>
               <p className={`text-xl font-black ${variance === 0 ? 'text-green-600' : 'text-orange-600'}`}>
-                {variance === 0 ? '$0.00' : formatCurrency(variance)}
+                {formatCurrency(variance)}
               </p>
             </div>
           </div>

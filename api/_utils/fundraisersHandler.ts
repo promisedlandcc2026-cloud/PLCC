@@ -128,9 +128,10 @@ function memberName(m: any): string {
 /** Tithe payment method → Vault label. */
 function titheMethod(m: unknown): string {
   const v = String(m || '');
-  if (v === 'cash_app' || v === 'cashapp') return 'cashapp';
-  if (v === 'zelle') return 'zelle';
-  if (v === 'venmo') return 'venmo';
+  // Tithe still sends the older codes; PLCC shows them as its own providers.
+  if (v === 'zelle' || v === 'mtn') return 'mtn';
+  if (v === 'cash_app' || v === 'cashapp' || v === 'airtel') return 'airtel';
+  if (v === 'venmo' || v === 'sendwave') return 'sendwave';
   if (v === 'card' || v === 'apple_pay' || v === 'google_pay' || v === 'link') return 'card';
   return 'other';
 }
