@@ -30,8 +30,8 @@ import {
   sanitizeReturnTo,
 } from '../../lib/authSession';
 import { isLocalDevHost, LOCAL_UI_PREVIEW_PROFILE } from '../../lib/localUiPreview';
-import { AwcOneBackground, AwcOneHeader, AwcOneScene, AwcOneTiles, AwcOneFooter } from '../../components/awcone/AwcOneChrome';
-import { TITHE_URL as AWC_ONE_TITHE_URL, rememberPendingApp, type AwcOneAppId } from '../../lib/awcOne';
+import { PlccLoginShell, PlccLoginHeading, PLCC_INPUT, PLCC_PRIMARY_BTN, PLCC_GREEN } from '../../components/awcone/PlccOneShell';
+import { TITHE_URL as AWC_ONE_TITHE_URL } from '../../lib/awcOne';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -577,7 +577,7 @@ const LoginPortal: React.FC = () => {
     setError('');
     if (stage === 'sms') setStage('password');
     else if (stage === 'otp' && phoneCodePurpose === 'signup') setStage('registration');
-    else if (stage === 'otp' || stage === 'password') setStage('identifier');
+    else if (stage === 'otp' || stage === 'password') setStage(portal === 'choose' ? 'idle' : 'identifier');
     else if (stage === 'method') setStage('identifier');
     else if (stage === 'credentials') setStage('registration');
     else if (stage === 'identifier' || stage === 'registration') setStage('idle');
@@ -595,33 +595,11 @@ const LoginPortal: React.FC = () => {
     setPortal('choose');
   };
 
-  /** PLCC ONE tiles before sign-in: Tithe opens straight away; the rest sign in first, then open. */
-  const openFromChooser = (id: AwcOneAppId) => {
-    if (id === 'tithe') {
-      window.location.assign(AWC_ONE_TITHE_URL);
-      return;
-    }
-    if (id !== 'vault') rememberPendingApp(id);
-    setAuthMode('login');
-    openMemberPortal();
-  };
-
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <AwcOneBackground className="font-inter">
-      <div className="min-h-screen flex flex-col items-center justify-center py-6">
-      <div className={`relative z-10 w-full px-6 ${portal === 'choose' && stage === 'idle' ? 'max-w-6xl' : 'max-w-md'}`}>
-
-        {/* Branding — PLCC ONE */}
-        <div className={`mb-6 transition-all duration-700 ${stage !== 'idle' ? 'scale-90 opacity-60 -translate-y-2 pointer-events-none' : 'scale-100'}`}>
-          <AwcOneHeader compact={portal !== 'choose' || stage !== 'idle'} />
-          {portal === 'choose' && stage === 'idle' && (
-            <div className="mt-2 md:hidden -mx-6">
-              <AwcOneScene className="h-[170px]" />
-            </div>
-          )}
-        </div>
+    <PlccLoginShell>
+      <div>
 
         {sessionExpiredNotice && (
           <div
@@ -649,38 +627,83 @@ const LoginPortal: React.FC = () => {
           </div>
         )}
 
+        {/* ── Member access (email first) ── */}
         {portal === 'choose' && stage === 'idle' && (
-          <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6">
-            <div className="relative z-10 mx-auto w-full max-w-md grid gap-3">
-              <button
-                type="button"
-                onClick={() => { setAuthMode('login'); openMemberPortal(); }}
-                className="min-h-[60px] rounded-2xl flex items-center justify-center gap-3 text-[#112019] text-lg font-black shadow-[0_0_18px_rgba(255,190,70,0.6),inset_0_1px_0_rgba(255,255,255,0.7)] active:scale-[0.99] transition-transform"
-                style={{ background: 'linear-gradient(180deg, #FFE08A 0%, #E4C98F 45%, #C98F1E 100%)' }}
-              >
-                <LogIn size={22} aria-hidden /> Sign in to PLCC ONE
+          <div className="animate-in fade-in duration-500">
+            <PlccLoginHeading />
+            <form onSubmit={handleIdentifierSubmit} className="space-y-4" noValidate>
+              <div className="space-y-2">
+                <label htmlFor="awc-login-identifier" className="block text-sm font-bold text-[#16251f]">
+                  Email address
+                </label>
+                <input
+                  ref={identifierInputRef}
+                  type="text"
+                  name="email"
+                  id="awc-login-identifier"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="username email"
+                  spellCheck={false}
+                  enterKeyHint="go"
+                  defaultValue={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  onInput={(e) => setIdentifier((e.target as HTMLInputElement).value)}
+                  placeholder="you@example.com"
+                  className={PLCC_INPUT}
+                />
+                <p className="text-xs text-[#16251f]/55">We'll email you a 6-digit code. Signing in with a phone number? Enter it here instead.</p>
+              </div>
+              {error && (
+                <p role="alert" className="text-red-700 text-sm font-semibold bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+                  {error}
+                </p>
+              )}
+              <button type="submit" disabled={isBusy} className={PLCC_PRIMARY_BTN} style={{ background: PLCC_GREEN }}>
+                {otpLoading ? <Loader2 className="animate-spin" size={20} /> : 'Continue'}
               </button>
-              <button
-                type="button"
-                onClick={() => { setAuthMode('signup'); openMemberPortal(); }}
-                className="min-h-[56px] rounded-2xl border-2 border-[#E4C98F] bg-[rgba(9, 17, 14,0.55)] text-white text-base font-extrabold hover:bg-white/10 transition-colors"
-              >
-                New here? Create your account
-              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <Link to={MEMBER_SETUP_HELP} className="text-sm font-bold text-[#1d372c] underline underline-offset-4 hover:no-underline">
+                Need help signing in?
+              </Link>
             </div>
 
-            <div className="hidden md:block">
-              <AwcOneScene className="h-[220px] rounded-[24px] overflow-hidden" />
+            <div className="mt-8 pt-6 border-t border-[#16251f]/10 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm">
+              <button
+                type="button"
+                onClick={() => { setError(''); setAuthMode('signup'); setStage('registration'); }}
+                className="font-semibold text-[#16251f]/70 hover:text-[#16251f]"
+              >
+                New here? <span className="font-bold text-[#1d372c] underline underline-offset-2">Create an account</span>
+              </button>
+              {passkeysAvailable && (
+                <button
+                  type="button"
+                  onClick={handlePasskeySignIn}
+                  disabled={isBusy}
+                  className="inline-flex items-center gap-1.5 font-bold text-[#1d372c] hover:underline underline-offset-2 disabled:opacity-50"
+                >
+                  {passkeyLoading ? <Loader2 className="animate-spin" size={15} /> : <Fingerprint size={15} />}
+                  Use a passkey
+                </button>
+              )}
+              <a href={AWC_ONE_TITHE_URL} className="font-semibold text-[#16251f]/70 hover:text-[#16251f]">
+                Give without signing in
+              </a>
             </div>
 
-            <AwcOneTiles onOpen={openFromChooser} />
-            <p className="text-center text-sm text-[#F3E3D0]">One sign-in opens every PLCC app. Giving with PLCC Tithe needs no sign-in.</p>
-          </div>
-        )}
-
-        {portal === 'choose' && stage === 'idle' && (
-          <div className="mt-6 mb-2 text-center">
-            <HelpCreateAccountLink light />
+            {localUiPreviewAvailable && (
+              <button
+                type="button"
+                onClick={enterLocalUiPreview}
+                className="mt-6 w-full min-h-[44px] rounded-xl border border-dashed border-[#16251f]/25 text-[#16251f] font-bold text-xs uppercase tracking-[0.14em]"
+              >
+                Preview Home (local only)
+              </button>
+            )}
           </div>
         )}
 
@@ -731,7 +754,7 @@ const LoginPortal: React.FC = () => {
               <button
                 type="button"
                 onClick={backToChooser}
-                className="inline-flex items-center gap-2 text-sm font-bold text-white/85 hover:text-white underline-offset-4 hover:underline"
+                className="inline-flex items-center gap-2 text-sm font-bold text-[#1d372c] underline-offset-4 hover:underline"
               >
                 <ArrowLeft size={14} /> Back to PLCC ONE
               </button>
@@ -1334,9 +1357,7 @@ const LoginPortal: React.FC = () => {
         @keyframes pulse-slow-reverse { 0%, 100% { opacity: 0.05; transform: scale(1); } 50% { opacity: 0.15; transform: scale(0.9); } }
         .animate-pulse-slow-reverse { animation: pulse-slow-reverse 10s ease-in-out infinite; }
       `}</style>
-      </div>
-      {portal === 'choose' && stage === 'idle' && <AwcOneFooter />}
-    </AwcOneBackground>
+    </PlccLoginShell>
   );
 };
 
