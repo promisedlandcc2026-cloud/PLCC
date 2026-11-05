@@ -112,8 +112,11 @@ async function proxyAuthOtp(body: Record<string, unknown>): Promise<any> {
   } catch (err: any) {
     const msg = String(err?.message || err || '');
     if (/failed to fetch|networkerror|load failed|ECONNREFUSED|timed out/i.test(msg)) {
+      const isLocal = typeof window !== 'undefined' && /localhost|127\.0\.0\.1/i.test(window.location.hostname);
       throw new Error(
-        'Local API is not running. In a second terminal run: npm run dev:api  (or use npm run dev:all)'
+        isLocal
+          ? 'Local API is not running. In a second terminal run: npm run dev:api  (or use npm run dev:all)'
+          : 'Sending your code is taking longer than usual. Check your email (and spam) in a minute; if nothing arrives, tap Send code again.'
       );
     }
     throw err;
