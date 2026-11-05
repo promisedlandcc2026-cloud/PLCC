@@ -7,7 +7,17 @@ const COLORS: Record<Exclude<SeasonEffect, 'none'>, string[]> = {
   snow: ['#FFFFFF', '#F8FAFC', '#E2E8F0'],
   petals: ['#F9A8D4', '#FBCFE8', '#FFFFFF'],
   sparkles: ['#C9A35A', '#FFFFFF', '#FDE68A'],
+  stars: ['#FFFFFF', '#FDE68A', '#E4C98F'],
+  drizzle: ['rgba(214,230,255,0.4)'],
+  rain: ['rgba(214,230,255,0.45)'],
+  storm: ['rgba(214,230,255,0.5)'],
+  clouds: ['#FFFFFF'],
+  sun: ['#FDE68A'],
 };
+
+const NOT_CANVAS = new Set<SeasonEffect>(['none', 'leaves', 'clouds', 'sun']);
+const RAINY = new Set<SeasonEffect>(['drizzle', 'rain', 'storm']);
+const COUNT: Partial<Record<SeasonEffect, number>> = { drizzle: 45, rain: 110, storm: 140, stars: 34 };
 
 type Particle = {
   x: number;
@@ -22,6 +32,19 @@ type Particle = {
 
 function spawn(width: number, height: number, colors: string[], effect: SeasonEffect, y?: number): Particle {
   const leaf = effect === 'leaves';
+  if (RAINY.has(effect)) {
+    const fast = effect === 'storm' ? 1.4 : effect === 'drizzle' ? 0.7 : 1;
+    return {
+      x: Math.random() * (width + 80) - 40,
+      y: y ?? Math.random() * height,
+      r: (effect === 'drizzle' ? 7 : 12) + Math.random() * 10, // streak length
+      vy: (7 + Math.random() * 5) * fast,
+      vx: effect === 'storm' ? -2.2 : -0.9,
+      spin: 0,
+      angle: 0,
+      color: colors[0],
+    };
+  }
   return {
     x: Math.random() * width,
     y: y ?? Math.random() * height,
@@ -64,7 +87,7 @@ const SeasonParticles: React.FC<{ effect: SeasonEffect }> = ({ effect }) => {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (effect === 'none' || effect === 'leaves') return;
+    if (NOT_CANVAS.has(effect)) return;
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -75,6 +98,7 @@ const SeasonParticles: React.FC<{ effect: SeasonEffect }> = ({ effect }) => {
     let frame = 0;
     const particles: Particle[] = [];
     let ready = false;
+    let flash = 0;
 
     const box = () => {
       const rect = canvas.getBoundingClientRect();
@@ -94,7 +118,7 @@ const SeasonParticles: React.FC<{ effect: SeasonEffect }> = ({ effect }) => {
       canvas.height = Math.max(1, Math.floor(height * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (!ready) {
-        const count = effect === 'leaves' ? 22 : 20;
+        const count = COUNT[effect] ?? 20;
         for (let i = 0; i < count; i += 1) particles.push(spawn(width, height, colors, effect));
         ready = true;
       }
@@ -104,8 +128,35 @@ const SeasonParticles: React.FC<{ effect: SeasonEffect }> = ({ effect }) => {
       const { width, height } = box();
       if (!ready || width < 8 || height < 8) return;
       ctx.clearRect(0, 0, width, height);
+      if (RAINY.has(effect)) {
+        // Lightning: a rare bright flash that fades over a few frames.
+        if (effect === 'storm' && animate) {
+          if (flash <= 0 && Math.random() < 0.004) flash = 1;
+          if (flash > 0) {
+            ctx.fillStyle = `rgba(235, 240, 255, ${0.35 * flash})`;
+            ctx.fillRect(0, 0, width, height);
+            flash -= 0.06;
+          }
+        }
+        ctx.strokeStyle = colors[0];
+        ctx.lineCap = 'round';
+        for (const drop of particles) {
+          if (animate) {
+            drop.y += drop.vy;
+            drop.x += drop.vx;
+            if (drop.y > height + 20) Object.assign(drop, spawn(width, height, colors, effect, -20));
+          }
+          ctx.lineWidth = effect === 'drizzle' ? 1 : 1.3;
+          ctx.beginPath();
+          ctx.moveTo(drop.x, drop.y);
+          ctx.lineTo(drop.x + drop.vx * (drop.r / drop.vy), drop.y + drop.r);
+          ctx.stroke();
+        }
+        frame += 1;
+        return;
+      }
       for (const particle of particles) {
-        if (animate) {
+        if (animate && effect !== 'stars') {
           particle.y += particle.vy;
           particle.x += particle.vx + Math.sin(particle.angle) * 0.15;
           particle.angle += particle.spin;
@@ -118,14 +169,14 @@ const SeasonParticles: React.FC<{ effect: SeasonEffect }> = ({ effect }) => {
         ctx.rotate(particle.angle);
         ctx.fillStyle = particle.color;
         ctx.globalAlpha =
-          effect === 'sparkles'
+          effect === 'sparkles' || effect === 'stars'
             ? 0.45 + Math.abs(Math.sin(frame / 12 + particle.angle)) * 0.55
             : effect === 'leaves'
               ? 0.95
               : 0.85;
-        if (effect === 'snow' || effect === 'sparkles') {
+        if (effect === 'snow' || effect === 'sparkles' || effect === 'stars') {
           ctx.beginPath();
-          ctx.arc(0, 0, particle.r * (effect === 'sparkles' ? 0.7 : 1), 0, Math.PI * 2);
+          ctx.arc(0, 0, particle.r * (effect === 'snow' ? 1 : effect === 'stars' ? 0.45 : 0.7), 0, Math.PI * 2);
           ctx.fill();
         } else if (effect === 'leaves') {
           drawLeaf(ctx, particle.r, particle.color, Math.cos(frame / 40 + particle.angle * 3));
@@ -165,6 +216,34 @@ const SeasonParticles: React.FC<{ effect: SeasonEffect }> = ({ effect }) => {
   }, [effect]);
 
   if (effect === 'none') return null;
+  if (effect === 'sun') {
+    return (
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-[30] overflow-hidden" data-weather="sun">
+        <div className="plcc-sun-rays" />
+        <div className="plcc-sun-glow" />
+      </div>
+    );
+  }
+  if (effect === 'clouds') {
+    return (
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-[30] overflow-hidden" data-weather="clouds">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span
+            key={i}
+            className="plcc-cloud"
+            style={{
+              top: `${4 + ((i * 19) % 60)}%`,
+              width: `${220 + (i % 3) * 90}px`,
+              height: `${70 + (i % 3) * 26}px`,
+              opacity: 0.1 + (i % 3) * 0.04,
+              animationDuration: `${60 + i * 14}s`,
+              animationDelay: `${-i * 17}s`,
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
   if (effect === 'leaves') {
     const reduceMotion =
       typeof window !== 'undefined' &&

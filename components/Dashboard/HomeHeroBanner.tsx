@@ -153,6 +153,11 @@ const HomeHeroBanner: React.FC<Props> = ({
           {theme.greeting ? (
             <p className="mt-2 text-sm font-black text-gold tracking-tight">{theme.greeting}</p>
           ) : null}
+          {!theme.greeting && theme.weatherLabel ? (
+            <p className="mt-2 text-sm font-bold text-white/85">
+              {theme.mark ? `${theme.mark} ` : ''}{theme.weatherLabel}
+            </p>
+          ) : null}
           <p className="mt-2 text-xs sm:text-sm font-black uppercase tracking-[0.22em] text-gold">
             Changing Hearts. Transforming Lives.
           </p>

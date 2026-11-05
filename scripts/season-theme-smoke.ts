@@ -6,6 +6,7 @@ import { dateOnNyDay } from '../lib/seasons/nyDate';
 import { getCurrentSeason, getSeasonWindow } from '../lib/seasons/season';
 import { easterSunday, getActiveHoliday, thanksgivingDay } from '../lib/seasons/holidays';
 import { getActiveTheme } from '../lib/seasons/theme';
+import { weatherFromCode } from '../lib/seasons/weather';
 
 function assert(cond: boolean, msg: string) {
   if (!cond) throw new Error(`FAIL: ${msg}`);
@@ -21,8 +22,8 @@ assert(getCurrentSeason(on(2026, 9, 1)) === 'fall', 'Sep 1 is fall');
 assert(getCurrentSeason(on(2026, 11, 30)) === 'fall', 'Nov 30 is fall');
 assert(getCurrentSeason(on(2026, 12, 1)) === 'winter', 'Dec 1 is winter');
 assert(getCurrentSeason(on(2026, 8, 31)) === 'summer', 'Aug 31 is summer');
-assert(getCurrentSeason(new Date('2026-09-01T03:00:00Z')) === 'summer', 'Sep 1 03:00 UTC is still Aug 31 in New York');
-assert(getCurrentSeason(new Date('2026-09-01T04:00:00Z')) === 'fall', 'Sep 1 04:00 UTC is fall in New York');
+assert(getCurrentSeason(new Date('2026-08-31T20:00:00Z')) === 'summer', 'Aug 31 20:00 UTC is still Aug 31 in Kampala');
+assert(getCurrentSeason(new Date('2026-08-31T21:00:00Z')) === 'fall', 'Aug 31 21:00 UTC is already Sep 1 in Kampala');
 assert(getCurrentSeason(on(2026, 3, 1)) === 'spring', 'Mar 1 is spring');
 assert(getCurrentSeason(on(2026, 5, 31)) === 'spring', 'May 31 is spring');
 assert(getCurrentSeason(on(2026, 6, 1)) === 'summer', 'Jun 1 is summer');
@@ -87,7 +88,21 @@ assert(getActiveTheme(christmas).id === 'christmas', 'automatic Christmas');
 assert(getActiveTheme(christmas, { mode: 'fall' }).id === 'fall', 'a forced season wins over the holiday');
 assert(getActiveTheme(christmas, { mode: 'off' }).id === 'brand', 'off is the base brand');
 assert(getActiveTheme(christmas, { mode: 'off' }).effect === 'none', 'off has no effect');
-assert(getActiveTheme(on(2026, 10, 2)).id === 'fall' && getActiveTheme(on(2026, 10, 2)).effect === 'leaves', 'October is fall leaves');
-assert(getActiveTheme(on(2026, 7, 4)).effect === 'none', 'summer has no particles');
+assert(getActiveTheme(on(2026, 10, 2)).id === 'rainy', 'October is Uganda rainy season');
+assert(getActiveTheme(on(2026, 7, 4)).id === 'dry' && getActiveTheme(on(2026, 7, 4)).effect === 'sun', 'July is dry season sun');
+assert(getActiveTheme(on(2026, 4, 20)).id === 'rainy', 'late April is rainy season');
+assert(getActiveTheme(on(2026, 1, 20)).id === 'dry', 'January is dry season');
+assert(getActiveTheme(on(2026, 11, 26)).id === 'rainy', 'no US Thanksgiving in Uganda');
+assert(getActiveTheme(on(2026, 10, 2), { mode: 'dry' }).effect === 'sun', 'forced dry season is sun');
+assert(getActiveTheme(on(2026, 7, 4), { mode: 'rainy' }).effect === 'rain', 'forced rainy season is rain');
+
+console.log('Weather codes');
+assert(weatherFromCode(0, true, 27.4).effect === 'sun' && weatherFromCode(0, true, 27.4).tempC === 27, 'clear day is sun, 27C');
+assert(weatherFromCode(0, false, 19).effect === 'stars', 'clear night is stars');
+assert(weatherFromCode(3, true, 22).effect === 'clouds', 'overcast is clouds');
+assert(weatherFromCode(53, true, 22).effect === 'drizzle', 'drizzle');
+assert(weatherFromCode(63, true, 22).effect === 'rain', 'rain');
+assert(weatherFromCode(81, true, 22).effect === 'rain', 'showers');
+assert(weatherFromCode(95, true, 22).effect === 'storm', 'thunderstorm');
 
 console.log('season-theme-smoke passed');

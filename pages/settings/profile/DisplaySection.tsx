@@ -17,7 +17,7 @@ const DisplaySection: React.FC<{ userId: string }> = ({ userId }) => {
         <span>
           <span className="block text-sm font-black text-[#0d1a14]">Seasonal motion</span>
           <span className="block text-xs text-gray-500 font-medium">
-            Leaves, snow, petals, and sparkles on Home. Turn off to keep the header still.
+            Today's weather (sun, clouds, rain) and holiday sparkles on Home. Turn off to keep the header still.
           </span>
         </span>
         <input

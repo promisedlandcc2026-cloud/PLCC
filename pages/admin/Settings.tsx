@@ -421,7 +421,7 @@ const SystemSettingsPage: React.FC = () => {
                   <div className="pt-10 border-t border-gray-50 space-y-6">
                     <div>
                       <h4 className="text-sm font-black text-[#0d1a14] uppercase tracking-widest">Seasonal theme</h4>
-                      <p className="text-xs text-gray-500 mt-1">Maroon and gold stay. This only changes the Home greeting and a light effect.</p>
+                      <p className="text-xs text-gray-500 mt-1">Green and gold stay. This only changes the Home greeting and a light weather effect.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <label className="space-y-4 block">
@@ -434,13 +434,10 @@ const SystemSettingsPage: React.FC = () => {
                           }))}
                           className="w-full px-8 py-5 rounded-[2rem] bg-gray-50 border border-transparent focus:bg-white focus:border-gold outline-none font-bold text-[#0d1a14]"
                         >
-                          <option value="automatic">Automatic</option>
+                          <option value="automatic">Automatic — today's Kampala weather</option>
                           <option value="off">Off — base brand only</option>
-                          <option value="fall">Fall</option>
-                          <option value="winter">Winter</option>
-                          <option value="spring">Spring</option>
-                          <option value="summer">Summer</option>
-                          <option value="thanksgiving">Thanksgiving</option>
+                          <option value="rainy">Rainy season</option>
+                          <option value="dry">Dry season</option>
                           <option value="christmas">Christmas</option>
                           <option value="new_year">New Year</option>
                           <option value="easter">Easter</option>
@@ -473,7 +470,7 @@ const SystemSettingsPage: React.FC = () => {
                     </div>
                     <SettingToggle
                       label="Seasonal effects"
-                      sub="Leaves, snow, petals, or sparkles on the Home header. Members can still turn this off for themselves."
+                      sub="Today's Kampala weather (sun, clouds, rain, storms) on the Home header, plus holiday touches. Members can still turn this off for themselves."
                       icon={Sparkles}
                       section="seasonal"
                       stateKey="effects"
@@ -489,11 +486,8 @@ const SystemSettingsPage: React.FC = () => {
                         >
                           <option value="automatic">Automatic for the date</option>
                           <option value="off">Off</option>
-                          <option value="fall">Fall</option>
-                          <option value="winter">Winter</option>
-                          <option value="spring">Spring</option>
-                          <option value="summer">Summer</option>
-                          <option value="thanksgiving">Thanksgiving</option>
+                          <option value="rainy">Rainy season</option>
+                          <option value="dry">Dry season</option>
                           <option value="christmas">Christmas</option>
                           <option value="new_year">New Year</option>
                           <option value="easter">Easter</option>

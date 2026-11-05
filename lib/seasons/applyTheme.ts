@@ -12,6 +12,7 @@ import {
   type SeasonalSettings,
   type ThemeMode,
 } from './index';
+import { fetchKampalaWeather } from './weather';
 
 export type SeasonPreview = { mode: ThemeMode; date: string | null };
 
@@ -24,7 +25,7 @@ const listeners = new Set<(published: PublishedSeason) => void>();
 const initialTheme = getActiveTheme(new Date());
 let published: PublishedSeason = {
   theme: initialTheme,
-  // Show fall leaves immediately; refreshSeasonTheme may turn them off
+  // Show the season's effect immediately; refreshSeasonTheme may turn it off
   // when the church or this member has seasonal effects off.
   showEffects: initialTheme.effect !== 'none',
 };
@@ -84,10 +85,22 @@ export async function refreshSeasonTheme(): Promise<PublishedSeason> {
         Number(preview.date.slice(8, 10))
       )
     : new Date();
-  const theme = getActiveTheme(date, {
+  let theme = getActiveTheme(date, {
     ...church,
     mode: preview ? preview.mode : church.mode,
   });
+  // Automatic, not a holiday, and today (not a previewed date): use Kampala's live weather.
+  if ((theme.id === 'rainy' || theme.id === 'dry') && (preview ? preview.mode : church.mode) === 'automatic' && !preview?.date) {
+    const live = await fetchKampalaWeather();
+    if (live) {
+      theme = {
+        ...theme,
+        mark: live.mark,
+        effect: live.effect,
+        weatherLabel: live.tempC !== null ? `${live.label} · ${live.tempC}°C in Kampala` : `${live.label} in Kampala`,
+      };
+    }
+  }
   const userId = typeof localStorage === 'undefined' ? null : localStorage.getItem('awc_user_id');
   // Reduced motion still shows the leaves; SeasonParticles holds them still.
   const showEffects = church.effects && !readMemberEffectsOff(userId) && theme.effect !== 'none';

@@ -1,9 +1,10 @@
 import { getActiveHoliday, type AnniversarySetting, type HolidayName } from './holidays';
 import { getSeasonWindow, type SeasonName } from './season';
+import { seasonalWeather, ugandaSeason, type UgandaSeason, type WeatherEffect } from './weather';
 
-export type ThemeId = SeasonName | HolidayName | 'brand';
-export type ThemeMode = 'automatic' | 'off' | SeasonName | HolidayName;
-export type SeasonEffect = 'leaves' | 'snow' | 'petals' | 'sparkles' | 'none';
+export type ThemeId = SeasonName | UgandaSeason | HolidayName | 'brand';
+export type ThemeMode = 'automatic' | 'off' | SeasonName | UgandaSeason | HolidayName;
+export type SeasonEffect = 'leaves' | 'snow' | 'petals' | 'sparkles' | WeatherEffect | 'none';
 
 export type SeasonalSettings = {
   mode: ThemeMode;
@@ -21,6 +22,8 @@ export type ActiveTheme = {
   mark: string;
   greeting: string | null;
   effect: SeasonEffect;
+  /** Kampala weather line for the Home header, e.g. "Light rain · 23°C". */
+  weatherLabel?: string | null;
 };
 
 export const DEFAULT_SEASONAL_SETTINGS: SeasonalSettings = {
@@ -33,6 +36,8 @@ export const DEFAULT_SEASONAL_SETTINGS: SeasonalSettings = {
 const THEME_MODES = new Set<ThemeMode>([
   'automatic',
   'off',
+  'rainy',
+  'dry',
   'fall',
   'winter',
   'spring',
@@ -49,6 +54,8 @@ const LOOK: Record<Exclude<ThemeId, 'brand'>, { mark: string; greeting: string |
   winter: { mark: '❄️', greeting: null, effect: 'snow' },
   spring: { mark: '🌸', greeting: null, effect: 'petals' },
   summer: { mark: '☀️', greeting: null, effect: 'none' },
+  rainy: { mark: '🌧️', greeting: null, effect: 'rain' },
+  dry: { mark: '☀️', greeting: null, effect: 'sun' },
   thanksgiving: { mark: '🦃', greeting: 'Happy Thanksgiving from PLCC', effect: 'leaves' },
   christmas: { mark: '🎄', greeting: 'Merry Christmas from PLCC', effect: 'sparkles' },
   new_year: { mark: '🎉', greeting: 'Happy New Year from PLCC', effect: 'sparkles' },
@@ -112,5 +119,14 @@ export function getActiveTheme(date: Date, rawSettings?: Partial<SeasonalSetting
       holiday,
     };
   }
-  return themeFor(holiday ?? seasonWindow.season, date, holiday);
+  // Uganda: no US Thanksgiving. Otherwise the season's look until live weather arrives.
+  const localHoliday = holiday === 'thanksgiving' ? null : holiday;
+  if (localHoliday) return themeFor(localHoliday, date, localHoliday);
+  const fallback = seasonalWeather(date);
+  return {
+    ...themeFor(ugandaSeason(date), date, null),
+    mark: fallback.mark,
+    effect: fallback.effect,
+    weatherLabel: fallback.label,
+  };
 }
