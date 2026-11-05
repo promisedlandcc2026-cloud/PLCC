@@ -6069,9 +6069,13 @@ const handleCommunity = async (req: any, res: any) => {
                     });
                 } catch (e: any) {
                     console.warn('[voice-token]', e);
+                    // Show LiveKit's reason (never contains the secret) so setup problems are visible.
+                    const reason = String(e?.message || e?.code || '').replace(/\s+/g, ' ').slice(0, 160);
                     return res.status(500).json({
                         ok: false,
-                        error: 'Could not issue voice huddle token',
+                        error: reason
+                            ? `Could not issue voice huddle token (${reason})`
+                            : 'Could not issue voice huddle token',
                     });
                 }
             }
