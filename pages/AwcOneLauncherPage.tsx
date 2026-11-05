@@ -11,6 +11,7 @@ import {
   PlccTopBar,
   PlccWelcomeBanner,
 } from '../components/awcone/PlccOneShell';
+import { PlccHomeExtras } from '../components/awcone/PlccHomeExtras';
 
 /**
  * PLCC ONE launcher — the home screen after signing in.
@@ -108,6 +109,7 @@ const AwcOneLauncherPage: React.FC = () => {
         {note ? (
           <p role="alert" className="mt-4 text-center text-sm font-bold text-red-700">{note}</p>
         ) : null}
+        <PlccHomeExtras enabled={isAuthenticated} />
       </main>
       <PlccFooter onSignOut={logout} />
     </div>
