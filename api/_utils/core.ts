@@ -698,6 +698,24 @@ const handleUsers = async (req: any, res: any) => {
             if (e2) throw e2;
             return res.status(200).json({ ok: true, users: d2 });
         }
+        // Phone sign-in accounts used to be left out of Members — add any that are missing.
+        try {
+            const phoneUsers = (data || []).filter((u: any) =>
+                /@phone\.awcvault\.invalid$/i.test(String(u?.email || ''))
+            );
+            if (phoneUsers.length) {
+                const { data: have } = await supabaseAdmin
+                    .from('members')
+                    .select('id')
+                    .in('id', phoneUsers.map((u: any) => u.id));
+                const haveIds = new Set((have || []).map((m: any) => String(m.id)));
+                for (const u of phoneUsers.filter((u: any) => !haveIds.has(String(u.id))).slice(0, 25)) {
+                    await ensureMemberForUser(supabaseAdmin, u).catch(() => null);
+                }
+            }
+        } catch (syncErr: any) {
+            console.warn('[Vault API] phone member sync:', syncErr?.message || syncErr);
+        }
         return res.status(200).json({ ok: true, users: data });
     }
     if (req.method === 'POST') {

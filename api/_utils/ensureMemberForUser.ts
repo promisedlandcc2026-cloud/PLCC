@@ -12,7 +12,6 @@ const isPlaceholderUserEmail = (email: string) => {
     /@awc-vault\.local$/i.test(e) ||
     /^orphaned\+/i.test(e) ||
     e === 'pending@email.com' ||
-    /@phone\.awcvault\.invalid$/i.test(e) ||
     /jerless/i.test(e) ||
     /@atomic(mail|vault)?\.io$/i.test(e) ||
     /@atomicmail\.com$/i.test(e) ||
@@ -26,6 +25,9 @@ const isPlaceholderUserEmail = (email: string) => {
     /^phase\d/i.test(e)
   );
 };
+
+/** Phone sign-in accounts use a hidden placeholder email; they still belong in Members. */
+const isPhoneSignInEmail = (email: string) => /@phone\.awcvault\.invalid$/i.test(String(email || ''));
 
 const splitUserDisplayName = (name?: string | null) => {
   const parts = String(name || '')
@@ -79,7 +81,11 @@ export async function ensureMemberForUser(
   const email = String(userRow.email || fields.email || '')
     .toLowerCase()
     .trim();
-  if (isPlaceholderUserEmail(email)) return null;
+  const phoneAccount = isPhoneSignInEmail(email);
+  if (!phoneAccount && isPlaceholderUserEmail(email)) return null;
+  // Never show the placeholder address in the directory.
+  const memberEmail: string | null = phoneAccount ? null : email;
+  const accountPhone = String(userRow.phone || fields.phone || '').trim();
 
   const nameSource =
     (typeof fields.name === 'string' && fields.name.trim() ? fields.name : null) ||
@@ -117,7 +123,17 @@ export async function ensureMemberForUser(
       .maybeSingle();
     if (byId?.id) memberId = byId.id;
 
-    if (!memberId && email) {
+    if (!memberId && phoneAccount && accountPhone) {
+      const { data: byPhone } = await supabaseAdmin
+        .from('members')
+        .select('id')
+        .eq('phone', accountPhone)
+        .limit(1)
+        .maybeSingle();
+      if (byPhone?.id) memberId = byPhone.id;
+    }
+
+    if (!memberId && memberEmail) {
       const { data: byEmail } = await supabaseAdmin
         .from('members')
         .select('id')
@@ -150,8 +166,8 @@ export async function ensureMemberForUser(
         id: userRow.id,
         first_name: firstName,
         last_name: lastName,
-        email,
-        phone: memberUpdates.phone ?? null,
+        email: memberEmail,
+        phone: memberUpdates.phone ?? (accountPhone || null),
         birthday: memberUpdates.birthday ?? null,
         avatar_url: memberUpdates.avatar_url ?? null,
         children: memberUpdates.children ?? [],
@@ -167,11 +183,9 @@ export async function ensureMemberForUser(
       if (createError) {
         // Race / id conflict: fall back to email match or insert without forced id
         console.error('[Vault API] ensureMemberForUser insert:', createError.message);
-        const { data: retryEmail } = await supabaseAdmin
-          .from('members')
-          .select('id')
-          .ilike('email', email)
-          .maybeSingle();
+        const { data: retryEmail } = memberEmail
+          ? await supabaseAdmin.from('members').select('id').ilike('email', memberEmail).maybeSingle()
+          : { data: null };
         if (retryEmail?.id) {
           memberId = retryEmail.id;
         } else {
