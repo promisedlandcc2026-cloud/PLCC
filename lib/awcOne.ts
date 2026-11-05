@@ -27,7 +27,7 @@ const trimSlash = (s: string) => s.replace(/\/+$/, '');
 export const CONNECT_ORIGIN = trimSlash(env.VITE_CONNECT_ORIGIN || 'https://plcc-connect.vercel.app');
 export const CHAT_ORIGIN = trimSlash(env.VITE_CHAT_ORIGIN || 'https://plcc-chat.vercel.app');
 /** Sanctum Live — PLCC's corporate prayer rooms (its own sign-in for now). */
-export const SANCTUM_URL = env.VITE_SANCTUM_URL || 'https://zwbc2n34bbn0iic4rhoda4dq.ewr.prisma.build/';
+export const SANCTUM_URL = env.VITE_SANCTUM_URL || 'https://plcc-sanctum.onrender.com/dashboard';
 export const TITHE_URL = env.VITE_TITHE_URL || 'https://plcc-tithe.vercel.app/';
 /** Set VITE_AWC_ONE_SSO=false to open the apps without the sign-on handoff. */
 const SSO_ENABLED = env.VITE_AWC_ONE_SSO !== 'false';
