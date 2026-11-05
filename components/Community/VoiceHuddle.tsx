@@ -71,6 +71,9 @@ import {
   shouldAutoRejoinHuddle,
 } from '../../api/_utils/huddleKeepAlive.js';
 import MinutesRecorder from '../Minutes/MinutesRecorder';
+
+/** PLCC doesn't keep meeting minutes, so the huddle hides the Minutes tools. */
+const HUDDLE_MINUTES_ENABLED = false;
 import {
   loadHuddleMinutesDraft,
   saveHuddleMinutesDraft,
@@ -2832,7 +2835,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
       await localTeardown;
       setEnding(false);
 
-      if (serverOk && !prayerWatch && typeof window !== 'undefined') {
+      if (HUDDLE_MINUTES_ENABLED && serverOk && !prayerWatch && typeof window !== 'undefined') {
         const draft = loadHuddleMinutesDraft();
         const hasDraft = Boolean(draft?.transcript?.trim());
         const go = window.confirm(
@@ -4158,7 +4161,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   </span>
                 ) : null}
               </button>
-              {canModerate && !onDaily && !prayerWatch ? (
+              {HUDDLE_MINUTES_ENABLED && canModerate && !onDaily && !prayerWatch ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -4231,7 +4234,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
             </div>
           )}
 
-          {inCall && canModerate && minutesPanelOpen ? (
+          {HUDDLE_MINUTES_ENABLED && inCall && canModerate && minutesPanelOpen ? (
             <div
               className={`rounded-xl border p-3 space-y-2 ${
                 focusActive
