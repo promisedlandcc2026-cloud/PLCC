@@ -36,8 +36,8 @@ const WAYS_TO_GIVE = [
   },
   {
     icon: Smartphone,
-    title: 'Zelle, Venmo or Cash App',
-    detail: 'Send from your phone; we record it for your statement',
+    title: 'MTN, Airtel or Sendwave',
+    detail: 'Mobile Money at home, or Sendwave from abroad; we record it for your statement',
   },
 ];
 
