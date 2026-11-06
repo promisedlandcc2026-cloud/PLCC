@@ -1,7 +1,7 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.8B — Privacy-first Member Directory
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
+-- Shared Supabase schema (Canaan-owned migrations).
 -- DO NOT apply automatically — review before live apply.
 --
 -- Requires 2.8A: member_directory_privacy + preferred_name + profile helpers.

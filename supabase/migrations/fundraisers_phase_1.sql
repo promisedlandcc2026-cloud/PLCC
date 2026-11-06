@@ -1,5 +1,5 @@
 -- Fundraisers (moved from DCB): gifts, pledges, fun charges, game cash, online gifts from PLCC Tithe.
--- Safe to run more than once. Data is only reached through the Vault API (service role); RLS on, no policies.
+-- Safe to run more than once. Data is only reached through PLCC Canaan API (service role); RLS on, no policies.
 
 CREATE TABLE IF NOT EXISTS public.fundraisers (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

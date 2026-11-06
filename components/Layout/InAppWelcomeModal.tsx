@@ -47,7 +47,7 @@ const InAppWelcomeModal: React.FC<InAppWelcomeModalProps> = ({ id, title, descri
                             {title}
                         </h2>
                         <p className="text-gray-400 font-medium leading-relaxed">
-                            {description || "Authorized Personnel Only. Your administrative session is now synchronized with the PLCC Identity Vault."}
+                            {description || "Authorized Personnel Only. Your administrative session is now synchronized with the PLCC ONE."}
                         </p>
                     </div>
 

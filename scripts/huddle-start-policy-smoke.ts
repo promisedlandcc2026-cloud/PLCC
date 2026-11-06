@@ -170,7 +170,7 @@ check('Tampered pass claiming canStart is rejected', () => {
 });
 
 console.log('Messages');
-check('Vault shows the "not started yet" wording, not "no access"', () => {
+check('Canaan shows the "not started yet" wording, not "no access"', () => {
   const msg = huddleJoinErrorMessage(403, "This huddle hasn't started yet.", HUDDLE_START_FORBIDDEN_CODE);
   assert.match(msg, /hasn't started yet/);
   assert.doesNotMatch(huddleJoinErrorMessage(403, 'x'), /hasn't started yet/);

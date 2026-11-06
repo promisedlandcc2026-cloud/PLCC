@@ -317,6 +317,6 @@ export function inviteExpiryLabel(expiresAt: string | null): string {
 }
 
 export function whatsappInviteHref(url: string, expiresAt: string | null): string {
-  const text = `Join our Family Huddle on The Vault (${inviteExpiryLabel(expiresAt)})\n${url}`;
+  const text = `Join our Family Huddle on PLCC Canaan (${inviteExpiryLabel(expiresAt)})\n${url}`;
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }

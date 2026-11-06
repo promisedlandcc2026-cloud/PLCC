@@ -184,7 +184,7 @@ const MediaNoticeModal: React.FC = () => {
             <p>
               If you or your family prefer not to appear in church photography, please submit a
               written opt-out request to the Church Office or contact the Administrator / Secretary
-              at the front desk. Your preference will be noted in the Vault member record and shared
+              at the front desk. Your preference will be noted in PLCC Canaan member record and shared
               with the Media Team.
             </p>
             <p className="text-xs text-gray-400">

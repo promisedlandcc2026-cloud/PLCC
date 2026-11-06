@@ -64,7 +64,7 @@ const Farewell: React.FC = () => {
             <span className="text-gold">.</span>
           </h1>
           <p className="text-sm text-gray-500 font-medium mb-8">
-            Your Vault session is closed. You can return anytime.
+            Your Canaan session is closed. You can return anytime.
           </p>
 
           <blockquote className="rounded-2xl bg-[#f7f4ef] border border-[#0d1a14]/08 px-5 py-5 text-left mb-8">

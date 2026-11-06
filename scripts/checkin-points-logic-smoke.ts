@@ -44,7 +44,7 @@ assert(!verifyQrToken(secret, otherSession, t0).ok, 'session swap rejected');
 assert(!verifyQrToken(secret, 'AWC1.deadbeef', t0).ok, 'membership card token rejected');
 
 const url = `https://plcc-opal.vercel.app/#/scan-in?c=${encodeURIComponent(signed.token)}`;
-assert(extractQrToken(url) === signed.token, 'token pulled from Vault link');
+assert(extractQrToken(url) === signed.token, 'token pulled from Canaan link');
 assert(extractQrToken(signed.token) === signed.token, 'bare token accepted');
 assert(extractQrToken('https://example.com/?c=hello') === null, 'foreign link rejected');
 assert(extractQrToken(42) === null, 'non-string rejected');

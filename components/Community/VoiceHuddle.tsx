@@ -41,6 +41,7 @@ import {
   type RemoteTrack,
   type RemoteTrackPublication,
   type TrackPublication,
+  DisconnectReason,
 } from 'livekit-client';
 import {
   fetchWithTimeout,
@@ -206,6 +207,23 @@ import {
   isHuddleMusicPublication,
   roomHasHuddleMusic,
 } from '../../api/_utils/huddleMusic.js';
+
+/** LiveKit closed this copy on purpose (joined elsewhere, removed, or ended): do not auto-rejoin. */
+function huddleDisconnectIsFinal(reason?: DisconnectReason): boolean {
+  return (
+    reason === DisconnectReason.DUPLICATE_IDENTITY ||
+    reason === DisconnectReason.PARTICIPANT_REMOVED ||
+    reason === DisconnectReason.ROOM_DELETED
+  );
+}
+
+function huddleDisconnectMessage(reason?: DisconnectReason): string {
+  if (reason === DisconnectReason.DUPLICATE_IDENTITY) {
+    return 'You joined this huddle somewhere else (another tab, app or device). Tap Join to bring it back here.';
+  }
+  if (reason === DisconnectReason.PARTICIPANT_REMOVED) return 'You were removed from the huddle.';
+  return 'The huddle has ended.';
+}
 
 type VoiceHuddleProps = {
   isOpen: boolean;
@@ -2263,7 +2281,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
           if (!mountedRef.current) return;
           setAudioBlocked(!room.canPlaybackAudio);
         })
-        .on(RoomEvent.Disconnected, () => {
+        .on(RoomEvent.Disconnected, (reason?: DisconnectReason) => {
           if (!mountedRef.current) return;
           // Only clear local UI — do not invent "huddle empty" (others may remain).
           clearAttachedAudio();
@@ -2287,6 +2305,13 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
             connected: false,
           });
           void checkStatus();
+          if (huddleDisconnectIsFinal(reason)) {
+            if (reason === DisconnectReason.DUPLICATE_IDENTITY) {
+              setError(huddleDisconnectMessage(reason));
+              setNeedsRejoin(true);
+            }
+            return;
+          }
           if (
             shouldAutoRejoinHuddle({
               stayInHuddle: stayInHuddleRef.current,

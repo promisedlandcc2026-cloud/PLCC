@@ -108,7 +108,7 @@ export async function sendPaymentsToDcb(
   if (!todo.length) return summary;
   if (!deps.isDcbConfigured()) {
     summary.waiting = todo.length;
-    summary.warning = 'The DCB link is not set up on the Vault (AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET), so cash and check payments are waiting to go to the DCB.';
+    summary.warning = 'The DCB link is not set up on PLCC Canaan (AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET), so cash and check payments are waiting to go to the DCB.';
     return summary;
   }
   const emails = await memberEmails(db, todo.map((p) => entries.get(p.entry_id)?.member_id));

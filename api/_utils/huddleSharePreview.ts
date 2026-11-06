@@ -199,7 +199,7 @@ if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})(
     <p class="signin">Sign in to PLCC Connect or PLCC Canaan, then tap the huddle link. It opens right into the prayer call.</p>
     <p class="q" style="margin-top:20px">Join the huddle on:</p>
     <a class="btn gold" href="${connectUrl}">PLCC Connect<small>Most members</small></a>
-    <a class="btn plain" href="${appInviteUrl}">The Vault<small>Church staff</small></a>
+    <a class="btn plain" href="${appInviteUrl}">PLCC Canaan<small>Church staff</small></a>
     <p class="note">Either way, you're in the same prayer call.</p>
   </main>`
     : `<main>

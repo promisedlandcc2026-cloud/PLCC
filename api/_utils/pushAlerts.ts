@@ -81,7 +81,7 @@ export function topicForNotification(type: string): PushTopic | null {
   if (type === 'announcement' || type === 'celebration') return 'church';
   if (type === 'prayer') return 'prayer';
   if (type.startsWith('community_') || type === 'kids_bucks_award') return 'community';
-  return null; // assignment, event_approval: Vault staff work, not Connect
+  return null; // assignment, event_approval: Canaan staff work, not Connect
 }
 
 /** Connect path a tap opens. Never passes the raw Vault link through. */
@@ -423,7 +423,7 @@ export async function handlePush(req: any, res: any) {
       const missing = /push_subscriptions/.test(error.message) && /does not exist|schema cache/i.test(error.message);
       return res.status(missing ? 503 : 500).json({
         ok: false,
-        error: missing ? 'Phone alerts need one setup step in the Vault (push_subscriptions.sql).' : 'Could not turn on alerts. Please try again.',
+        error: missing ? 'Phone alerts need one setup step in PLCC Canaan (push_subscriptions.sql).' : 'Could not turn on alerts. Please try again.',
       });
     }
     return res.status(200).json({ ok: true, subscribed: true, topics });

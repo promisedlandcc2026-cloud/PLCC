@@ -5,9 +5,9 @@
 --
 -- Additive:
 --   * public.event_attendance_reconciliations
---   * attendance_reconcile_event_checkin(...) helper called from Vault API
+--   * attendance_reconcile_event_checkin(...) helper called from Canaan API
 --
--- When a digital/manual check-in lands on a session with event_id, Vault upserts
+-- When a digital/manual check-in lands on a session with event_id, Canaan upserts
 -- a reconciliation row linking event ↔ member ↔ attendance_record.
 -- Connect reads personal status via get_my_event_attendance_status (2.7D.10).
 -- =============================================================================
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS public.event_attendance_reconciliations (
 );
 
 COMMENT ON TABLE public.event_attendance_reconciliations IS
-  'Phase 2.7D.8 — links event RSVP/attendance to session check-in. No raw QR. Vault service_role writes; Connect reads via narrow RPC.';
+  'Phase 2.7D.8 — links event RSVP/attendance to session check-in. No raw QR. Canaan service_role writes; Connect reads via narrow RPC.';
 
 CREATE INDEX IF NOT EXISTS event_attendance_reconciliations_session_idx
   ON public.event_attendance_reconciliations (session_id);

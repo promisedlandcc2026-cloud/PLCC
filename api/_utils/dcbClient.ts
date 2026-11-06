@@ -122,7 +122,7 @@ export async function postContributionToDcb(
       mock: false,
       skipped: true,
       error:
-        'DCB bridge not configured (set AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET on Vault).',
+        'DCB bridge not configured (set AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET on Canaan).',
     };
   }
 
@@ -247,7 +247,7 @@ export async function voidContributionInDcb(
 ): Promise<DcbVoidResult> {
   const ingestUrl = resolveDcbIngestUrl();
   if (!ingestUrl || !dcbServiceSecret()) {
-    return { ok: false, skipped: true, error: 'DCB bridge not configured (set AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET on Vault).' };
+    return { ok: false, skipped: true, error: 'DCB bridge not configured (set AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET on Canaan).' };
   }
   const url = `${ingestUrl.replace(/\/$/, '')}/${encodeURIComponent(voucherId || body.transactionId)}/void`;
   try {

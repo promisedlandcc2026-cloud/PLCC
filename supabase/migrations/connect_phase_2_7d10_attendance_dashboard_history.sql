@@ -4,7 +4,7 @@
 -- DO NOT apply automatically — review before live apply.
 --
 -- Additive:
---   * attendance_dashboard_summary() — Vault leadership aggregates
+--   * attendance_dashboard_summary() — Canaan leadership aggregates
 --   * get_my_attendance_history() — Connect personal session check-ins
 --   * get_my_children_custody_history() — Connect guardian custody times
 --   * get_my_event_attendance_status(uuid) — Connect event reconcile status
@@ -13,7 +13,7 @@
 BEGIN;
 
 -- ---------------------------------------------------------------------------
--- Vault dashboard aggregates (service_role)
+-- Canaan dashboard aggregates (service_role)
 -- ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.attendance_dashboard_summary(
@@ -112,7 +112,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.attendance_dashboard_summary(integer) IS
-  'Phase 2.7D.10 — Vault leadership aggregates. No QR hashes or PII beyond session titles.';
+  'Phase 2.7D.10 — Canaan leadership aggregates. No QR hashes or PII beyond session titles.';
 
 REVOKE ALL ON FUNCTION public.attendance_dashboard_summary(integer) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.attendance_dashboard_summary(integer) FROM anon;

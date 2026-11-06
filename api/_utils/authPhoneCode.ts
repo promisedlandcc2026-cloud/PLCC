@@ -39,7 +39,7 @@ const UNIFORM_SIGNIN = {
   message:
     'If an account uses this number for text sign-in, a 6-digit code is on its way. ' +
     'No text in a minute? Sign in with your email once, then turn on "Sign in by text" ' +
-    '(PLCC Connect: Account · Vault: your profile).',
+    '(PLCC Connect: Account · Canaan: your profile).',
 };
 const BAD_CODE = 'That code did not work. Check it, or request a new code.';
 const HOUR = 60 * 60 * 1000;

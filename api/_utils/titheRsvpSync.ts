@@ -223,7 +223,7 @@ export async function syncRsvpGiftsFromTithe(
       if (!error && data) {
         Object.assign(row, data);
         updated++;
-        warnings.push('Run add_thanksgiving_dcb_voucher.sql so Tithe-paid gifts also post to the Vault ledger.');
+        warnings.push('Run add_thanksgiving_dcb_voucher.sql so Tithe-paid gifts also post to PLCC Canaan ledger.');
         continue;
       }
     }
@@ -251,7 +251,7 @@ export async function syncRsvpGiftsFromTithe(
       }
       if (posted.warning) warnings.push(posted.warning);
     } catch (err: any) {
-      warnings.push(err?.message || 'Could not post a Tithe gift to the Vault ledger');
+      warnings.push(err?.message || 'Could not post a Tithe gift to PLCC Canaan ledger');
     }
   }
 

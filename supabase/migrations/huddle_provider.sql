@@ -1,5 +1,5 @@
 -- Which media provider an open community huddle is using.
--- Run this in the Vault Supabase SQL editor.
+-- Run this in PLCC Canaan Supabase SQL editor.
 -- Service role writes the columns. Members cannot pick a different provider.
 
 ALTER TABLE public.chat_channels

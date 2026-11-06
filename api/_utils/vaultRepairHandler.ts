@@ -143,7 +143,7 @@ async function buildDiagnosis(supabase: any, opts: { query?: string; userId?: st
   const authUser = await findAuthUser(supabase, emailHint, appUser?.id || opts.userId);
 
   if (!appUser && !authUser) {
-    findings.push({ level: 'error', code: 'not_found', message: 'No Auth or Vault user matched that lookup.' });
+    findings.push({ level: 'error', code: 'not_found', message: 'No Auth or Canaan user matched that lookup.' });
     return {
       query: opts.query || null,
       auth: null,
@@ -160,7 +160,7 @@ async function buildDiagnosis(supabase: any, opts: { query?: string; userId?: st
     findings.push({
       level: 'warn',
       code: 'auth_only',
-      message: 'Auth account exists but no Vault users row — run Relink / create PENDING stub.',
+      message: 'Auth account exists but no Canaan users row — run Relink / create PENDING stub.',
     });
   }
 
@@ -316,14 +316,14 @@ async function runRepair(
 
   switch (action) {
     case 'ensure_member_row': {
-      if (!appUser) throw new Error('Vault user row required');
+      if (!appUser) throw new Error('Canaan user row required');
       const memberId = await ensureMemberForUser(supabase, appUser);
       if (!memberId) throw new Error('Could not create/sync Members row');
       result.memberId = memberId;
       break;
     }
     case 'promote_onboarded_member': {
-      if (!appUser) throw new Error('Vault user row required');
+      if (!appUser) throw new Error('Canaan user row required');
       const completed = !!(appUser.notification_prefs as any)?.onboarding?.completedAt;
       if (!completed) throw new Error('Onboarding is not completed — cannot auto-promote');
       if (String(appUser.role || '').toUpperCase() !== 'PENDING') {
@@ -356,7 +356,7 @@ async function runRepair(
       break;
     }
     case 'clear_media_notice': {
-      if (!appUser) throw new Error('Vault user row required');
+      if (!appUser) throw new Error('Canaan user row required');
       const prefs = { ...(appUser.notification_prefs || {}) };
       delete (prefs as any).mediaNotice;
       const { error } = await supabase.from('users').update({ notification_prefs: prefs }).eq('id', userId);
@@ -365,7 +365,7 @@ async function runRepair(
       break;
     }
     case 'force_media_ack': {
-      if (!appUser) throw new Error('Vault user row required');
+      if (!appUser) throw new Error('Canaan user row required');
       const prefs = {
         ...(appUser.notification_prefs || {}),
         mediaNotice: {
@@ -390,7 +390,7 @@ async function runRepair(
       break;
     }
     case 'set_member_active': {
-      if (!appUser) throw new Error('Vault user row required');
+      if (!appUser) throw new Error('Canaan user row required');
       if (String(appUser.role || '').toUpperCase() === 'PENDING') {
         throw new Error('Cannot set Active while login role is PENDING');
       }
@@ -421,7 +421,7 @@ async function runRepair(
 
   const logAudit = await getAudit();
   await logAudit({
-    action: 'Vault Repair',
+    action: 'Canaan Repair',
     details: { action, targetUserId: userId, actorId, result: { ...result, temporaryPassword: result.temporaryPassword ? '[redacted]' : undefined } },
     resourceType: 'user',
     resourceId: userId,
@@ -552,7 +552,7 @@ export async function handleVaultRepair(req: any, res: any) {
   const auth = await requireAuth(req, res, supabase);
   if (!auth) return;
   if (!isSuperAdmin(auth.role)) {
-    return res.status(403).json({ error: 'Only Super Admins can use Vault Repair.' });
+    return res.status(403).json({ error: 'Only Super Admins can use Canaan Repair.' });
   }
 
   const action = String(req.query?.action || req.body?.action || '').toLowerCase();
@@ -643,6 +643,6 @@ export async function handleVaultRepair(req: any, res: any) {
     return res.status(400).json({ error: 'Unknown action. Use diagnose, repair, or chat.' });
   } catch (err: any) {
     console.error('[vault-repair]', err);
-    return res.status(500).json({ error: err?.message || 'Vault repair failed' });
+    return res.status(500).json({ error: err?.message || 'Canaan repair failed' });
   }
 }

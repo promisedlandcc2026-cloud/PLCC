@@ -53,7 +53,7 @@ const ALL_ITEMS: Record<string, SettingsNavItem> = {
 
 const VAULT_REPAIR: SettingsNavItem = {
     id: 'vault-repair',
-    label: 'Vault Repair',
+    label: 'Canaan Repair',
     icon: Wrench,
     description: 'Fix sign-in problems and run safe repairs',
     href: '/admin/vault-repair',

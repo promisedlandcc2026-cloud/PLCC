@@ -23,7 +23,7 @@ CREATE INDEX IF NOT EXISTS kids_ministry_plans_service_date_idx
 
 ALTER TABLE public.kids_ministry_plans ENABLE ROW LEVEL SECURITY;
 
--- No anon/authenticated policies: Vault API uses service role (bypasses RLS).
+-- No anon/authenticated policies: Canaan API uses service role (bypasses RLS).
 
 -- Private Storage bucket for plan images / PDFs (~15MB)
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Serve Phase 2.3 — core schema + member signup/cancel RPCs
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 -- Companion: serve_phase_2_3_signup_normalize.sql (idempotent legacy-collision repair).
@@ -23,10 +23,10 @@
 -- Identity (locked):
 --   serve_signups.user_id → public.users(id)  (canonical; auth.uid())
 --   serve_signups.member_id NULL on member self-signup
---   optional member_id backfill = Vault service-role only (later)
+--   optional member_id backfill = Canaan service-role only (later)
 --
 -- Product launch note:
---   Schema alone does not authorize Serve UI. Connect/Vault must still define
+--   Schema alone does not authorize Serve UI. Connect/Canaan must still define
 --   a SERVER-SIDE adult/eligibility rule before member Serve UI ships.
 --   UI hiding alone is not sufficient protection for minors.
 -- =============================================================================
@@ -123,7 +123,7 @@ CREATE POLICY serve_signups_select_own
   USING (user_id = auth.uid());
 
 -- No INSERT/UPDATE/DELETE policies for authenticated or anon.
--- Mutations: SECURITY DEFINER RPCs + Vault service_role (bypasses RLS).
+-- Mutations: SECURITY DEFINER RPCs + Canaan service_role (bypasses RLS).
 
 -- ---------------------------------------------------------------------------
 -- 4) Table grants (defense in depth vs default privileges)
@@ -358,7 +358,7 @@ REVOKE ALL ON FUNCTION public.serve_cancel_signup(uuid) FROM anon;
 GRANT EXECUTE ON FUNCTION public.serve_signup_opportunity(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.serve_cancel_signup(uuid) TO authenticated;
 
--- Admin approve/decline remains Vault service-role API only (no public admin RPC).
+-- Admin approve/decline remains Canaan service-role API only (no public admin RPC).
 
 COMMENT ON TABLE public.serve_opportunities IS
   'PLCC Serve 2.3 member-facing opportunities. Full = derived, not stored. event_volunteers remains separate staff roster.';

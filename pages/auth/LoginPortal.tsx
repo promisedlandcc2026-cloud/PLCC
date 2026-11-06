@@ -335,7 +335,7 @@ const LoginPortal: React.FC = () => {
   const handlePhonePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loginPassword.trim().length < 6) {
-      setError('Enter your Vault password (at least 6 characters).');
+      setError('Enter your Canaan password (at least 6 characters).');
       return;
     }
     setOtpLoading(true);
@@ -1145,7 +1145,7 @@ const LoginPortal: React.FC = () => {
                       autoFocus
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
-                      placeholder="Your Vault password"
+                      placeholder="Your Canaan password"
                       className="w-full pl-14 pr-5 py-5 bg-white text-[#0d1a14] caret-[#0d1a14] border border-white/20 rounded-2xl outline-none focus:ring-2 focus:ring-gold/60 font-bold placeholder:text-[#0d1a14]/35 [&:-webkit-autofill]:[-webkit-text-fill-color:#0d1a14]"
                       required
                       minLength={6}

@@ -39,7 +39,7 @@ export const ASK_ADMIN_PAGE_HINTS: Record<string, string> = {
   '/communication/announcements': 'How do I post or find announcements?',
   '/communication/minutes': 'How do I find meeting minutes?',
   '/admin/policies': 'Where are church policies and playbooks?',
-  '/help/how-to-videos': 'How do I find or add Vault how-to videos?',
+  '/help/how-to-videos': 'How do I find or add Canaan how-to videos?',
   '/community/chat': 'How do I use Chat and start a Live Huddle?',
   '/settings': 'How do I update my Settings and profile?',
 };

@@ -59,7 +59,7 @@ const WorshipToolsPage: React.FC = () => {
 
   // Dynamic AI Strategy Analysis
   const strategyText = React.useMemo(() => {
-    if (songs.length === 0) return "Vault ready for set initialization. Add songs to begin rehearsal plotting.";
+    if (songs.length === 0) return "Canaan ready for set initialization. Add songs to begin rehearsal plotting.";
     if (songs.length === 1) return `Focus on the thematic depth of "${songs[0].title}". Ensure ${songs[0].lead} is comfortable with the ${songs[0].key} transposition.`;
 
     // Analyze transitions
@@ -323,7 +323,7 @@ ${song.lyrics || 'No lyrics provided.'}
       <SlideDrawer
         isOpen={isLibraryOpen}
         onClose={() => setIsLibraryOpen(false)}
-        title="Worship Vault"
+        title="Worship Canaan"
       >
         <LibraryContent />
       </SlideDrawer>
@@ -336,7 +336,7 @@ ${song.lyrics || 'No lyrics provided.'}
         <div className="p-8 border-b border-white/5">
           <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
             <Music className="text-gold" size={20} />
-            Worship Vault
+            Worship Canaan
           </h2>
           <p className="text-[10px] text-gold/40 font-bold uppercase tracking-widest mt-1">PLCC Admin Library</p>
         </div>
@@ -535,7 +535,7 @@ ${song.lyrics || 'No lyrics provided.'}
           <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-300 border border-gold/20">
             <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-[#fcfcfb]">
               <div>
-                <h3 className="text-2xl font-black text-[#0d1a14] tracking-tight">{editingSong?.id ? 'Edit Vault Item' : 'New Vault Item'}</h3>
+                <h3 className="text-2xl font-black text-[#0d1a14] tracking-tight">{editingSong?.id ? 'Edit Canaan Item' : 'New Canaan Item'}</h3>
                 <p className="text-[10px] text-gold font-bold uppercase tracking-[0.2em] mt-1">Worship Resource Registry</p>
               </div>
               <button onClick={() => setIsEditorOpen(false)} className="p-3 text-gray-300 hover:text-burgundy bg-white rounded-2xl border border-gray-100 transition-all active:scale-95">
@@ -611,7 +611,7 @@ ${song.lyrics || 'No lyrics provided.'}
                 onClick={() => saveSong(editingSong || {})}
                 className="flex-[2] py-4 bg-burgundy text-gold rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-burgundy-dark transition-all active:scale-95 shadow-xl shadow-burgundy/20 border-b-4 border-gold/30"
               >
-                Committal to Vault
+                Committal to Canaan
               </button>
             </div>
           </div>

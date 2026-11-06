@@ -29,7 +29,7 @@ PLCC uses photographs and video for:
 If you or your family do not wish to be photographed at PLCC events:
 1. Submit a written opt-out request to the Church Office
 2. Email the Administrator or Secretary listed at the front desk
-3. Your preference will be noted in the Vault member record and communicated to the Media Team
+3. Your preference will be noted in PLCC Canaan member record and communicated to the Media Team
 4. Opt-outs apply to all future events until you request otherwise in writing
 
 ---

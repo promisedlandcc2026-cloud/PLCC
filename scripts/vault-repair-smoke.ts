@@ -32,10 +32,10 @@ const expectedActions = [
 for (const a of expectedActions) {
   assert(handler.includes(`'${a}'`), `allowlist: ${a}`);
 }
-assert(/Only Super Admins can use Vault Repair/.test(handler), 'handler: Super Admin gate');
+assert(/Only Super Admins can use Canaan Repair/.test(handler), 'handler: Super Admin gate');
 assert(/confirm === true/.test(handler), 'handler: repair requires confirm:true');
 assert(/Action not allowlisted/.test(handler), 'handler: rejects non-allowlisted actions');
-assert(/Vault Repair/.test(handler) && /logAudit/.test(handler), 'handler: audits repairs');
+assert(/Canaan Repair/.test(handler) && /logAudit/.test(handler), 'handler: audits repairs');
 assert(/Never invent actions outside the allowlist/.test(handler), 'AI prompt: allowlist-only');
 assert(/isAllowlistedAction/.test(handler), 'AI parse: hard-reject non-allowlisted suggestions');
 
@@ -60,6 +60,6 @@ assert(/awc_vault_repair_unlocked/.test(settings) && /repair=1|repair'\) === '1'
 
 const staff = read('pages/admin/AdminUsers.tsx');
 assert(/Canaan Repair Desk/.test(staff) && /awc_vault_repair_unlocked/.test(staff), 'Staff & Roles: card entry when unlocked');
-assert(/Vault Repair/.test(settings) && /repairUnlocked/.test(settings), 'Settings hub: Admin nav when unlocked');
+assert(/Canaan Repair/.test(settings) && /repairUnlocked/.test(settings), 'Settings hub: Admin nav when unlocked');
 
 console.log('\nAll Vault Repair smoke tests passed.\n');

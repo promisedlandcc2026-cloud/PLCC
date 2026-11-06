@@ -8,7 +8,7 @@
 ## Overview
 
 This guide covers three tasks:
-1. Adding a new adult member to the Vault
+1. Adding a new adult member to PLCC Canaan
 2. Creating a household (family unit)
 3. Adding a child to an existing household
 
@@ -125,7 +125,7 @@ If a member was added before a household was created:
 
 ---
 
-## Where to Find This Guide in the Vault
+## Where to Find This Guide in PLCC Canaan
 
 **More → Policies & Guides** (`/#/admin/policies`) → Category: **Administration & Membership** → **How to Add a Member**
 

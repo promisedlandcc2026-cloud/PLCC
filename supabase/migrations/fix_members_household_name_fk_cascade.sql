@@ -1,7 +1,7 @@
 -- Fix: renaming a household that has members failed with
 --   "update or delete on table households violates foreign key constraint
 --    members_household_name_fkey on table members"
--- which surfaced in the Vault as "INTERNAL ERROR" (e.g. The Vance Household, Oct 2026).
+-- which surfaced in PLCC Canaan as "INTERNAL ERROR" (e.g. The Vance Household, Oct 2026).
 --
 -- members.household_name references households.name with no ON UPDATE rule,
 -- so any rename of a household with members was blocked, and deleting one

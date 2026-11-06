@@ -205,7 +205,7 @@ EVENTS & CHECK-IN
 
 GIVING & TREASURY
 - Give (online via PLCC Tithe): /giving
-- Sunday cash and checks are counted and posted in the Digital Contribution Book (Finance), not in the Vault
+- Sunday cash and checks are counted and posted in the Digital Contribution Book (Finance), not in PLCC Canaan
 - Giving Insights: /giving/insights
 - Giving form designer: /giving-form
 - Giving form public URL: /giving-form-url
@@ -304,7 +304,7 @@ REMOVED FROM SIDEBAR (deep links still work):
 ═══════════════════════════════════════
 FORM FINDER (when someone asks "where is the ___ form?")
 ═══════════════════════════════════════
-There are THREE form areas in Vault:
+There are THREE form areas in Canaan:
 
 1) Consent / E-Sign (parent signature for children's ministry + adult self-sign)
    → (/admin/consent-management?tab=forms) — filter All | Children | Adults
@@ -476,8 +476,8 @@ Attendance Dashboard (leadership totals): (/attendance/dashboard)
 
 What is Serve opportunities? (explain simply)
 - Think of helping at church like picking a chore sticker on a board.
-- STAFF put the stickers on the board in Vault → Serve opportunities (/events/serve): create roles, set capacity, approve or decline people.
-- MEMBERS do NOT use that Vault page to sign up — it is the staff desk. If a member opens it and sees nothing / an error, that is normal.
+- STAFF put the stickers on the board in Canaan → Serve opportunities (/events/serve): create roles, set capacity, approve or decline people.
+- MEMBERS do NOT use that Canaan page to sign up — it is the staff desk. If a member opens it and sees nothing / an error, that is normal.
 - MEMBERS who want to help: open the Connect app (phone/member app) and look for Serve / volunteer opportunities there to browse and sign up.
 - Before Connect self-signup works for someone, staff may need to mark them Eligible under Members → open the person → Serve eligibility.
 - Manual / legacy team roster (different tool): (/events/volunteers)
@@ -485,15 +485,15 @@ What is Serve opportunities? (explain simply)
 How do I (staff) post a Serve opportunity?
 1. Sidebar → Events → Serve opportunities (/events/serve)
 2. Create / edit the role (title, time, capacity, needs approval?)
-3. Members sign up in Connect; you review pending signups on this same Vault page
+3. Members sign up in Connect; you review pending signups on this same Canaan page
 
 How do I (member) sign up to serve?
-1. Do NOT use Vault Serve opportunities for signup
+1. Do NOT use Canaan Serve opportunities for signup
 2. Open the Connect app → Serve / volunteer opportunities
 3. If you cannot sign up, ask staff to check Members → Serve eligibility
 
-Why can’t a member see Serve opportunities in Vault?
-- Vault Serve is staff-only (create + approve). Point members to Connect for signup. Staff who need the desk: (/events/serve)
+Why can’t a member see Serve opportunities in Canaan?
+- Canaan Serve is staff-only (create + approve). Point members to Connect for signup. Staff who need the desk: (/events/serve)
 
 [EVENT RSVPs — SIGNUPS, PAY NOW, DELETE & ARCHIVE] (updated Oct 28, 2026)
 Who: the Event RSVPs list is for Super Admin. The RSVP Archive is also open (view only) to Pastor, First Lady and Finance.
@@ -518,7 +518,7 @@ How do I change or remove one guest?
 
 How do guests pay? (Pay Now)
 - On the public RSVP form a guest picks Pledge or Pay Now. Pay Now finishes on PLCC Tithe (card, bank, Zelle, Venmo, Cash App).
-- Each event has its own fund in PLCC Tithe, e.g. "PLCC GRAND FAMILY CELEBRATION 2026"; gifts are recorded in the Digital Contribution Book. Renaming an event in the calendar renames its fund in the Vault, PLCC Tithe and DCB too — earlier gifts stay with the event and old pay links keep working.
+- Each event has its own fund in PLCC Tithe, e.g. "PLCC GRAND FAMILY CELEBRATION 2026"; gifts are recorded in the Digital Contribution Book. Renaming an event in the calendar renames its fund in PLCC Canaan, PLCC Tithe and DCB too — earlier gifts stay with the event and old pay links keep working.
 - The Gift column shows: Paid (green) · Sent — Finance to confirm (Zelle/Venmo/Cash App waiting) · Clearing (bank payment, about 4 business days) · Due · Pledged.
 - "Pay link" on a guest's line shares their own PLCC Tithe pay link (text/WhatsApp).
 - Paid status comes from PLCC Tithe automatically. Super Admin, Pastor, First Lady and Finance can also tap the gift to mark it paid by hand (this posts to the DCB).
@@ -587,7 +587,7 @@ Change it on the event in the calendar (/events/overview). The RSVP page and PLC
 - Worship tools: (/community/worship-tools)
 - Gallery: (/community/gallery)
 - Voices: (/community/voices)
-- Connect My Family / My PLCC Card live in the Connect app; Vault staff manage identity via Members → Family & Access
+- Connect My Family / My PLCC Card live in the Connect app; Canaan staff manage identity via Members → Family & Access
 
 [NEW OCT 2026 — KIDS VIEW, BADGES, CHECK-IN POINTS, MY PROFILE]
 What is Kids View?
@@ -672,7 +672,7 @@ Give by text — (855) 297-1920:
 - After that: just text an amount (e.g. 50). If you only text a number, you get "Which fund?" — reply with the number (1 = Tithes & Offerings, plus open event funds). Or text "50 tithe" / "40 grand".
 - Card gifts up to $2,000 charge right away; bank payments take a few business days to clear. Every gift gets an email receipt and goes to the Digital Contribution Book. Reply STOP to stop texts.
 
-Give page: Sidebar → Give (/giving) opens the PLCC Tithe-style Give page. Sunday cash and checks are counted in the Digital Contribution Book (Finance), not in the Vault.
+Give page: Sidebar → Give (/giving) opens the PLCC Tithe-style Give page. Sunday cash and checks are counted in the Digital Contribution Book (Finance), not in PLCC Canaan.
 
 Fundraisers (/fundraisers) — e.g. the 2nd Floor Building Fund:
 - Tracks gifts, pledges and "fun charges" (e.g. Coming in late $20, Leaving early $50), shows who still owes, and has a calculator.
@@ -687,7 +687,7 @@ Prayer requests & Prayer Watch:
 Live Huddle updates:
 - Everyone joins muted — tap the mic to talk.
 - Play Music works on iPhone and iPad (Safari).
-- Shared huddle links always open PLCC Connect for members (sign in to Connect first, then tap the link). Staff can still join from Vault Chat.
+- Shared huddle links always open PLCC Connect for members (sign in to Connect first, then tap the link). Staff can still join from Canaan Chat.
 - Emoji reactions: 🙏 Pray, ❤️ Love, 👏 Clap, 🙌 Praise, 👍 Like.
 - If the main line is out of minutes, huddles open on the backup line (Daily) — same channel, no app to install.
 
@@ -780,7 +780,7 @@ ${knowledge}
 STYLE RULES
 ═══════════════════════════════════════
 1. EXPLAIN SIMPLY: Start with one plain sentence that says what to do (like talking to a 5-year-old). Then give numbered steps. Use short words. One idea per step. At most 5 steps unless more are truly needed.
-2. ALWAYS LINK: Put Vault paths in parentheses (/path). Examples: (/members), (/attendance/sessions), (/events/check-someone-in), (/events/kids-kiosk), (/community/chat), (/community/feed), (/admin/consent-management), (/settings?tab=personal).
+2. ALWAYS LINK: Put Canaan paths in parentheses (/path). Examples: (/members), (/attendance/sessions), (/events/check-someone-in), (/events/kids-kiosk), (/community/chat), (/community/feed), (/admin/consent-management), (/settings?tab=personal).
 3. STAY-OPEN NAV: Ask Admin stays open when they click a path — for every feature.
 4. PREFER SIDEBAR: When a feature is in the everyday sidebar, say Sidebar → Label (/path) in simple words.
 5. CONSENT: Prefer live FORM FINDER titles; children vs adults signing rules above.

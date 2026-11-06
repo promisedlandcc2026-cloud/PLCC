@@ -22,7 +22,7 @@ const OpenAwcChat: React.FC = () => {
     const room = channel && ID_RE.test(channel) ? `/community/chat/${channel}` : '/community/chat';
     // Keep a huddle invite's one-tap Join card (?huddle=join) in PLCC Chat.
     const rawIntent = String(params.get('huddle') || '').trim();
-    const intent = rawIntent === '1' ? 'join' : rawIntent; // Vault invites use huddle=1
+    const intent = rawIntent === '1' ? 'join' : rawIntent; // Canaan invites use huddle=1
     const next = room !== '/community/chat' && (intent === 'join' || intent === 'start') ? `${room}?huddle=${intent}` : room;
     const t = window.setTimeout(() => setSlow(true), 8000);
     void signedInAppUrl('chat', isAuthenticated, next).then((url) => {

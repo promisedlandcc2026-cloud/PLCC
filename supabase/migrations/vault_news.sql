@@ -1,5 +1,5 @@
--- Short church news on the Vault home page.
--- Pastor, Ministry Leader, and Super Admin post through the Vault API.
+-- Short church news on PLCC Canaan home page.
+-- Pastor, Ministry Leader, and Super Admin post through PLCC Canaan API.
 
 CREATE TABLE IF NOT EXISTS public.vault_news (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -22,4 +22,4 @@ CREATE POLICY "Signed-in members can read vault news"
   USING (true);
 
 COMMENT ON TABLE public.vault_news IS
-  'Home-page Vault News. Writes go through the Vault API for Pastor, Ministry Leader, and Super Admin.';
+  'Home-page Canaan News. Writes go through PLCC Canaan API for Pastor, Ministry Leader, and Super Admin.';

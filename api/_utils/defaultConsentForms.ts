@@ -185,7 +185,7 @@ BY SIGNING, YOU ACKNOWLEDGE THAT:
 • Photos or videos of an injured child will not be taken or posted
 • You will keep emergency contacts up to date with the church office
 
-Related policy: Child Injury & Incident Policy in the Vault Playbook (/admin/policies).
+Related policy: Child Injury & Incident Policy in PLCC Canaan Playbook (/admin/policies).
 
 This acknowledgment is valid for one (1) year from the date signed.`,
     is_required: true,
@@ -437,7 +437,7 @@ BY SIGNING, YOU ACKNOWLEDGE THAT:
 • You will keep your emergency contact information reasonably current with the church office when serving or attending events
 • This acknowledgment does not replace medical advice or insurance coverage
 
-Related guidance: Child Injury & Incident Policy (for children's ministry) and church leadership for adult-campus incidents — see the Vault Playbook (/admin/policies).
+Related guidance: Child Injury & Incident Policy (for children's ministry) and church leadership for adult-campus incidents — see PLCC Canaan Playbook (/admin/policies).
 
 This acknowledgment is valid for one (1) year from the date signed.`,
     is_required: false,
@@ -489,7 +489,7 @@ WHAT WE PROMISE:
 
 BY SIGNING, YOU GIVE PLCC PERMISSION to photograph and/or video record you during church activities and to use those images as described above.
 
-Related policy: Photography & Media Policy in the Vault Playbook (/admin/policies).
+Related policy: Photography & Media Policy in PLCC Canaan Playbook (/admin/policies).
 
 This consent is valid for one (1) year from the date signed.`,
     is_required: false,

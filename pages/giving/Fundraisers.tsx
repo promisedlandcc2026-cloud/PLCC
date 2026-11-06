@@ -601,7 +601,7 @@ function DcbCard(props: { full: Full; perms: Full['permissions']; busy: boolean;
       </ul>
       {canManage && d.failed.lastError && <p className="text-xs text-amber-800">Last DCB message: {d.failed.lastError}</p>}
       {canManage && !d.configured && (
-        <p className="text-xs text-amber-800">The DCB link is not set up on the Vault (AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET).</p>
+        <p className="text-xs text-amber-800">The DCB link is not set up on PLCC Canaan (AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET).</p>
       )}
       {d.pendingVoids > 0 && (
         <p className="text-xs text-amber-800">
@@ -1829,7 +1829,7 @@ function SettingsTab(props: { full: Full; perms: Full['permissions']; busy: bool
         <p className="text-sm text-gray-500 max-w-2xl">
           Pick the PLCC Tithe fund for this fundraiser (for example, 2nd Floor Building Fund). Gifts to that fund appear here as
           <b> Online · PLCC Tithe</b> once they are confirmed — card and bank by Flutterwave, MTN, Airtel and Sendwave after Finance verifies them in
-          Tithe. They are read-only here and also go to the DCB as usual. Cash and check recorded here go to the DCB from the Vault.
+          Tithe. They are read-only here and also go to the DCB as usual. Cash and check recorded here go to the DCB from PLCC Canaan.
         </p>
       </div>
       {f.tithe_fund_name && (

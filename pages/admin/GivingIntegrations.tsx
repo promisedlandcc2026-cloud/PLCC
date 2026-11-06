@@ -203,7 +203,7 @@ const GivingIntegrationsPage: React.FC = () => {
         <h2 className="text-xl font-black text-[#0d1a14] tracking-tight">RhemaNotes</h2>
         <p className="text-sm text-gray-400 font-medium leading-relaxed max-w-2xl">
           Paste a key from RhemaNotes Settings → API keys. Sermon Manager can then open a study
-          session. Generate an integration token and paste it, with this Vault URL, into RhemaNotes
+          session. Generate an integration token and paste it, with this Canaan URL, into RhemaNotes
           Church CMS to sync members.
         </p>
         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">

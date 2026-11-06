@@ -181,7 +181,7 @@ export async function vaultFetch(path: string, options: VaultFetchOptions = {}):
 }
 
 const VAULT_TIMEOUT_MESSAGE =
-  'The Vault API timed out waiting for Supabase. Wait a moment and tap Refresh — the first request after idle can take up to a minute.';
+  'PLCC Canaan API timed out waiting for Supabase. Wait a moment and tap Refresh — the first request after idle can take up to a minute.';
 
 export async function apiFetch<T = any>(
   path: string,

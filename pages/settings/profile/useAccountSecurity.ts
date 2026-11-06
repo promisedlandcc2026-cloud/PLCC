@@ -91,7 +91,7 @@ export function useAccountSecurity(userId: string | null | undefined) {
 
   const startMfa = () =>
     run('Could not start 2-step setup', async () => {
-      setMfaEnroll(await startMfaEnroll('PLCC-Vault'));
+      setMfaEnroll(await startMfaEnroll('PLCC-Canaan'));
     });
 
   /** Returns true when the factor was verified and turned on. */

@@ -1,9 +1,9 @@
--- PLCC Vault — Security Advisor fix: rls_disabled_in_public
+-- PLCC Canaan — Security Advisor fix: rls_disabled_in_public
 -- Project: yrpwdrioomdihjlmcfnu
 --
 -- Enables Row Level Security on every public BASE TABLE that lacks it.
 -- With RLS on and no anon policies, PostgREST anon clients cannot read/write
--- (Service Role / Vault API continues to bypass RLS).
+-- (Service Role / Canaan API continues to bypass RLS).
 --
 -- Also hardens sensitive VIEWS that were leaking PII to anon
 -- (consent_status_summary, minutes_tracking_summary, unified_giving).
@@ -184,7 +184,7 @@ END $$;
 
 -- ---------------------------------------------------------------------------
 -- 4) Narrow public-read policies for intentional marketing / church site data
---    (only if table exists; Vault API still uses service role)
+--    (only if table exists; Canaan API still uses service role)
 -- ---------------------------------------------------------------------------
 DO $$
 BEGIN

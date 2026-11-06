@@ -66,9 +66,9 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 # Optional: PLCC Store order staff alerts (comma-separated). No-op until set.
 # STORE_ORDER_NOTIFY_EMAILS=store@example.com,finance@example.com
-# Shared secret for store/Supabase → Vault notify webhook:
+# Shared secret for store/Supabase → Canaan notify webhook:
 # STORE_ORDERS_WEBHOOK_SECRET=long-random-string
-# Optional public Vault URL used in email links:
+# Optional public Canaan URL used in email links:
 # STORE_ORDERS_VAULT_URL=https://plcc-opal.vercel.app
 
 # Optional: extra event calendar approvers (comma-separated user UUIDs).
@@ -80,7 +80,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Same secret as DCB Render env AWC_DCB_SERVICE_SECRET.
 # AWC_DCB_API_URL=https://awc-digital-contribution-book.onrender.com
 # AWC_DCB_SERVICE_SECRET=long-random-shared-secret
-# Optional Vault fund UUID for local giving_transactions:
+# Optional Canaan fund UUID for local giving_transactions:
 # RSVP_GIFT_FUND_ID=
 # MARRIEDS_GIFT_FUND_ID=
 # THANKSGIVING_GIFT_FUND_ID=
@@ -100,11 +100,11 @@ ANTHROPIC_API_KEY=sk-ant-...
 3. In DCB, ensure an active fund matches `AWC_DCB_RSVP_FUND_CODE` / `AWC_DCB_RSVP_FUND_NAME` (or legacy `AWC_DCB_THANKSGIVING_*`).
 4. Smoke: `/#/marrieds-dinner-rsvp` or `/#/thanksgiving-rsvp` → Pay Now · Zelle → staff **Mark Paid** → gift appears in DCB **Online Giving → Overview → Thanksgiving / RSVP gifts**.
 
-Pledges stay on the Vault RSVP list until Mark Paid; only paid gifts post to DCB.
+Pledges stay on PLCC Canaan RSVP list until Mark Paid; only paid gifts post to DCB.
 
 ### Ask Admin AI providers
 
-Ask Admin calls the Vault API (`resource=ask-admin`), which tries **OpenAI first**, then **Anthropic** if OpenAI fails due to credits/quota/errors.
+Ask Admin calls PLCC Canaan API (`resource=ask-admin`), which tries **OpenAI first**, then **Anthropic** if OpenAI fails due to credits/quota/errors.
 
 Set both keys in **Vercel → Project → Settings → Environment Variables**, then redeploy.
 
@@ -123,7 +123,7 @@ Emails send only if `STORE_ORDER_NOTIFY_EMAILS` and `RESEND_API_KEY` are set.
 
 Templates live in Supabase `consent_forms`. If Forms → Consent / E-Sign shows an empty list:
 
-1. **Preferred:** In Vault, open Consent / E-Sign → click **Install Default Forms** (or Forms tab → **Install Defaults**). This calls `POST /api/vault?resource=consent&action=seed_defaults`.
+1. **Preferred:** In Canaan, open Consent / E-Sign → click **Install Default Forms** (or Forms tab → **Install Defaults**). This calls `POST /api/vault?resource=consent&action=seed_defaults`.
 2. **SQL fallback:** Run `supabase/migrations/insert_awc_consent_forms.sql` then `supabase/migrations/seed_awc_consent_esign_forms.sql` in the Supabase SQL Editor.
 3. **Audience column (Children / Adults):** Run `supabase/migrations/add_consent_forms_audience.sql` once in the Supabase SQL Editor. Existing forms default to **children**. Create/Edit and Install Defaults set `audience` after this migration.
 4. **Kids check-in vs adult forms:** Run `supabase/migrations/get_missing_consents_exclude_adults.sql` so required adult templates never block child check-in. Then **Sync Defaults** to install Adult Incident / Volunteer Liability / Adult Photo / Adult Code of Conduct.
@@ -135,7 +135,7 @@ Parents / members: Forms → Consent / E-Sign → Forms → filter **Children** 
 - **500 Errors on API Calls**: Make sure the API server (`npm run dev:api`) is running
 - **Port Conflicts**: If port 3000 or 5001 is in use, the servers will try alternative ports
 - **Module Not Found**: Run `npm install` to ensure all dependencies are installed
-- **No e-sign forms / nothing to sign**: Install defaults (see Consent / E-Sign above). Tell parents to come to the Kids Check-In desk — not to hunt forms in Vault alone.
+- **No e-sign forms / nothing to sign**: Install defaults (see Consent / E-Sign above). Tell parents to come to the Kids Check-In desk — not to hunt forms in Canaan alone.
 
 ### Supabase compute for multi-member meetings (required ops)
 

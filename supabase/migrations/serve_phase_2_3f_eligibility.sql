@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS public.serve_eligibility (
 );
 
 -- Note on CONSTRAINT serve_eligibility_no_self_verify_chk:
--- Soft guard only. Real enforcement is Vault API (service_role + role gate).
+-- Soft guard only. Real enforcement is Canaan API (service_role + role gate).
 -- Allows verified_by = user_id for non-eligible transitions if needed by tooling;
 -- blocks marking oneself eligible.
 
@@ -81,7 +81,7 @@ CREATE POLICY serve_eligibility_select_own
   USING (user_id = auth.uid());
 
 -- No INSERT/UPDATE/DELETE for authenticated or anon.
--- Mutations: Vault API via service_role only.
+-- Mutations: Canaan API via service_role only.
 
 -- ---------------------------------------------------------------------------
 -- Grants

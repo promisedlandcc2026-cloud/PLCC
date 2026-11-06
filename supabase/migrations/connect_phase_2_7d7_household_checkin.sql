@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.7D.7 — Household / Family Check-In
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 --

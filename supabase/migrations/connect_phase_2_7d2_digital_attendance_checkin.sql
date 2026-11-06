@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.7D.2 — Atomic Digital Adult Attendance Check-In RPC
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 --
@@ -22,7 +22,7 @@ BEGIN;
 -- ---------------------------------------------------------------------------
 -- Atomic digital check-in by qr_token_hash
 -- ---------------------------------------------------------------------------
--- Vault API hashes AWC1 token in Node, then calls this RPC as service_role.
+-- Canaan API hashes AWC1 token in Node, then calls this RPC as service_role.
 -- One transaction: session lock + adult card + approval + verified link + insert.
 -- ---------------------------------------------------------------------------
 

@@ -2,7 +2,7 @@
 -- PLCC Bucks — Phase 1 (Foundation) · v2 · approved Oct 17, 2026
 -- Earn + view only. No store, no spending, no money link.
 -- Server-only like every child table: RLS on, no client policies, nothing
--- granted to anon/authenticated. The Vault API (service role) calls these
+-- granted to anon/authenticated. PLCC Canaan API (service role) calls these
 -- functions; the functions ALSO check role + permission themselves, so a bug
 -- in the API cannot let an unauthorized user award, reverse or change settings.
 -- Safe to re-run. Changes no existing table.

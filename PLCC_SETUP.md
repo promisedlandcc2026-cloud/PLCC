@@ -1,6 +1,6 @@
 # PLCC Canaan — setup notes
 
-PLCC Canaan is the Promised Land Christian Center copy of AWC Vault. It is a **fully separate deployment**:
+PLCC Canaan is the Promised Land Christian Center copy of AWC Canaan. It is a **fully separate deployment**:
 its own Supabase project, its own Vercel project, its own keys. Nothing here talks to AWC.
 
 ## What was rebranded (Nov 2026)

@@ -122,7 +122,7 @@ function suggestYoutubeThumbnail(videoUrl: string): string | null {
 
 const CHIP_LABELS: Record<'all' | HowToCategoryKey, string> = {
   all: 'All',
-  vault: 'Vault',
+  vault: 'Canaan',
   connect: 'Connect',
   dcb: 'DCB',
   tithe: 'Tithe',
@@ -486,7 +486,7 @@ const HowToVideosPage: React.FC = () => {
           <div className="flex items-center gap-3 mb-2">
             <div className="h-1 w-8 bg-gold rounded-full" />
             <h2 className="text-[10px] font-black text-gold uppercase tracking-[0.4em]">
-              Vault guides
+              Canaan guides
             </h2>
           </div>
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -498,7 +498,7 @@ const HowToVideosPage: React.FC = () => {
                 <AskAdminTitleLink />
               </div>
               <p className="text-gray-400 font-medium text-sm max-w-xl">
-                Short walkthroughs by product — Vault, Connect, DCB, and Tithe. Host the video
+                Short walkthroughs by product — Canaan, Connect, DCB, and Tithe. Host the video
                 elsewhere, then paste the link and a thumbnail here.
               </p>
             </div>
@@ -743,7 +743,7 @@ const HowToVideosPage: React.FC = () => {
             </div>
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
               <p className="text-xs text-gray-400 font-medium leading-relaxed">
-                Paste a YouTube (unlisted), Vimeo, Bunny, or direct video link. Vault stores the
+                Paste a YouTube (unlisted), Vimeo, Bunny, or direct video link. Canaan stores the
                 link and thumbnail only — not the video file.
               </p>
               <label className="block space-y-1.5">

@@ -325,7 +325,7 @@ const PrayerWatchPage: React.FC = () => {
         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-burgundy">{roomName}</p>
         <h1 className="text-2xl sm:text-3xl font-black text-[#0d1a14] tracking-tight">{PAGE_TITLE}</h1>
         <p className="text-sm text-gray-600 mt-1">
-          Every shared prayer request from the Vault and PLCC Connect. Next meeting: <b>{longFmt.format(nextMeeting)}</b>.
+          Every shared prayer request from PLCC Canaan and PLCC Connect. Next meeting: <b>{longFmt.format(nextMeeting)}</b>.
           Private requests for the Pastor never appear here.
         </p>
       </header>

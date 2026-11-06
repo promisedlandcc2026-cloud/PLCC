@@ -1,8 +1,8 @@
 -- =============================================================================
 -- Check-in Points — Phase 1 (rotating QR self check-in + points ledger)
 -- =============================================================================
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
--- Run once in the Vault Supabase SQL editor. Safe to re-run.
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
+-- Run once in PLCC Canaan Supabase SQL editor. Safe to re-run.
 --
 -- Additive only:
 --   * attendance_records.source: allow 'self_qr' (member scanned the leader's
@@ -251,7 +251,7 @@ CREATE TRIGGER attendance_records_award_points
   EXECUTE FUNCTION public.award_attendance_points();
 
 -- ---------------------------------------------------------------------------
--- 7) Self check-in RPC (rotating QR). Vault API verifies the QR token first,
+-- 7) Self check-in RPC (rotating QR). Canaan API verifies the QR token first,
 --    then calls this as service_role with the signed-in user's id.
 --    Same session rules as attendance_checkin_member.
 -- ---------------------------------------------------------------------------
@@ -436,7 +436,7 @@ END;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 9) RLS + grants — fail closed; Vault API (service_role) only
+-- 9) RLS + grants — fail closed; Canaan API (service_role) only
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE public.member_point_ledger ENABLE ROW LEVEL SECURITY;

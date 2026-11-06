@@ -23,6 +23,7 @@ import {
   type Participant,
   type RemoteParticipant,
   type RemoteTrack,
+  DisconnectReason,
 } from 'livekit-client';
 import {
   HUDDLE_AUTO_REJOIN_DELAY_MS,
@@ -51,6 +52,23 @@ import {
   type FamilyHuddleInvite,
   type FamilyHuddleJoinToken,
 } from '../../lib/familyHuddleTypes';
+
+/** LiveKit closed this copy on purpose (joined elsewhere, removed, or ended): do not auto-rejoin. */
+function huddleDisconnectIsFinal(reason?: DisconnectReason): boolean {
+  return (
+    reason === DisconnectReason.DUPLICATE_IDENTITY ||
+    reason === DisconnectReason.PARTICIPANT_REMOVED ||
+    reason === DisconnectReason.ROOM_DELETED
+  );
+}
+
+function huddleDisconnectMessage(reason?: DisconnectReason): string {
+  if (reason === DisconnectReason.DUPLICATE_IDENTITY) {
+    return 'You joined this huddle somewhere else (another tab, app or device). Tap Join to bring it back here.';
+  }
+  if (reason === DisconnectReason.PARTICIPANT_REMOVED) return 'You were removed from the huddle.';
+  return 'The huddle has ended.';
+}
 
 type ConnState = 'prejoin' | 'connecting' | 'connected' | 'error';
 
@@ -394,13 +412,17 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
             if (!mountedRef.current) return;
             refreshTiles(room);
           })
-          .on(RoomEvent.Disconnected, () => {
+          .on(RoomEvent.Disconnected, (reason?: DisconnectReason) => {
             if (!mountedRef.current) return;
             clearRemoteAudio();
             if (roomRef.current === room) roomRef.current = null;
             setConn('prejoin');
             setTiles([]);
-            if (
+            if (huddleDisconnectIsFinal(reason)) {
+            setError(huddleDisconnectMessage(reason));
+            return;
+          }
+          if (
               shouldAutoRejoinHuddle({
                 stayInHuddle: stayInHuddleRef.current,
                 endedForEveryone: endedForEveryoneRef.current,
@@ -589,7 +611,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
     const created = invite || (await ensureInvite());
     if (!created) return;
     const url = familyInviteAbsoluteUrl(created.path);
-    const text = `Join our Family Huddle on The Vault (${inviteExpiryLabel(created.expiresAt)})`;
+    const text = `Join our Family Huddle on PLCC Canaan (${inviteExpiryLabel(created.expiresAt)})`;
     try {
       if (navigator.share) {
         await navigator.share({ title: 'Family Huddle', text, url });

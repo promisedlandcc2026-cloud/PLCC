@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.6A — digital membership card foundation
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 --
@@ -16,7 +16,7 @@
 -- Does NOT:
 --   * Family Pass / household grants / child cards / guardian columns
 --   * staff scanner resolve RPC (design-only; future phase)
---   * alter Vault Official Member Pass (raw members.id QR in Members.tsx)
+--   * alter Canaan Official Member Pass (raw members.id QR in Members.tsx)
 --   * auto-link members by email/name/phone
 --   * require a public.members row to issue a card
 --

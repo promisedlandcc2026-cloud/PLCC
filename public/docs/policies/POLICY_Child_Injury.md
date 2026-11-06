@@ -36,7 +36,7 @@ This policy establishes the standard procedure for responding to any injury, med
 - A second volunteer or staff member must stay with the child at all times
 
 ### Step 4 — Contact the parent or guardian
-- Retrieve the parent's contact information from the check-in record in the Vault (`/#/events/kids-checkin`)
+- Retrieve the parent's contact information from the check-in record in PLCC Canaan (`/#/events/kids-checkin`)
 - The Ministry Lead or designated staff member must personally notify the parent — not a volunteer
 - If the parent cannot be reached within 5 minutes during a medical emergency, proceed with calling 911
 
@@ -120,7 +120,7 @@ An **Incident Report must be completed for every injury or safety event**, no ma
 
 ## 9. Policy Review
 
-This policy is reviewed annually by the Children's Ministry Lead and Church Administrator. Updates take effect immediately upon publication in the Vault Playbook.
+This policy is reviewed annually by the Children's Ministry Lead and Church Administrator. Updates take effect immediately upon publication in PLCC Canaan Playbook.
 
 ---
 

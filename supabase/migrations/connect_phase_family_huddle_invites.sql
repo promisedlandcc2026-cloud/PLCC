@@ -29,7 +29,7 @@ CREATE INDEX IF NOT EXISTS family_huddle_invites_expires_at_idx
 
 ALTER TABLE public.family_huddle_invites ENABLE ROW LEVEL SECURITY;
 
--- No direct client access — Vault service_role only.
+-- No direct client access — Canaan service_role only.
 REVOKE ALL ON public.family_huddle_invites FROM PUBLIC;
 REVOKE ALL ON public.family_huddle_invites FROM anon;
 REVOKE ALL ON public.family_huddle_invites FROM authenticated;

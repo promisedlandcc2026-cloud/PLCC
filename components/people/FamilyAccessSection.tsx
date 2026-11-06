@@ -217,7 +217,7 @@ export default function FamilyAccessSection({ memberId }: Props) {
     try {
       const invite = await createFamilyHuddleInvite();
       const url = familyInviteAbsoluteUrl(invite.path);
-      const text = `Join our Family Huddle on The Vault (${inviteExpiryLabel(invite.expiresAt)})`;
+      const text = `Join our Family Huddle on PLCC Canaan (${inviteExpiryLabel(invite.expiresAt)})`;
       try {
         if (navigator.share) {
           await navigator.share({ title: 'Family Huddle', text, url });

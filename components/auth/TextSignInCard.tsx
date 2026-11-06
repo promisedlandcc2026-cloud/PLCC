@@ -92,7 +92,7 @@ export default function TextSignInCard({ defaultPhone }: { defaultPhone?: string
         <div>
           <h2 className="text-base font-semibold text-stone-900">Sign in by text</h2>
           <p className="text-sm text-stone-600 mt-0.5 leading-relaxed">
-            Get a 6-digit code by text instead of typing a password. Works in the Vault and PLCC Connect.
+            Get a 6-digit code by text instead of typing a password. Works in PLCC Canaan and PLCC Connect.
           </p>
         </div>
       </div>

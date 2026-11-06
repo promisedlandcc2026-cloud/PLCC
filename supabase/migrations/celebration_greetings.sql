@@ -1,4 +1,4 @@
--- Automatic birthday & anniversary greetings (Vault Home → Celebrations).
+-- Automatic birthday & anniversary greetings (Canaan Home → Celebrations).
 -- Paste into Supabase → SQL Editor and run once. Safe to re-run.
 --   * organization_settings.celebration_settings — Pastor's wording, on/off
 --   * celebration_greetings — one row per person per occasion per year (never greets twice)

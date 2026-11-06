@@ -1,4 +1,4 @@
--- Text-message sign-in codes (Vault + PLCC Connect). Run once in Supabase → SQL Editor.
+-- Text-message sign-in codes (Canaan + PLCC Connect). Run once in Supabase → SQL Editor.
 
 -- A phone number proven by an approved text code. Only this column (or a
 -- phone sign-up's own number) lets a code sign in to an account — the editable

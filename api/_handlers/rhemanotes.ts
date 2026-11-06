@@ -229,7 +229,7 @@ export async function handleRhemaStudyGuide(req: VercelRequest, res: VercelRespo
     if (updateError && /rhemanotes_study_url|rhemanotes_study_title|column/i.test(updateError.message || '')) {
       return res.status(503).json({
         error:
-          'Run supabase/migrations/rhemanotes_study_guide.sql in the Vault database, then push the study guide again.',
+          'Run supabase/migrations/rhemanotes_study_guide.sql in PLCC Canaan database, then push the study guide again.',
       });
     }
     if (updateError) throw updateError;

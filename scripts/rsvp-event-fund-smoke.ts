@@ -66,7 +66,7 @@ assert(!/fundName \|\| 'Special Offerings'\} · /.test(dcb), 'DCB fund name is n
 assert(/memo: payload\.memo/.test(dcb) && /eventFund: payload\.eventFund/.test(dcb), 'DCB gets the note and the event flag');
 const pay = readFileSync('api/_utils/rsvpGiftPayment.ts', 'utf8');
 assert(/fundName: eventFund \|\| dcbRsvpFundName\(\)/.test(pay), 'Mark Paid posts to the event fund in DCB');
-assert(/findOrCreateVaultEventFund/.test(pay), 'Vault ledger uses the event fund');
+assert(/findOrCreateVaultEventFund/.test(pay), 'Canaan ledger uses the event fund');
 const core = readFileSync('api/_utils/core.ts', 'utf8');
 assert(/ensureTitheEventFund\(eventFundName\(/.test(core), 'Pay Now signup sets up the fund in Tithe');
 const rsvpPage = readFileSync('pages/events/FellowshipCookoutRsvp.tsx', 'utf8');

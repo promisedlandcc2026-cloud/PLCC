@@ -32,7 +32,7 @@ const ACTION_LABELS: Record<string, string> = {
   reset_temporary_password: 'Reset temporary password',
   clear_media_notice: 'Clear media notice (re-prompt)',
   force_media_ack: 'Force media acknowledgment',
-  relink_auth_user: 'Relink Auth ↔ Vault user',
+  relink_auth_user: 'Relink Auth ↔ Canaan user',
   set_member_active: 'Set Members status Active',
 };
 
@@ -209,7 +209,7 @@ const VaultRepairPage: React.FC = () => {
           </p>
           <h1 className="text-3xl md:text-4xl font-semibold text-[#0d1a14] tracking-tight flex items-center gap-3">
             <Wrench className="text-burgundy" size={28} />
-            Vault Repair
+            Canaan Repair
           </h1>
           <p className="text-gray-500 mt-2 max-w-2xl">
             Diagnose login and section-access issues, then run allowlisted fixes. AI can suggest the same

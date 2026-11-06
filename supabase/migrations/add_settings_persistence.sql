@@ -1,4 +1,4 @@
--- Settings persistence for Vault Settings Hub
+-- Settings persistence for Canaan Settings Hub
 DO $$
 BEGIN
   -- Church-wide event / system / integration settings live on organization_settings

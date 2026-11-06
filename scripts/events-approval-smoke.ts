@@ -190,7 +190,7 @@ assert(
 );
 
 // --- Notify helper source ---
-assert(/notifyUser/.test(notify) && /getResend/.test(notify), 'N: Vault + Resend path');
+assert(/notifyUser/.test(notify) && /getResend/.test(notify), 'N: Canaan + Resend path');
 assert(/EVENT_APPROVER_USER_IDS/.test(notify), 'N: env override for approvers');
 assert(/eventApprovalDeepLink|pending=1/.test(logic), 'N: deep link helper');
 

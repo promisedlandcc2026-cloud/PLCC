@@ -1580,7 +1580,7 @@ const handleEvents = async (req: any, res: any) => {
                 const email = String(body.email || '').trim() || null;
                 const allergies = String(body.allergies || '').trim() || null;
                 const notes =
-                    [String(body.notes || '').trim(), staffAdd ? `Added in the Vault by ${staffAddedBy}` : '']
+                    [String(body.notes || '').trim(), staffAdd ? `Added in PLCC Canaan by ${staffAddedBy}` : '']
                         .filter(Boolean)
                         .join(' | ') || null;
                 const foodBringing = String(body.food_bringing ?? body.foodBringing ?? '').trim() || null;
@@ -8523,7 +8523,7 @@ const handleMinutes = async (req: any, res: any) => {
                                 </div>
                                 <div style="padding: 32px;">
                                     <p style="color: #333; font-size: 15px;">Hi <strong>${l.name}</strong>,</p>
-                                    <p style="color: #666; font-size: 14px; line-height: 1.6;">A signed PDF of the ${kindLabel} for <strong>${data.department}</strong> is attached. Please review and add your digital signature in Vault.</p>
+                                    <p style="color: #666; font-size: 14px; line-height: 1.6;">A signed PDF of the ${kindLabel} for <strong>${data.department}</strong> is attached. Please review and add your digital signature in Canaan.</p>
                                     <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 20px 0;">
                                         <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: 900; color: #0d1a14;">${data.title}</p>
                                         <p style="margin: 0 0 4px 0; font-size: 12px; color: #888;">📅 Date: ${new Date(data.meeting_date).toLocaleDateString('en-US', { dateStyle: 'long' })}</p>

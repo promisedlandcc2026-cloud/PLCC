@@ -1,5 +1,5 @@
 -- PLCC Chat media: allow voice notes and videos in chat, up to 25 MB.
--- Uploads go straight to Storage with one-time signed URLs issued by the Vault
+-- Uploads go straight to Storage with one-time signed URLs issued by PLCC Canaan
 -- (api/_utils/chatAttachmentUpload.ts). Bucket stays private; reads use signed URLs.
 UPDATE storage.buckets
 SET

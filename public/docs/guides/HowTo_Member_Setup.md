@@ -26,7 +26,7 @@ Public walkthrough (no login required): `/#/help/member-setup`
 1. Open PLCC Canaan and choose the Members portal  
 2. Create an account (name, phone, email, password)  
 3. Choose New guest or Current member  
-4. Finish that short path, review, and enter the Vault  
+4. Finish that short path, review, and enter PLCC Canaan  
 
 Already have an account? Use **Sign in** (email code or passkey) — this guide is for **Create account** only.
 

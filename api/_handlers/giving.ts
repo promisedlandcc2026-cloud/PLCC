@@ -96,7 +96,7 @@ export const handleGiving = async (req: any, res: any) => {
                 amount: Number(t.amount),
                 fund: t.fund_name || 'General Fund',
                 date: (t.given_at || '').split('T')[0],
-                source: t.source_app === 'home' ? 'Home Page' : 'Vault'
+                source: t.source_app === 'home' ? 'Home Page' : 'Canaan'
             }));
 
             return res.status(200).json({

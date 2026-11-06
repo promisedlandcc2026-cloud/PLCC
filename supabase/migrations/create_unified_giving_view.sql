@@ -1,4 +1,4 @@
--- Unified giving view that merges giving_transactions (Vault) 
+-- Unified giving view that merges giving_transactions (Canaan) 
 -- and giving_intents (PLCC-Redesign home page giving)
 -- Run this in Supabase SQL Editor
 

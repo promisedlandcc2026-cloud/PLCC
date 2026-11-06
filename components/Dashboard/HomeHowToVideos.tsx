@@ -43,7 +43,7 @@ const HomeHowToVideos: React.FC<Props> = ({ videos, loading }) => {
           <div className="min-w-0">
             <h3 className="font-black text-white text-sm tracking-tight">HOW TO VIDEOS</h3>
             <p className="text-[10px] font-bold text-gold/60 uppercase tracking-widest">
-              Vault walkthroughs
+              Canaan walkthroughs
             </p>
           </div>
         </div>
@@ -125,7 +125,7 @@ const HomeHowToVideos: React.FC<Props> = ({ videos, loading }) => {
       <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-50 flex items-center gap-2">
         <AlertCircle size={12} className="text-burgundy/40 shrink-0" />
         <p className="text-[9px] font-bold text-gray-400">
-          Short Vault walkthroughs. Open the library to watch the full set.
+          Short Canaan walkthroughs. Open the library to watch the full set.
         </p>
       </div>
     </div>

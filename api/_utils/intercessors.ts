@@ -165,7 +165,7 @@ async function emailIntercessorLeaders(supabase: SupabaseClient, channelId: stri
       ${item.privateToIntercessors
         ? '<p style="color:#1d372c;font-weight:bold">Private to the Intercessors. Not on the Prayer Wall. Please keep it confidential.</p>'
         : item.onWall ? '' : '<p style="color:#555">Sent by a visitor. Not on the Prayer Wall yet.</p>'}
-      <p><a href="${escapeHtml(listUrl)}">Open the Intercessors Prayer Watch in the Vault</a> to pray through every request, join the Live Huddle, and print the list for Tuesday and Friday.</p>
+      <p><a href="${escapeHtml(listUrl)}">Open the Intercessors Prayer Watch in PLCC Canaan</a> to pray through every request, join the Live Huddle, and print the list for Tuesday and Friday.</p>
     `;
     const { error } = await resend.emails.send({
         from: vaultFrom('Promised Land Christian Center'),

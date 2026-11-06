@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.6D.1 — Dependent digital cards + guardian read RPC
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 --
@@ -44,7 +44,7 @@
 -- Audit:
 --   Lazy mint is recorded via row created_at / issued_at only.
 --   No audit_logs writes from this RPC (avoids unsafe coupling).
---   Future Vault staff mint/rotate/revoke should use audit_logs.
+--   Future Canaan staff mint/rotate/revoke should use audit_logs.
 -- =============================================================================
 
 BEGIN;

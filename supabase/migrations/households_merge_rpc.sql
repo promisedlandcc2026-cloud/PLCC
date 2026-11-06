@@ -2,7 +2,7 @@
 -- Moves members (household_id + household_name), household_members links and
 -- family huddle invites to the kept household, fills its blank details from the
 -- merged ones, then deletes the merged households. All-or-nothing.
--- Called only by the Vault API with the service role.
+-- Called only by PLCC Canaan API with the service role.
 
 CREATE OR REPLACE FUNCTION public.merge_households(p_keep uuid, p_merge uuid[])
 RETURNS jsonb

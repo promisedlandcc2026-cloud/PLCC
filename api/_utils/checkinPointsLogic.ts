@@ -200,7 +200,7 @@ export function canSelfCheckin(role: unknown): boolean {
 export function selfCheckinMessage(code: string): string {
   switch (code) {
     case 'invalid_code':
-      return 'That code isn’t a Vault check-in code. Scan the code on the check-in screen.';
+      return 'That code isn’t a Canaan check-in code. Scan the code on the check-in screen.';
     case 'membership_card':
       return 'That’s a membership card. On this page, scan the check-in code on the leader’s screen (Self check-in QR). Membership cards are scanned by a leader.';
     case 'code_expired':

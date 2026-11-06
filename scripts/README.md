@@ -22,4 +22,4 @@ node scripts/apply_giving_migration.js
 
 ## Kids ministry plans Storage
 
-After applying [`supabase/migrations/create_kids_ministry_plans.sql`](../supabase/migrations/create_kids_ministry_plans.sql), confirm the private bucket `kids-ministry-plans` exists in the Supabase Dashboard (the migration inserts it). Vault API uses the service role for upload/list/delete; clients receive short-lived signed URLs only.
+After applying [`supabase/migrations/create_kids_ministry_plans.sql`](../supabase/migrations/create_kids_ministry_plans.sql), confirm the private bucket `kids-ministry-plans` exists in the Supabase Dashboard (the migration inserts it). Canaan API uses the service role for upload/list/delete; clients receive short-lived signed URLs only.

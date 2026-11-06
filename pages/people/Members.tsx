@@ -554,7 +554,7 @@ const MembersPage: React.FC = () => {
               <form onSubmit={submitAccessForm} className="space-y-4">
                 {existingLogin ? (
                   <p className="text-sm text-gray-600 font-medium leading-relaxed bg-gold-cream/50 border border-gold/20 rounded-xl px-4 py-3">
-                    This email already has a Vault login
+                    This email already has a Canaan login
                     {existingLogin.role ? ` (${String(existingLogin.role).replace(/_/g, ' ')})` : ''}.
                     Changing the role does <span className="font-black text-[#0d1a14]">not</span> reset their password.
                     You can also manage roles in{' '}

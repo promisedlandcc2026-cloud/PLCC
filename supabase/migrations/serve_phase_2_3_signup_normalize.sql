@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Serve Phase 2.3 — serve_signups legacy-collision normalization
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- Runs AFTER serve_phase_2_3_core.sql.
 --

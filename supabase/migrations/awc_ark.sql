@@ -1,7 +1,7 @@
 -- =============================================================================
 -- PLCC Ark — retro games for the PLCC family (approved Oct 21, 2026)
 -- Scores, leaderboards and PLCC Bucks for kids. Needs awc_bucks_phase_1 + _2.
--- Server only (Vault API, service role), like the PLCC Bucks tables. Safe to re-run.
+-- Server only (Canaan API, service role), like the PLCC Bucks tables. Safe to re-run.
 --
 -- PLCC Bucks from the Ark (kids only; adults play and rank but never earn):
 --   +2  first game of the day            (ark_first_game)
@@ -13,7 +13,7 @@
 -- =============================================================================
 BEGIN;
 
--- 1) Settings (one row; Super Admin edits in the Vault) -------------------------
+-- 1) Settings (one row; Super Admin edits in PLCC Canaan) -------------------------
 CREATE TABLE IF NOT EXISTS public.ark_settings (
   id                boolean PRIMARY KEY DEFAULT true CHECK (id),
   bucks_enabled     boolean NOT NULL DEFAULT true,

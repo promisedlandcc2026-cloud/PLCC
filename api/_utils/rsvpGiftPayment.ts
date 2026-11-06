@@ -446,7 +446,7 @@ export async function postRsvpGiftToGivingTransactions(
       fundId = first?.id ? String(first.id) : '';
     }
     if (!fundId) {
-      warnings.push('No Vault finance fund found — gift marked paid but not posted to Vault ledger yet.');
+      warnings.push('No Canaan finance fund found — gift marked paid but not posted to Canaan ledger yet.');
     } else {
       let memberId: string | null = null;
       const email = String(reg.email || '').trim().toLowerCase();
@@ -487,7 +487,7 @@ export async function postRsvpGiftToGivingTransactions(
 
       if (error) {
         console.error('[RSVP] Vault gift post failed:', error.message);
-        warnings.push(error.message || 'Could not post gift to Vault ledger');
+        warnings.push(error.message || 'Could not post gift to Canaan ledger');
       } else {
         txId = tx?.id ? String(tx.id) : null;
         created = true;
@@ -502,7 +502,7 @@ export async function postRsvpGiftToGivingTransactions(
   if (!dcbVoucherId) {
     if (!isDcbBridgeConfigured()) {
       warnings.push(
-        'DCB bridge not configured (set AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET). Gift stays in Vault until configured.'
+        'DCB bridge not configured (set AWC_DCB_API_URL + AWC_DCB_SERVICE_SECRET). Gift stays in Canaan until configured.'
       );
     } else {
       const dcb = await postSettledContributionToDcb({

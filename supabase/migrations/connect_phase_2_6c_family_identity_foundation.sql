@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.6C.1 — Family Identity Foundation
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 --
@@ -61,7 +61,7 @@ COMMENT ON TABLE public.user_member_links IS
   'Phase 2.6C.1 — canonical 1:1 link public.users ↔ public.members. Only status=verified is authorization-grade. No email/name/phone matching.';
 
 COMMENT ON COLUMN public.user_member_links.user_id IS
-  'Authenticated Connect/Vault identity = public.users(id) matching auth.uid() for own-link reads.';
+  'Authenticated Connect/Canaan identity = public.users(id) matching auth.uid() for own-link reads.';
 
 COMMENT ON COLUMN public.user_member_links.member_id IS
   'CRM directory subject = public.members(id). UNIQUE — one user per member.';
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS public.household_members (
 );
 
 COMMENT ON TABLE public.household_members IS
-  'Phase 2.6C.1 — authorization-grade household membership rows for future Family metadata. Does NOT grant guardian or card rights. Legacy members.household_* remain for Vault directory UI.';
+  'Phase 2.6C.1 — authorization-grade household membership rows for future Family metadata. Does NOT grant guardian or card rights. Legacy members.household_* remain for Canaan directory UI.';
 
 COMMENT ON COLUMN public.household_members.relationship_type IS
   'Descriptive only. A value of parent/guardian here MUST NEVER authorize child card view — use guardian_relationships.';
@@ -263,7 +263,7 @@ CREATE TRIGGER guardian_relationships_set_updated_at
 --   * NO SELECT on household_members / guardian_relationships
 --   * NO INSERT/UPDATE/DELETE on any of these tables
 -- anon / PUBLIC: no access
--- service_role: bypasses RLS (Vault staff APIs)
+-- service_role: bypasses RLS (Canaan staff APIs)
 -- Future Family data: narrow SECURITY DEFINER RPC (not created here)
 -- ---------------------------------------------------------------------------
 
@@ -336,6 +336,6 @@ GRANT EXECUTE ON FUNCTION public.set_guardian_relationships_updated_at() TO serv
 -- NO ALTER public.members.children / household_id / household_name.
 -- NO INSERT INTO public.user_member_links (no same-UUID DML in this file).
 -- NO email/name/phone matching.
--- Staff writes: Vault/server service_role only — no browser mutation RPCs.
+-- Staff writes: Canaan/server service_role only — no browser mutation RPCs.
 
 COMMIT;

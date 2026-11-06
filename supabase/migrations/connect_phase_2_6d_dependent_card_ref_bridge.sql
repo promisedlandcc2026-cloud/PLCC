@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.6D.2B — Dependent UI reference bridge (cardRef)
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 --

@@ -288,7 +288,7 @@ const MEMBER_B = randomUUID();
   const john = r.body.entries.find((e: any) => e.display_name === 'John Doe');
   ok(john?.received_amount_cents === 5000 && r.body.summary.onlineCents === 9000, 'a partial refund in Tithe lowers it to $50');
   r = await call('SUPER_ADMIN', 'POST', 'update-entry', { fundraiserId: F, entryId: john.id, notes: 'x' });
-  ok(r.statusCode === 400, 'online gifts are read-only in the Vault');
+  ok(r.statusCode === 400, 'online gifts are read-only in PLCC Canaan');
 
   console.log('\n"Pay my balance" and matching');
   r = await call('ACCOUNTANT', 'GET', 'get', {}, { id: F });
@@ -352,7 +352,7 @@ const MEMBER_B = randomUUID();
     ok(dcbPosts.length > 0, 'hand-entered payments were sent to the DCB');
     ok(
       dcbPosts.every((x) => { const p: any = byId.get(String(x.transactionId).replace('fundraiser:', '')); return !p || !p.external_ref; }),
-      'online gifts from PLCC Tithe are never sent from the Vault (Tithe already sent them)'
+      'online gifts from PLCC Tithe are never sent from PLCC Canaan (Tithe already sent them)'
     );
     ok(pays.filter((p: any) => p.external_ref).every((p: any) => p.dcb_status == null), 'Tithe payment rows carry no DCB status');
     ok(pays.filter((p: any) => !p.external_ref && p.amount_cents >= 100).every((p: any) => p.dcb_status === 'posted'), 'every cash/check payment is marked In DCB', pays.map((p: any) => p.dcb_status));

@@ -93,7 +93,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, initialTab = '
                                 <p className="lead">Last Updated: February 2026</p>
 
                                 <h4>1. Initial Provisions</h4>
-                                <p>Promised Land Christian Center ("PLCC", "we", "us") is committed to protecting your privacy. This policy outlines how we collect, use, and safeguard your personal information within the Vault system.</p>
+                                <p>Promised Land Christian Center ("PLCC", "we", "us") is committed to protecting your privacy. This policy outlines how we collect, use, and safeguard your personal information within PLCC Canaan system.</p>
 
                                 <h4>2. Data Collection</h4>
                                 <ul>
@@ -120,7 +120,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, initialTab = '
                                 </div>
 
                                 <h4>4. Your Rights</h4>
-                                <p>You have the right to request access to, correction of, or deletion of your personal data stored in the Vault. Please contact the administration team for such requests.</p>
+                                <p>You have the right to request access to, correction of, or deletion of your personal data stored in PLCC Canaan. Please contact the administration team for such requests.</p>
                             </div>
                         ) : (
                             <div className="animate-in slide-in-from-right-4 fade-in duration-500">

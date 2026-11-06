@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.7B — Attendance Session Foundation
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 --
@@ -169,9 +169,9 @@ CREATE TRIGGER attendance_sessions_set_updated_at
   EXECUTE FUNCTION public.set_attendance_sessions_updated_at();
 
 -- ---------------------------------------------------------------------------
--- 4) RLS — fail closed; Vault service_role only
+-- 4) RLS — fail closed; Canaan service_role only
 -- ---------------------------------------------------------------------------
--- No authenticated/anon SELECT or writes. Session admin is Vault API only.
+-- No authenticated/anon SELECT or writes. Session admin is Canaan API only.
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE public.attendance_sessions ENABLE ROW LEVEL SECURITY;

@@ -1,4 +1,4 @@
--- PLCC Chat: per-room "Mute" for phone alerts. Server-only (Vault API), like the other chat tables.
+-- PLCC Chat: per-room "Mute" for phone alerts. Server-only (Canaan API), like the other chat tables.
 CREATE TABLE IF NOT EXISTS public.chat_room_mutes (
   user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   channel_id uuid NOT NULL REFERENCES public.chat_channels(id) ON DELETE CASCADE,

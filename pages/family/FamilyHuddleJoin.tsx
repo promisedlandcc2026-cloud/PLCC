@@ -81,11 +81,11 @@ export default function FamilyHuddleJoinPage() {
     <main className="min-h-[100dvh] flex flex-col bg-[#faf7f5]">
       <div className="flex-1 flex flex-col justify-center px-5 py-12 max-w-[420px] w-full mx-auto">
         <p className="text-[10px] font-black uppercase tracking-widest text-burgundy/70 mb-2">
-          The Vault
+          PLCC Canaan
         </p>
         <h1 className="text-2xl font-black text-[#1A1A1A] mb-2">Family Huddle</h1>
         <p className="text-sm text-gray-600 leading-relaxed mb-6">
-          You were invited by a household on The Vault. Enter a display name to join their
+          You were invited by a household on PLCC Canaan. Enter a display name to join their
           private live huddle. This does not create an account or add you to their household.
         </p>
 

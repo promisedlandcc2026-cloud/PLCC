@@ -1,8 +1,8 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.7D.1 — Attendance Records + Atomic Check-In RPC
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
--- Project: yrpwdrioomdihjlmcfnu (Vault + Connect)
+-- Shared Supabase schema (Canaan-owned migrations).
+-- Project: yrpwdrioomdihjlmcfnu (Canaan + Connect)
 --
 -- DO NOT apply automatically — review before live apply.
 --
@@ -15,7 +15,7 @@
 --   * ALTER / UPDATE / DELETE / INSERT public.attendance (legacy preserved)
 --   * seed user_member_links / backfill legacy attendance
 --   * digital-card token resolution inside RPC
---   * Vault API / scanner UI / manual check-in UI / Kids / Connect
+--   * Canaan API / scanner UI / manual check-in UI / Kids / Connect
 --   * visitor_count / serve_signups / events / notifications / audit_logs writes
 -- =============================================================================
 
@@ -82,7 +82,7 @@ CREATE INDEX IF NOT EXISTS attendance_records_session_checked_in_idx
   ON public.attendance_records (session_id, checked_in_at ASC);
 
 -- ---------------------------------------------------------------------------
--- 3) RLS — fail closed; Vault service_role only
+-- 3) RLS — fail closed; Canaan service_role only
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE public.attendance_records ENABLE ROW LEVEL SECURITY;
@@ -101,14 +101,14 @@ REVOKE ALL ON TABLE public.attendance_records FROM authenticated;
 GRANT ALL ON TABLE public.attendance_records TO service_role;
 
 -- ---------------------------------------------------------------------------
--- 5) Atomic check-in RPC — shared by future digital + manual Vault API paths
+-- 5) Atomic check-in RPC — shared by future digital + manual Canaan API paths
 -- ---------------------------------------------------------------------------
 -- Session lock: SELECT ... FOR SHARE on attendance_sessions row.
 --   * Concurrent check-ins may proceed together (UNIQUE + ON CONFLICT).
 --   * Status-changing UPDATEs (close/open) wait for SHARE locks — prevents
 --     insert-after-close without relying on non-transactional SELECT-then-INSERT.
 -- Digital card/token/link resolution is intentionally OUTSIDE this RPC
--- (Vault API later). Link race remains a 2.7D.3 design point.
+-- (Canaan API later). Link race remains a 2.7D.3 design point.
 -- ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.attendance_checkin_member(
@@ -136,7 +136,7 @@ BEGIN
     RAISE EXCEPTION 'invalid_request' USING ERRCODE = 'P0001';
   END IF;
 
-  -- Actor existence only (role/permission gated later by Vault API)
+  -- Actor existence only (role/permission gated later by Canaan API)
   IF NOT EXISTS (
     SELECT 1
     FROM public.users u
@@ -236,7 +236,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.attendance_checkin_member(uuid, uuid, text, uuid) IS
-  'Phase 2.7D.1 — atomic adult check-in for open non-kids sessions. Server-only (service_role). Idempotent UNIQUE(session_id,member_id). No card/token/link logic. No visitor/Serve/event/notification/audit side effects. RPC JSON may include attendanceId/memberId for Vault API; client DTOs must sanitize.';
+  'Phase 2.7D.1 — atomic adult check-in for open non-kids sessions. Server-only (service_role). Idempotent UNIQUE(session_id,member_id). No card/token/link logic. No visitor/Serve/event/notification/audit side effects. RPC JSON may include attendanceId/memberId for Canaan API; client DTOs must sanitize.';
 
 REVOKE ALL ON FUNCTION public.attendance_checkin_member(uuid, uuid, text, uuid) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.attendance_checkin_member(uuid, uuid, text, uuid) FROM anon;

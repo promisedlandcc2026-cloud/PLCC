@@ -1,7 +1,7 @@
 -- =============================================================================
 -- PLCC Connect Phase 2.8A — My Profile & Directory Privacy Preferences
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations).
+-- Shared Supabase schema (Canaan-owned migrations).
 --
 -- DO NOT apply automatically — review before live apply.
 --
@@ -639,7 +639,7 @@ GRANT EXECUTE ON FUNCTION public.update_my_directory_privacy(jsonb) TO service_r
 -- ---------------------------------------------------------------------------
 -- 8) Avatars storage — Connect self-upload under {auth.uid()}/…
 -- ---------------------------------------------------------------------------
--- Bucket may already exist (Vault Members). Policies are additive IF NOT EXISTS
+-- Bucket may already exist (Canaan Members). Policies are additive IF NOT EXISTS
 -- via drop/create by name. Public read of avatars is assumed for directory photos.
 
 INSERT INTO storage.buckets (id, name, public)

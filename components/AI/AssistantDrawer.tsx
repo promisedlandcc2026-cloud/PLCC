@@ -27,7 +27,7 @@ const AssistantDrawer: React.FC<AssistantDrawerProps> = ({ isOpen, onClose }: As
     {
       role: 'ai',
       content:
-        "Hi! I'm Ask Admin. I explain Vault in plain words.\n\nAsk me things like how to check someone in (/events/check-someone-in), open Chat (/community/chat), or find Members (/members).\n\nTap any path I show — I stay open so you can check you're in the right place.",
+        "Hi! I'm Ask Admin. I explain Canaan in plain words.\n\nAsk me things like how to check someone in (/events/check-someone-in), open Chat (/community/chat), or find Members (/members).\n\nTap any path I show — I stay open so you can check you're in the right place.",
     },
   ]);
   const [input, setInput] = useState('');

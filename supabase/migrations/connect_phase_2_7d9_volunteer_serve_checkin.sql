@@ -4,7 +4,7 @@
 -- DO NOT apply automatically — review before live apply.
 --
 -- Additive:
---   * attendance_require_serve_signup_for_card_hash(...) — pre-check for Vault API
+--   * attendance_require_serve_signup_for_card_hash(...) — pre-check for Canaan API
 --
 -- When session.type = 'serve' AND serve_opportunity_id IS NOT NULL, adult AWC1
 -- check-in requires an active serve_signups row for that opportunity.

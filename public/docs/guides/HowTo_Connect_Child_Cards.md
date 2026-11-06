@@ -19,7 +19,7 @@ Use the **one-click** button on the **parent** — do not open every child one b
 
 On the parent’s Family & Access tab, make sure:
 
-1. Their **Connect / Vault login** is linked and **verified**
+1. Their **Connect / Canaan login** is linked and **verified**
 2. They are in a **structured household** with the kids listed as children/dependents
 
 If kids are missing from the household roster, add them first (Family & Access household steps), then come back.

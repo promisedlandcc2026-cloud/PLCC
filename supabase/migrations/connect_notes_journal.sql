@@ -1,7 +1,7 @@
 -- =============================================================================
 -- PLCC Connect — Sermon Notes → "My Notes & Journal"
 -- =============================================================================
--- Shared Supabase schema (Vault-owned migrations). Project: Vault + Connect.
+-- Shared Supabase schema (Canaan-owned migrations). Project: Canaan + Connect.
 --
 -- Additive only. Safe to run more than once.
 --   * entry_type   — sermon | prayer | reflection | gratitude (existing notes = sermon)
