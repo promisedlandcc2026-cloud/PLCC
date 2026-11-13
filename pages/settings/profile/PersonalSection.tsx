@@ -3,6 +3,7 @@ import { BirthdayMonthDay } from '../../../components/BirthdayMonthDay';
 import { Briefcase, Globe, Mail, Smartphone, User } from 'lucide-react';
 import { FieldLabel, IconInput, SectionCard } from './ui';
 import type { ProfileFields } from './useProfileForm';
+import PhoneInput from '../../../components/common/PhoneInput';
 
 type Props = {
   fields: ProfileFields;
@@ -47,15 +48,14 @@ const PersonalSection: React.FC<Props> = ({ fields, setField, phoneOnlyAccount, 
 
       <label className="block space-y-1.5">
         <FieldLabel>Phone</FieldLabel>
-        <IconInput
-          icon={Smartphone}
-          type="tel"
-          autoComplete="tel"
-          inputMode="tel"
-          placeholder="0772 123456"
+        <PhoneInput
           value={fields.phone}
           disabled={disabled}
-          onChange={(e) => setField('phone', e.target.value)}
+          onChange={(next) => setField('phone', next)}
+          icon={Smartphone}
+          iconClassName="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"
+          countryClassName="rounded-xl border border-stone-200 bg-white text-stone-800"
+          inputClassName="w-full pl-11 pr-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-900 outline-none focus:ring-2 focus:ring-[#1d372c]/20 disabled:opacity-60"
         />
       </label>
 

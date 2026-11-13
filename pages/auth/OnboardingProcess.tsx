@@ -20,6 +20,7 @@ import {
 import { useNav } from '../../App';
 import { getAuthHeaders } from '../../lib/api';
 import { BirthdayMonthDay } from '../../components/BirthdayMonthDay';
+import PhoneInput from '../../components/common/PhoneInput';
 
 type OnboardingPath = 'new' | 'current';
 
@@ -477,16 +478,14 @@ const OnboardingProcess: React.FC = () => {
                 </p>
               </div>
               <div className="max-w-xl mx-auto bg-white p-6 md:p-10 rounded-[2rem] border border-gray-100 shadow-xl">
-                <div className="relative">
-                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="0772 123456"
-                    className="w-full pl-14 pr-5 py-4 rounded-2xl bg-[#F9F9F7] border border-transparent outline-none focus:ring-4 focus:ring-burgundy/10 focus:bg-white focus:border-burgundy/20 font-bold text-lg text-[#0d1a14]"
-                  />
-                </div>
+                <PhoneInput
+                  value={phone}
+                  onChange={setPhone}
+                  icon={Phone}
+                  iconClassName="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none"
+                  countryClassName="rounded-2xl bg-[#F9F9F7] text-[#0d1a14]"
+                  inputClassName="w-full pl-14 pr-5 py-4 rounded-2xl bg-[#F9F9F7] border border-transparent outline-none focus:ring-4 focus:ring-burgundy/10 focus:bg-white focus:border-burgundy/20 font-bold text-lg text-[#0d1a14]"
+                />
               </div>
             </div>
           )}
@@ -578,16 +577,14 @@ const OnboardingProcess: React.FC = () => {
                   <label className="text-[10px] font-black text-gold uppercase tracking-[0.2em] ml-1">
                     Phone *
                   </label>
-                  <div className="relative">
-                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" size={20} />
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="0772 123456"
-                      className="w-full pl-14 pr-5 py-4 rounded-2xl bg-[#F9F9F7] border border-transparent outline-none focus:ring-4 focus:ring-burgundy/10 focus:bg-white focus:border-burgundy/20 font-bold text-lg text-[#0d1a14]"
-                    />
-                  </div>
+                  <PhoneInput
+                    value={phone}
+                    onChange={setPhone}
+                    icon={Phone}
+                    iconClassName="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none"
+                    countryClassName="rounded-2xl bg-[#F9F9F7] text-[#0d1a14]"
+                    inputClassName="w-full pl-14 pr-5 py-4 rounded-2xl bg-[#F9F9F7] border border-transparent outline-none focus:ring-4 focus:ring-burgundy/10 focus:bg-white focus:border-burgundy/20 font-bold text-lg text-[#0d1a14]"
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-gold uppercase tracking-[0.2em] ml-1">

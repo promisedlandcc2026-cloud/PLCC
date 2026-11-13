@@ -32,6 +32,7 @@ import {
 import { isLocalDevHost, LOCAL_UI_PREVIEW_PROFILE } from '../../lib/localUiPreview';
 import { PlccLoginShell, PlccLoginHeading, PLCC_INPUT, PLCC_PRIMARY_BTN, PLCC_GREEN } from '../../components/awcone/PlccOneShell';
 import { TITHE_URL as AWC_ONE_TITHE_URL } from '../../lib/awcOne';
+import PhoneInput from '../../components/common/PhoneInput';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -653,7 +654,7 @@ const LoginPortal: React.FC = () => {
                   placeholder="you@example.com"
                   className={PLCC_INPUT}
                 />
-                <p className="text-xs text-[#16251f]/55">We'll email you a 6-digit code. Signing in with a phone number? Enter it here instead.</p>
+                <p className="text-xs text-[#16251f]/55">We'll email you a 6-digit code. Signing in with a phone number? Enter it here instead (outside Uganda, start with + and your country code).</p>
               </div>
               {error && (
                 <p role="alert" className="text-red-700 text-sm font-semibold bg-red-50 border border-red-100 rounded-xl px-4 py-3">
@@ -978,10 +979,11 @@ const LoginPortal: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[9px] font-black text-gold/60 uppercase tracking-widest ml-1">Mobile Number</label>
-                    <input 
-                      type="tel" value={regData.phone} onChange={e => setRegData({...regData, phone: e.target.value})}
-                      className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-gold/30 font-bold text-sm"
-                      placeholder="0772 123456"
+                    <PhoneInput
+                      value={regData.phone}
+                      onChange={(next) => setRegData({ ...regData, phone: next })}
+                      countryClassName="rounded-xl bg-white/5 border border-white/10 text-white"
+                      inputClassName="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-gold/30 font-bold text-sm"
                     />
                     <p className="text-white/30 text-[10px] font-medium leading-relaxed ml-1">You can sign in with this number and a password. Email is optional.</p>
                   </div>
@@ -1229,20 +1231,16 @@ const LoginPortal: React.FC = () => {
                   <label htmlFor="sms-phone" className="text-[10px] font-black text-gold/80 uppercase tracking-[0.3em] ml-1">
                     Mobile Number
                   </label>
-                  <div className="relative">
-                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-[#0d1a14]/45 pointer-events-none" size={18} />
-                    <input
-                      id="sms-phone"
-                      type="tel"
-                      inputMode="tel"
-                      autoComplete="tel"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder="0772 123456"
-                      required
-                      className="w-full pl-14 pr-5 py-5 bg-white text-[#0d1a14] caret-[#0d1a14] border border-white/20 rounded-2xl outline-none focus:ring-2 focus:ring-gold/60 font-bold placeholder:text-[#0d1a14]/35 [&:-webkit-autofill]:[-webkit-text-fill-color:#0d1a14]"
-                    />
-                  </div>
+                  <PhoneInput
+                    id="sms-phone"
+                    value={identifier}
+                    onChange={setIdentifier}
+                    required
+                    icon={Phone}
+                    iconClassName="absolute left-5 top-1/2 -translate-y-1/2 text-[#0d1a14]/45 pointer-events-none"
+                    countryClassName="rounded-2xl bg-white text-[#0d1a14] border border-white/20"
+                    inputClassName="w-full pl-14 pr-5 py-5 bg-white text-[#0d1a14] caret-[#0d1a14] border border-white/20 rounded-2xl outline-none focus:ring-2 focus:ring-gold/60 font-bold placeholder:text-[#0d1a14]/35 [&:-webkit-autofill]:[-webkit-text-fill-color:#0d1a14]"
+                  />
                 </div>
 
                 <label className="flex items-start gap-3 cursor-pointer">

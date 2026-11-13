@@ -6,6 +6,7 @@ import { AvatarDisplay } from './AvatarDisplay';
 import { ageFromBirthday, mayHoldOwnContact, normalizeBirthday } from '../lib/memberAge';
 import { useNav } from '../../../lib/NavContext';
 import { BirthdayMonthDay } from '../../../components/BirthdayMonthDay';
+import PhoneInput from '../../../components/common/PhoneInput';
 
 export const EditProfileModal: React.FC = () => {
   const {
@@ -413,11 +414,11 @@ export const EditProfileModal: React.FC = () => {
                   <label className="block text-xs font-medium text-stone-700 mb-1">
                     Phone Number
                   </label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#1d372c]"
+                    onChange={(next) => setFormData({ ...formData, phone: next })}
+                    countryClassName="rounded-lg border border-stone-200 bg-white text-stone-800"
+                    inputClassName="w-full px-3 py-2 text-sm rounded-lg border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#1d372c]"
                   />
                   <label className="flex items-center gap-2 mt-2 cursor-pointer">
                     <input

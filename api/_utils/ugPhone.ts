@@ -10,15 +10,28 @@
  *   +44 7911 123456   → +447911123456   (any number typed with +)
  */
 
+import { parsePhoneNumberFromString } from './phoneLib.js';
+
 export const HOME_COUNTRY_CODE = '256';
 
 /** Placeholder for phone inputs. */
 export const PHONE_PLACEHOLDER = '0772 123456';
 
-export function toE164Intl(raw: unknown): string | null {
+/**
+ * Any country's number → E.164. A number without a + code is read as Ugandan
+ * (or as `defaultCountry` when the person picked their country). Older US-style
+ * numbers saved before country codes still resolve the way they always did.
+ */
+export function toE164Intl(raw: unknown, defaultCountry: string = 'UG'): string | null {
   const s = String(raw ?? '').trim();
   let d = s.replace(/\D/g, '');
   if (!d) return null;
+  try {
+    const parsed = parsePhoneNumberFromString(s.replace(/^00/, '+'), (defaultCountry || 'UG') as any);
+    if (parsed && parsed.isValid()) return parsed.number;
+  } catch {
+    /* fall through to the older rules */
+  }
   const ok = (x: string) => (x.length >= 8 && x.length <= 15 ? `+${x}` : null);
 
   if (s.startsWith('+')) return ok(d);
@@ -36,11 +49,19 @@ export function isUgandanE164(e164: string | null | undefined): boolean {
   return /^\+256\d{9}$/.test(String(e164 || ''));
 }
 
-/** "+256 772 557 842", "+1 (508) 555-1234", or the input as typed. */
+/** "+256 772 557 842", "+1 (508) 555-1234", "+44 7911 123456", or the input as typed. */
 export function formatPhoneForDisplay(raw: unknown): string {
   const s = String(raw ?? '').trim();
   if (!s) return '';
   const e164 = toE164Intl(s);
+  if (e164 && !isUgandanE164(e164) && !(e164.startsWith('+1') && e164.length === 12)) {
+    try {
+      const parsed = parsePhoneNumberFromString(e164);
+      if (parsed && parsed.isValid()) return parsed.formatInternational();
+    } catch {
+      /* show as stored */
+    }
+  }
   const d = (e164 || '').replace(/\D/g, '');
   if (e164 && isUgandanE164(e164)) {
     return `+256 ${d.slice(3, 6)} ${d.slice(6, 9)} ${d.slice(9)}`;

@@ -35,6 +35,7 @@ import {
   tidyHouseholdName,
 } from '../../lib/householdCleanup';
 import { Role } from '../../types';
+import PhoneInput from '../../components/common/PhoneInput';
 
 type HouseholdRow = {
   id: string;
@@ -739,14 +740,11 @@ const HouseholdsPage: React.FC = () => {
             <label htmlFor="hh-phone" className={labelClass}>
               Home phone
             </label>
-            <input
+            <PhoneInput
               id="hh-phone"
-              type="tel"
               value={editForm.phone}
-              onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-              placeholder="0772 123456"
-              autoComplete="tel"
-              className={inputClass}
+              onChange={(next) => setEditForm({ ...editForm, phone: next })}
+              inputClassName={inputClass}
             />
           </div>
           <div>

@@ -42,6 +42,7 @@ import {
 } from '../../api/_utils/rsvpGiftPayment';
 
 import { formatCurrency } from '../../utils/formatters';
+import PhoneInput from '../../components/common/PhoneInput';
 /** Display serif (Fraunces, loaded in index.html) — matches PLCC Tithe's amounts. */
 const SERIF: React.CSSProperties = { fontFamily: "'Fraunces', Georgia, serif" };
 
@@ -716,18 +717,17 @@ const FellowshipCookoutRsvp: React.FC = () => {
                   <label htmlFor="cookout-phone" className="block text-sm font-bold text-[#0d1a14]">
                     Phone number <span className="text-burgundy">*</span>
                   </label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      id="cookout-phone"
-                      required
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="So we can reach you"
-                      className="w-full min-h-[52px] pl-12 pr-4 rounded-xl border-2 border-gray-200 bg-[#FBFBF9] text-base font-medium outline-none focus:border-burgundy focus:bg-white transition-colors"
-                    />
-                  </div>
+                  <PhoneInput
+                    id="cookout-phone"
+                    required
+                    value={phone}
+                    onChange={setPhone}
+                    placeholder="So we can reach you"
+                    icon={Phone}
+                    iconClassName="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    countryClassName="rounded-xl border-2 border-gray-200 bg-[#FBFBF9] text-gray-800"
+                    inputClassName="w-full min-h-[52px] pl-12 pr-4 rounded-xl border-2 border-gray-200 bg-[#FBFBF9] text-base font-medium outline-none focus:border-burgundy focus:bg-white transition-colors"
+                  />
                 </div>
 
                 <div className="space-y-2">

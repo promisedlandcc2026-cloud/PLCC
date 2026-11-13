@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Loader2, MessageSquareText } from 'lucide-react';
 import { fetchAuthorized } from '../../lib/api';
+import PhoneInput from '../common/PhoneInput';
 
 /**
  * "Turn on text sign-in" — members who joined with email/password confirm their mobile
@@ -117,14 +118,11 @@ export default function TextSignInCard({ defaultPhone }: { defaultPhone?: string
         <div className="space-y-3">
           <label className="block">
             <span className="block text-sm font-semibold text-stone-700 mb-1.5">Your mobile number</span>
-            <input
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
+            <PhoneInput
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="0772 123456"
-              className="w-full rounded-xl border-2 border-stone-200 px-4 py-3 text-lg focus:border-[#1d372c] focus:outline-none"
+              onChange={setPhone}
+              countryClassName="rounded-xl border-2 border-stone-200 bg-white text-stone-800"
+              inputClassName="w-full rounded-xl border-2 border-stone-200 px-4 py-3 text-lg focus:border-[#1d372c] focus:outline-none"
             />
           </label>
           {step === 'code' ? (

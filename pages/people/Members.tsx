@@ -43,6 +43,7 @@ import { canManageFamilyAdmin } from '../../lib/familyAdminUi';
 import FamilyAccessSection from '../../components/people/FamilyAccessSection';
 import { formatAccountContact } from '../../api/_utils/authPhone';
 import { BirthdayMonthDay } from '../../components/BirthdayMonthDay';
+import PhoneInput from '../../components/common/PhoneInput';
 
 /** Format YYYY-MM-DD for display without UTC timezone shift. */
 function formatMemberBirthday(value?: string | null): string {
@@ -715,7 +716,13 @@ const MembersPage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Phone</label>
-                <input name="phone" type="tel" defaultValue={editingMember?.phone === 'No Phone' ? '' : editingMember?.phone} placeholder="0772 123456" className="w-full p-3 bg-gray-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-gold" />
+                <PhoneInput
+                  key={editingMember?.id || 'new'}
+                  name="phone"
+                  defaultValue={editingMember?.phone === 'No Phone' ? '' : editingMember?.phone || ''}
+                  countryClassName="rounded-xl bg-gray-50 text-gray-800"
+                  inputClassName="w-full p-3 bg-gray-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-gold"
+                />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Household Name</label>
