@@ -120,17 +120,18 @@ export function parseSeasonKey(key: unknown): { year: number; season: SeasonName
   return { year: Number(match[1]), season: match[2] as SeasonName };
 }
 
+/** Uganda's seasons line up with the leaderboard windows: Mar–May and Sep–Nov rains, Dec–Feb and Jun–Aug dry. */
 const SEASON_TITLE: Record<SeasonName, string> = {
-  fall: 'Fall',
-  winter: 'Winter',
-  spring: 'Spring',
-  summer: 'Summer',
+  fall: 'Rainy Season · Sep–Nov',
+  winter: 'Dry Season · Dec–Feb',
+  spring: 'Rainy Season · Mar–May',
+  summer: 'Dry Season · Jun–Aug',
 };
 
 const SEASON_EMOJI: Record<SeasonName, string> = {
-  fall: '🍂',
-  winter: '❄️',
-  spring: '🌸',
+  fall: '🌧️',
+  winter: '☀️',
+  spring: '🌧️',
   summer: '☀️',
 };
 
@@ -138,7 +139,7 @@ export function seasonLabel(key: string): string {
   const parsed = parseSeasonKey(key);
   if (!parsed) return 'This season';
   if (parsed.season === 'winter') {
-    return `Winter ${parsed.year}–${String((parsed.year + 1) % 100).padStart(2, '0')}`;
+    return `${SEASON_TITLE.winter} ${parsed.year}–${String((parsed.year + 1) % 100).padStart(2, '0')}`;
   }
   return `${SEASON_TITLE[parsed.season]} ${parsed.year}`;
 }

@@ -111,7 +111,7 @@ const HomeHeroBanner: React.FC<Props> = ({
       {/* Soft watermark — decorative only, behind copy */}
       <p
         aria-hidden
-        className="pointer-events-none absolute left-4 sm:left-8 top-[28%] md:top-1/2 -translate-y-1/2 text-[clamp(2.5rem,8vw,5.5rem)] font-black leading-none text-white/[0.06] tracking-tight select-none max-w-[55%] break-words"
+        className="hidden md:block pointer-events-none absolute left-8 bottom-4 text-[clamp(2.5rem,6vw,4.5rem)] font-black leading-none text-white/[0.035] tracking-tight select-none max-w-[55%] truncate"
       >
         Welcome Home to PLCC
       </p>
@@ -180,7 +180,7 @@ const HomeHeroBanner: React.FC<Props> = ({
 
       {/* Next Service — desktop/tablet only; hidden on phones to keep the mobile hero clean */}
       <div className="hidden md:block absolute z-20 right-6 bottom-6 w-[270px]">
-        <div className="rounded-2xl bg-[#0c110f]/92 backdrop-blur-md border border-gold/30 p-5 shadow-2xl">
+        <div className="rounded-2xl bg-[#0c110f]/90 backdrop-blur-md border border-gold/30 p-5 shadow-2xl">
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gold mb-2">
             Next service
           </p>

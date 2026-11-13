@@ -59,10 +59,11 @@ assert(resolveQrSecret({}) === null, 'no secret without keys');
 assert(pointsSeasonKey(new Date('2026-10-15T16:00:00Z')) === '2026-fall', 'October is fall');
 assert(pointsSeasonKey(new Date('2026-12-05T16:00:00Z')) === '2026-winter', 'December starts winter');
 assert(pointsSeasonKey(new Date('2027-02-10T16:00:00Z')) === '2026-winter', 'February keyed to December year');
-assert(pointsSeasonKey(new Date('2026-09-01T03:30:00Z')) === '2026-summer', 'NY time, not UTC, at the edge');
+assert(pointsSeasonKey(new Date('2026-08-31T20:30:00Z')) === '2026-summer', 'Kampala time, not UTC, at the edge (still Aug 31 there)');
+assert(pointsSeasonKey(new Date('2026-08-31T21:30:00Z')) === '2026-fall', 'Kampala time: already Sep 1 there');
 assert(pointsSeasonKey(new Date('2026-03-01T17:00:00Z')) === '2026-spring', 'March is spring');
-assert(seasonLabel('2026-fall') === 'Fall 2026', 'fall label');
-assert(seasonLabel('2026-winter') === 'Winter 2026–27', 'winter label spans years');
+assert(seasonLabel('2026-fall') === 'Rainy Season · Sep–Nov 2026', 'fall label is Uganda rainy season');
+assert(seasonLabel('2026-winter') === 'Dry Season · Dec–Feb 2026–27', 'winter label spans years');
 
 assert(leaderboardName({ first_name: 'Anaya', last_name: 'Diaz' }) === 'Anaya D.', 'first name + initial');
 assert(leaderboardName({ preferred_name: 'Nay', first_name: 'Anaya', last_name: 'Diaz' }) === 'Nay D.', 'preferred name used');
