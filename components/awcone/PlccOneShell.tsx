@@ -19,7 +19,8 @@ export const PLCC_GREEN = '#1d372c';
 export const PLCC_GREEN_DEEP = '#16251f';
 export const PLCC_GOLD = '#C9A35A';
 export const PLCC_CREAM = '#f6f1e6';
-export const SANCTUARY_IMG = '/images/awc-one/sanctuary.webp';
+/** The future PLCC building at dusk (architect's render). */
+export const SANCTUARY_IMG = '/images/awc-one/plcc-building-dusk.webp';
 export const WORDMARK_IMG = '/images/awc-one/awc-one-wordmark.webp';
 
 const serif = { fontFamily: "'Fraunces', Georgia, serif" } as const;
@@ -33,8 +34,8 @@ export const PlccLoginShell: React.FC<{ children: React.ReactNode }> = ({ childr
     >
       <img
         src={SANCTUARY_IMG}
-        alt="Sanctuary with stained-glass windows"
-        className="absolute inset-0 w-full h-full object-cover object-center"
+        alt="The future Promised Land Christian Center building at dusk"
+        className="absolute inset-0 w-full h-full object-cover object-[62%_center]"
         decoding="async"
       />
       <div
