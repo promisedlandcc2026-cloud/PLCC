@@ -1,69 +1,319 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Flag, Loader2, X, CheckCircle2, ShieldAlert, ImagePlus, Trash2 } from 'lucide-react';
-import type { ReportRequest, ReportAppKey } from '../../lib/report';
+import type { ReportRequest } from '../../lib/report';
 import { MAX_REPORT_SCREENSHOTS, prepareScreenshot, type ReportScreenshot } from '../../lib/screenshot';
+import {
+  REPORT_APP_OPTIONS,
+  REPORT_GIVING_METHODS,
+  REPORT_ID_PREFIX,
+  REPORT_IMPERSONATED_OPTIONS,
+  REPORT_MONEY_CATEGORIES,
+  REPORT_MONEY_PLACEHOLDER,
+  REPORT_MONEY_SENT_TIP,
+  REPORT_PHONE_PLACEHOLDER,
+  REPORT_SAFETY_OPTIONS,
+  REPORT_SAFETY_WARNING,
+  REPORT_WHERE_OPTIONS,
+  type ReportOption,
+  type ReportSourceApp,
+} from '../../lib/reportConfig';
 
 /**
- * The Report dialog body, shared by PLCC Canaan and PLCC Connect.
- * Each app passes its own `send` (Canaan → /api/vault?resource=report,
- * Connect → /api/report bridge). Keep the two copies in sync.
+ * The Report dialog. Same as in AWC Vault, PLCC Canaan and PLCC Connect;
+ * church wording lives in lib/reportConfig.ts. The host passes `send`.
+ *
+ * Problem reports: the member picks what's wrong from a dropdown, then gets
+ * questions that fit that choice (Huddle → room, device, microphone…). Answers
+ * are sent as [{ q, a }] and listed in the email.
  */
 
-type Option = { value: string; label: string };
+type Question = {
+  id: string;
+  label: string;
+  type: 'select' | 'text';
+  options?: ReportOption[];
+  placeholder?: string;
+  required?: boolean;
+  /** Only ask when an earlier answer matches. */
+  showIf?: (a: Record<string, string>) => boolean;
+};
 
-const APP_OPTIONS: Option[] = [
-  { value: 'chat', label: 'PLCC Chat' },
-  { value: 'canaan', label: 'PLCC Canaan' },
-  { value: 'connect', label: 'PLCC Connect' },
-  { value: 'sanctum', label: 'PLCC Sanctum' },
+type Flow = {
+  value: string;
+  label: string;
+  questions: Question[];
+  /** Label for the free-text box at the end. */
+  detailsLabel: string;
+  detailsPlaceholder?: string;
+  detailsRequired?: boolean;
+  /** Extra note shown under the questions. */
+  note?: string;
+};
+
+const opts = (...labels: string[]): ReportOption[] => labels.map((l) => ({ value: l, label: l }));
+
+const DEVICE: Question = {
+  id: 'device',
+  label: 'What are you using?',
+  type: 'select',
+  options: opts('iPhone', 'Android phone', 'iPad or tablet', 'Computer'),
+};
+const YES_NO_UNSURE = opts('Yes', 'No', 'Not sure');
+
+const PROBLEM_FLOWS: Flow[] = [
+  {
+    value: 'huddle',
+    label: 'Live Huddle (prayer calls, audio or video)',
+    questions: [
+      {
+        id: 'issue',
+        label: 'What is happening?',
+        type: 'select',
+        required: true,
+        options: opts(
+          "I can't join the huddle",
+          "I can't hear other people",
+          "Other people can't hear me",
+          'Video or camera not working',
+          'It keeps dropping or freezing',
+          "I can't mute or unmute",
+          'Something else'
+        ),
+      },
+      { id: 'room', label: 'Which room or channel?', type: 'text', placeholder: 'e.g. Morning Prayer' },
+      DEVICE,
+      {
+        id: 'mic',
+        label: 'When it asked to use your microphone, did you tap Allow?',
+        type: 'select',
+        options: YES_NO_UNSURE,
+        showIf: (a) => a.issue === "Other people can't hear me" || a.issue === "I can't join the huddle",
+      },
+      { id: 'headphones', label: 'Are you using headphones or Bluetooth?', type: 'select', options: opts('Yes', 'No') },
+      {
+        id: 'others',
+        label: 'Is it happening to other people on the call too?',
+        type: 'select',
+        options: YES_NO_UNSURE,
+      },
+    ],
+    detailsLabel: 'Anything else we should know? (optional)',
+  },
+  {
+    value: 'messages',
+    label: 'Chat or messages',
+    questions: [
+      {
+        id: 'issue',
+        label: 'What is happening?',
+        type: 'select',
+        required: true,
+        options: opts(
+          "My messages won't send",
+          "I'm not seeing new messages",
+          "Photos, voice notes or files won't send or open",
+          "I can't find a chat, room or person",
+          'Something else'
+        ),
+      },
+      { id: 'where', label: 'Which room, channel or person?', type: 'text' },
+      { id: 'since', label: 'When did it start?', type: 'text', placeholder: 'e.g. This morning' },
+      DEVICE,
+    ],
+    detailsLabel: 'Anything else we should know? (optional)',
+  },
+  {
+    value: 'notifications',
+    label: 'Not getting phone alerts',
+    questions: [
+      {
+        id: 'which',
+        label: 'Which alerts are missing?',
+        type: 'select',
+        required: true,
+        options: opts('Messages', 'Huddles starting', 'Prayer requests', 'Church news and announcements', 'All of them'),
+      },
+      DEVICE,
+      {
+        id: 'homescreen',
+        label: 'Did you add the app to your home screen?',
+        type: 'select',
+        options: YES_NO_UNSURE,
+      },
+      {
+        id: 'allowed',
+        label: 'Are notifications turned on for the app in your phone settings?',
+        type: 'select',
+        options: YES_NO_UNSURE,
+      },
+    ],
+    detailsLabel: 'Anything else we should know? (optional)',
+  },
+  {
+    value: 'login',
+    label: 'Signing in or my account',
+    questions: [
+      {
+        id: 'issue',
+        label: 'What is happening?',
+        type: 'select',
+        required: true,
+        options: opts(
+          'The sign-in code never arrives',
+          "The code doesn't work",
+          'It says my account was not found',
+          'It keeps sending me back to sign in',
+          'I forgot my password',
+          "I'm signed in as the wrong person",
+          'Something else'
+        ),
+      },
+      {
+        id: 'method',
+        label: 'How do you sign in?',
+        type: 'select',
+        options: opts('Text message code to my phone', 'Email code', 'Email and password', 'Google', 'Not sure'),
+      },
+      {
+        id: 'contact',
+        label: 'Phone number or email you sign in with',
+        type: 'text',
+        placeholder: 'So we can find your account',
+      },
+    ],
+    detailsLabel: 'Anything else we should know? (optional)',
+  },
+  {
+    value: 'giving',
+    label: 'Giving, tithes or payments',
+    questions: [
+      {
+        id: 'issue',
+        label: 'What is happening?',
+        type: 'select',
+        required: true,
+        options: opts(
+          "My payment didn't go through",
+          "I was charged but it isn't showing",
+          'I was charged twice',
+          'The amount is wrong',
+          'I need a receipt or giving statement',
+          "I can't find where to give",
+          'Something else'
+        ),
+      },
+      { id: 'amount', label: 'Amount', type: 'text', placeholder: 'e.g. 50,000' },
+      { id: 'date', label: 'Date you gave', type: 'text', placeholder: 'e.g. Sunday, Nov 9' },
+      { id: 'method', label: 'How did you give?', type: 'select', options: REPORT_GIVING_METHODS },
+    ],
+    note: 'Never type a full card number, PIN or password here.',
+    detailsLabel: 'Anything else we should know? (optional)',
+  },
+  {
+    value: 'events',
+    label: 'Events, RSVP or check-in',
+    questions: [
+      {
+        id: 'issue',
+        label: 'What is happening?',
+        type: 'select',
+        required: true,
+        options: opts(
+          "I can't RSVP",
+          "My RSVP isn't showing",
+          'I need to change or cancel my RSVP',
+          "I can't check in",
+          "The QR code won't scan",
+          "My child's check-in or pickup",
+          'Something else'
+        ),
+      },
+      { id: 'event', label: 'Which event?', type: 'text' },
+    ],
+    detailsLabel: 'Anything else we should know? (optional)',
+  },
+  {
+    value: 'profile',
+    label: 'My profile or household',
+    questions: [
+      {
+        id: 'issue',
+        label: 'What is happening?',
+        type: 'select',
+        required: true,
+        options: opts(
+          'Some of my information is wrong',
+          "My photo won't upload",
+          'A family member is missing from my household',
+          'I have two profiles',
+          'Something else'
+        ),
+      },
+      {
+        id: 'fix',
+        label: 'What should it say instead?',
+        type: 'text',
+        showIf: (a) => a.issue === 'Some of my information is wrong',
+      },
+      {
+        id: 'who',
+        label: 'Who is missing?',
+        type: 'text',
+        showIf: (a) => a.issue === 'A family member is missing from my household',
+      },
+    ],
+    detailsLabel: 'Anything else we should know? (optional)',
+  },
+  {
+    value: 'slow',
+    label: 'Slow, stuck or not loading',
+    questions: [
+      {
+        id: 'what',
+        label: 'What is slow?',
+        type: 'select',
+        required: true,
+        options: opts('The whole app', 'One page', 'Videos or sermons', 'Pictures', 'It shows a blank screen'),
+      },
+      { id: 'page', label: 'Which page?', type: 'text', showIf: (a) => a.what === 'One page' },
+      { id: 'internet', label: 'Are you on Wi-Fi or mobile data?', type: 'select', options: opts('Wi-Fi', 'Mobile data', 'Not sure') },
+      DEVICE,
+    ],
+    detailsLabel: 'Anything else we should know? (optional)',
+  },
+  {
+    value: 'bug',
+    label: 'Something else is broken or shows an error',
+    questions: [
+      { id: 'doing', label: 'What were you trying to do?', type: 'text', required: true },
+      { id: 'error', label: 'Did you see an error message?', type: 'select', options: opts('Yes', 'No') },
+      { id: 'errortext', label: 'What did it say?', type: 'text', showIf: (a) => a.error === 'Yes' },
+      { id: 'often', label: 'Does it happen every time?', type: 'select', options: opts('Every time', 'Sometimes', 'Only once') },
+      DEVICE,
+    ],
+    detailsLabel: 'Describe what happened',
+    detailsRequired: true,
+  },
+  {
+    value: 'idea',
+    label: 'I have a suggestion',
+    questions: [
+      { id: 'idea', label: 'What would you like added or changed?', type: 'text', required: true },
+      { id: 'helps', label: 'Who would it help?', type: 'text', placeholder: 'e.g. Parents, youth, elderly members' },
+    ],
+    detailsLabel: 'Tell us more (optional)',
+  },
+  {
+    value: 'other',
+    label: 'Something else',
+    questions: [],
+    detailsLabel: 'Describe the issue',
+    detailsPlaceholder: 'What were you doing, and what went wrong?',
+    detailsRequired: true,
+  },
 ];
 
-const PROBLEM_OPTIONS: Option[] = [
-  { value: 'bug', label: 'Something is broken' },
-  { value: 'login', label: 'Sign-in or account' },
-  { value: 'messages', label: 'Messages not sending or showing' },
-  { value: 'huddle', label: 'Live Huddle / audio / video' },
-  { value: 'giving', label: 'Giving' },
-  { value: 'slow', label: 'Slow or not loading' },
-  { value: 'idea', label: 'Suggestion' },
-  { value: 'other', label: 'Other' },
-];
-
-const SAFETY_OPTIONS: Option[] = [
-  { value: 'impersonation', label: 'Pretending to be a pastor, the Apostle, a leader or a member' },
-  { value: 'money_request', label: 'Asking me for money' },
-  { value: 'money_send', label: 'Asking me to send money, pay a fee or share mobile money details' },
-  { value: 'scam', label: 'Other scam (fake link, prize, investment, job, account details)' },
-  { value: 'harassment', label: 'Harassment, bullying or threats' },
-  { value: 'inappropriate', label: 'Unwanted sexual or inappropriate messages' },
-  { value: 'other', label: 'Something else' },
-];
-
-const IMPERSONATED_OPTIONS: Option[] = [
-  { value: 'apostle', label: 'The Apostle' },
-  { value: 'pastor', label: 'A pastor' },
-  { value: 'bishop', label: 'A bishop' },
-  { value: 'elder', label: 'An elder' },
-  { value: 'minister', label: 'A minister or ministry leader' },
-  { value: 'deacon', label: 'A deacon' },
-  { value: 'staff', label: 'Church staff or office' },
-  { value: 'member', label: 'Another member' },
-  { value: 'other', label: 'Someone else' },
-];
-
-const WHERE_OPTIONS: Option[] = [
-  { value: 'chat', label: 'PLCC Chat' },
-  { value: 'connect', label: 'PLCC Connect' },
-  { value: 'canaan', label: 'PLCC Canaan' },
-  { value: 'sanctum', label: 'PLCC Sanctum' },
-  { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'call_sms', label: 'Phone call or SMS' },
-  { value: 'social', label: 'Facebook / social media' },
-  { value: 'in_person', label: 'In person' },
-  { value: 'other', label: 'Somewhere else' },
-];
-
-const CONTENT_REASONS: Option[] = [
+const CONTENT_REASONS: ReportOption[] = [
   { value: 'impersonation', label: 'Pretending to be a pastor, leader or member' },
   { value: 'money', label: 'Asking for money' },
   { value: 'spam', label: 'Spam or scam' },
@@ -83,68 +333,60 @@ const CONTENT_NOUN: Record<string, string> = {
   profile: 'profile',
 };
 
-const MONEY_CATEGORIES = new Set(['money_request', 'money_send', 'scam', 'impersonation']);
+const MONEY_CATEGORIES = new Set(REPORT_MONEY_CATEGORIES);
 
 export type ReportSender = (payload: Record<string, unknown>) => Promise<void>;
 
 type Props = {
   request: ReportRequest;
   /** Which app this dialog is running in. */
-  sourceApp: 'canaan' | 'connect';
+  sourceApp: ReportSourceApp;
   send: ReportSender;
   onClose: () => void;
 };
 
 const inputCls =
-  'w-full rounded-xl border border-gray-200 px-3 py-2.5 text-[15px] bg-white focus:outline-none focus:ring-2 focus:ring-burgundy/30';
-const labelCls = 'block text-sm font-semibold text-gray-700 mb-1.5';
+  'w-full min-h-[48px] rounded-xl border border-gray-200 px-3 py-2.5 text-[16px] bg-white focus:outline-none focus:ring-2 focus:ring-burgundy/30';
+const labelCls = 'block text-[15px] font-semibold text-gray-800 mb-1.5';
 
-function Choices({
-  name,
-  options,
+const id = (s: string) => `${REPORT_ID_PREFIX}-${s}`;
+
+function Select({
+  fieldId,
   value,
   onChange,
+  options,
+  placeholder = 'Choose one…',
 }: {
-  name: string;
-  options: Option[];
+  fieldId: string;
   value: string;
   onChange: (v: string) => void;
+  options: ReportOption[];
+  placeholder?: string;
 }) {
   return (
-    <div className="grid gap-1.5" role="radiogroup">
+    <select id={fieldId} value={value} onChange={(e) => onChange(e.target.value)} className={inputCls}>
+      <option value="">{placeholder}</option>
       {options.map((o) => (
-        <label
-          key={o.value}
-          className={`flex items-center gap-3 min-h-[44px] px-3 py-2 rounded-xl border cursor-pointer transition-colors ${
-            value === o.value ? 'border-burgundy bg-burgundy/5' : 'border-gray-100 hover:bg-gray-50'
-          }`}
-        >
-          <input
-            type="radio"
-            name={name}
-            value={o.value}
-            checked={value === o.value}
-            onChange={() => onChange(o.value)}
-            className="accent-burgundy shrink-0"
-          />
-          <span className="text-[15px] text-gray-800">{o.label}</span>
-        </label>
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
       ))}
-    </div>
+    </select>
   );
 }
 
 export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose }) => {
   const kind = request.kind;
   const [choice, setChoice] = useState('');
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [app, setApp] = useState<string>(
-    (request.kind === 'problem' && request.app) || sourceApp
+    (request.kind === 'problem' && request.app) ||
+      (REPORT_APP_OPTIONS.some((o) => o.value === sourceApp) ? sourceApp : REPORT_APP_OPTIONS[0].value)
   );
   const [details, setDetails] = useState('');
   const [impersonated, setImpersonated] = useState('');
-  const [offenderName, setOffenderName] = useState(
-    (request.kind === 'safety' && request.offenderName) || ''
-  );
+  const [offenderName, setOffenderName] = useState((request.kind === 'safety' && request.offenderName) || '');
   const [offenderContact, setOffenderContact] = useState('');
   const [where, setWhere] = useState('');
   const [happenedAt, setHappenedAt] = useState('');
@@ -168,7 +410,11 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
 
   useEffect(() => () => shots.forEach((s) => URL.revokeObjectURL(s.previewUrl)), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const showScreenshots = true;
+  const flow = kind === 'problem' ? PROBLEM_FLOWS.find((f) => f.value === choice) || null : null;
+  const visibleQuestions = useMemo(
+    () => (flow ? flow.questions.filter((q) => !q.showIf || q.showIf(answers)) : []),
+    [flow, answers]
+  );
   const askMoney = kind === 'safety' && MONEY_CATEGORIES.has(choice);
 
   const title =
@@ -178,12 +424,24 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
         ? 'Report harassment or a scam'
         : `Report this ${CONTENT_NOUN[request.contentType] || 'item'}`;
 
+  const detailsRequired = kind === 'safety' || Boolean(flow?.detailsRequired);
+  const requiredAnswered = visibleQuestions.every((q) => !q.required || Boolean((answers[q.id] || '').trim()));
+
   const canSend =
     !sending &&
     !shotBusy &&
     Boolean(choice) &&
-    (kind === 'content' || details.trim().length > 0) &&
+    requiredAnswered &&
+    (!detailsRequired || details.trim().length > 0) &&
     (kind !== 'safety' || choice !== 'impersonation' || Boolean(impersonated));
+
+  const pickChoice = (v: string) => {
+    setChoice(v);
+    setAnswers({});
+    setError('');
+  };
+
+  const setAnswer = (qid: string, v: string) => setAnswers((prev) => ({ ...prev, [qid]: v }));
 
   const addFiles = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -218,9 +476,22 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
   };
 
   const submit = async () => {
-    if (!canSend) return;
+    if (!canSend) {
+      if (!choice) setError('Please choose what is wrong first.');
+      else if (!requiredAnswered) setError('Please answer the questions marked *.');
+      else if (detailsRequired && !details.trim()) setError('Please describe what happened.');
+      return;
+    }
     setSending(true);
     setError('');
+    const answerList = visibleQuestions
+      .map((q) => {
+        const raw = (answers[q.id] || '').trim();
+        if (!raw) return null;
+        const label = q.options?.find((o) => o.value === raw)?.label || raw;
+        return { q: q.label, a: label };
+      })
+      .filter(Boolean);
     const common: Record<string, unknown> = {
       sourceApp,
       details: details.trim(),
@@ -232,7 +503,7 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
     };
     let payload: Record<string, unknown>;
     if (request.kind === 'problem') {
-      payload = { kind: 'problem', app, category: choice, ...common };
+      payload = { kind: 'problem', app, category: choice, answers: answerList, ...common };
     } else if (request.kind === 'safety') {
       payload = {
         kind: 'safety',
@@ -273,12 +544,15 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
     if (!sending) onClose();
   };
 
+  const choiceOptions: ReportOption[] =
+    kind === 'problem' ? PROBLEM_FLOWS.map((f) => ({ value: f.value, label: f.label })) : kind === 'safety' ? REPORT_SAFETY_OPTIONS : CONTENT_REASONS;
+
   return (
     <div
       className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="plcc-report-title"
+      aria-labelledby={id('title')}
       onClick={close}
     >
       <div
@@ -288,42 +562,41 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
         <div className="sticky top-0 bg-white flex items-center justify-between px-5 pt-5 pb-3 z-10">
           <div className="flex items-center gap-2">
             {kind === 'safety' ? (
-              <ShieldAlert size={18} className="text-red-600" aria-hidden />
+              <ShieldAlert size={20} className="text-red-600" aria-hidden />
             ) : (
-              <Flag size={18} className="text-burgundy" aria-hidden />
+              <Flag size={20} className="text-burgundy" aria-hidden />
             )}
-            <h2 id="plcc-report-title" className="text-lg font-bold text-gray-900">
+            <h2 id={id('title')} className="text-lg font-bold text-gray-900">
               {sent ? 'Thank you' : title}
             </h2>
           </div>
           <button
             type="button"
             onClick={close}
-            className="p-2 -mr-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50"
+            className="p-2.5 -mr-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50"
             aria-label="Close"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         {sent ? (
           <div className="px-5 pb-6 text-center">
-            <CheckCircle2 size={40} className="mx-auto text-green-600 mb-3" aria-hidden />
-            <p className="text-sm text-gray-600">
+            <CheckCircle2 size={44} className="mx-auto text-green-600 mb-3" aria-hidden />
+            <p className="text-[15px] text-gray-700">
               {kind === 'problem'
                 ? 'Your report was sent. We will look into it as soon as we can.'
                 : 'Your report was sent privately to church leadership. The person you reported will not be told who reported them.'}
             </p>
             {kind === 'safety' && moneySent === 'yes' ? (
-              <p className="mt-3 text-sm text-gray-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 text-left">
-                If you sent money by mobile money or bank, call your provider (MTN, Airtel or your bank) right away
-                and ask them to stop or reverse the payment.
+              <p className="mt-3 text-[15px] text-gray-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 text-left">
+                {REPORT_MONEY_SENT_TIP}
               </p>
             ) : null}
             <button
               type="button"
               onClick={close}
-              className="mt-5 w-full min-h-[48px] rounded-xl bg-burgundy text-white font-semibold"
+              className="mt-5 w-full min-h-[52px] rounded-xl bg-burgundy text-white text-[16px] font-semibold"
             >
               Done
             </button>
@@ -331,9 +604,8 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
         ) : (
           <div className="px-5 pb-5 space-y-4">
             {kind === 'safety' ? (
-              <div className="rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-[13px] text-red-900 leading-relaxed">
-                <strong>Remember:</strong> PLCC pastors, the Apostle and church leaders will never ask you privately to
-                send money, pay a fee, or share your mobile money PIN. Do not send money. Stop replying and report it here.
+              <div className="rounded-xl border border-red-100 bg-red-50 px-3 py-2.5 text-[14px] text-red-900 leading-relaxed">
+                <strong>Remember:</strong> {REPORT_SAFETY_WARNING}
               </div>
             ) : null}
 
@@ -348,65 +620,70 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
 
             {kind === 'problem' ? (
               <div>
-                <label className={labelCls} htmlFor="plcc-report-app">
+                <label className={labelCls} htmlFor={id('app')}>
                   Which app?
                 </label>
-                <select id="plcc-report-app" value={app} onChange={(e) => setApp(e.target.value)} className={inputCls}>
-                  {APP_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
+                <Select fieldId={id('app')} value={app} onChange={setApp} options={REPORT_APP_OPTIONS} />
               </div>
             ) : null}
 
             <div>
-              <p className={labelCls}>
-                {kind === 'problem'
-                  ? 'What kind of problem?'
-                  : kind === 'safety'
-                    ? 'What happened?'
-                    : 'Why are you reporting this?'}
-              </p>
-              <Choices
-                name="plcc-report-choice"
-                options={kind === 'problem' ? PROBLEM_OPTIONS : kind === 'safety' ? SAFETY_OPTIONS : CONTENT_REASONS}
-                value={choice}
-                onChange={setChoice}
-              />
+              <label className={labelCls} htmlFor={id('choice')}>
+                {kind === 'problem' ? "What's wrong?" : kind === 'safety' ? 'What happened?' : 'Why are you reporting this?'} *
+              </label>
+              <Select fieldId={id('choice')} value={choice} onChange={pickChoice} options={choiceOptions} />
             </div>
 
-            {kind === 'safety' && choice === 'impersonation' ? (
-              <div>
-                <label className={labelCls} htmlFor="plcc-report-imp">
-                  Who were they pretending to be?
-                </label>
-                <select
-                  id="plcc-report-imp"
-                  value={impersonated}
-                  onChange={(e) => setImpersonated(e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="">Choose…</option>
-                  {IMPERSONATED_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
+            {/* Follow-up questions for the chosen problem */}
+            {flow && visibleQuestions.length ? (
+              <div className="space-y-4 rounded-2xl border border-burgundy/10 bg-burgundy/[0.03] p-3.5">
+                {visibleQuestions.map((q) => (
+                  <div key={q.id}>
+                    <label className={labelCls} htmlFor={id(`q-${q.id}`)}>
+                      {q.label}
+                      {q.required ? ' *' : ''}
+                    </label>
+                    {q.type === 'select' ? (
+                      <Select
+                        fieldId={id(`q-${q.id}`)}
+                        value={answers[q.id] || ''}
+                        onChange={(v) => setAnswer(q.id, v)}
+                        options={q.options || []}
+                      />
+                    ) : (
+                      <input
+                        id={id(`q-${q.id}`)}
+                        value={answers[q.id] || ''}
+                        onChange={(e) => setAnswer(q.id, e.target.value)}
+                        maxLength={300}
+                        placeholder={q.placeholder}
+                        className={inputCls}
+                      />
+                    )}
+                  </div>
+                ))}
+                {flow.note ? <p className="text-[13px] text-amber-800">{flow.note}</p> : null}
               </div>
             ) : null}
 
-            {kind === 'safety' ? (
+            {kind === 'safety' && choice === 'impersonation' ? (
+              <div>
+                <label className={labelCls} htmlFor={id('imp')}>
+                  Who were they pretending to be? *
+                </label>
+                <Select fieldId={id('imp')} value={impersonated} onChange={setImpersonated} options={REPORT_IMPERSONATED_OPTIONS} />
+              </div>
+            ) : null}
+
+            {kind === 'safety' && choice ? (
               <>
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={labelCls} htmlFor="plcc-report-oname">
+                    <label className={labelCls} htmlFor={id('oname')}>
                       Name they used
                     </label>
                     <input
-                      id="plcc-report-oname"
+                      id={id('oname')}
                       value={offenderName}
                       onChange={(e) => setOffenderName(e.target.value)}
                       maxLength={120}
@@ -414,11 +691,11 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
                     />
                   </div>
                   <div>
-                    <label className={labelCls} htmlFor="plcc-report-ocontact">
+                    <label className={labelCls} htmlFor={id('ocontact')}>
                       Their phone, username or link
                     </label>
                     <input
-                      id="plcc-report-ocontact"
+                      id={id('ocontact')}
                       value={offenderContact}
                       onChange={(e) => setOffenderContact(e.target.value)}
                       maxLength={200}
@@ -428,24 +705,17 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
                 </div>
                 <div className="grid sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={labelCls} htmlFor="plcc-report-where">
+                    <label className={labelCls} htmlFor={id('where')}>
                       Where did it happen?
                     </label>
-                    <select id="plcc-report-where" value={where} onChange={(e) => setWhere(e.target.value)} className={inputCls}>
-                      <option value="">Choose…</option>
-                      {WHERE_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
+                    <Select fieldId={id('where')} value={where} onChange={setWhere} options={REPORT_WHERE_OPTIONS} />
                   </div>
                   <div>
-                    <label className={labelCls} htmlFor="plcc-report-when">
+                    <label className={labelCls} htmlFor={id('when')}>
                       When? (date or time)
                     </label>
                     <input
-                      id="plcc-report-when"
+                      id={id('when')}
                       value={happenedAt}
                       onChange={(e) => setHappenedAt(e.target.value)}
                       maxLength={80}
@@ -466,7 +736,7 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
                           key={o.v}
                           type="button"
                           onClick={() => setMoneySent(o.v)}
-                          className={`flex-1 min-h-[44px] rounded-xl border text-[15px] ${
+                          className={`flex-1 min-h-[48px] rounded-xl border text-[16px] ${
                             moneySent === o.v ? 'border-burgundy bg-burgundy/5 font-semibold' : 'border-gray-200'
                           }`}
                         >
@@ -479,7 +749,7 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
                         value={moneyDetails}
                         onChange={(e) => setMoneyDetails(e.target.value)}
                         maxLength={200}
-                        placeholder="How much, and how (MTN, Airtel, Sendwave, bank…)"
+                        placeholder={REPORT_MONEY_PLACEHOLDER}
                         className={`${inputCls} mt-2`}
                         aria-label="Amount and how it was sent"
                       />
@@ -489,98 +759,99 @@ export const ReportForm: React.FC<Props> = ({ request, sourceApp, send, onClose 
               </>
             ) : null}
 
-            <div>
-              <label className={labelCls} htmlFor="plcc-report-details">
-                {kind === 'problem'
-                  ? 'Describe the issue'
-                  : kind === 'safety'
-                    ? 'Tell us what they said or did'
-                    : 'Anything else we should know? (optional)'}
-              </label>
-              <textarea
-                id="plcc-report-details"
-                value={details}
-                onChange={(e) => setDetails(e.target.value)}
-                maxLength={4000}
-                rows={4}
-                placeholder={
-                  kind === 'problem'
-                    ? 'What were you doing, and what went wrong?'
-                    : kind === 'safety'
-                      ? 'Copy their message if you can.'
-                      : ''
-                }
-                className={inputCls}
-              />
-            </div>
+            {choice ? (
+              <>
+                <div>
+                  <label className={labelCls} htmlFor={id('details')}>
+                    {kind === 'problem'
+                      ? flow?.detailsLabel || 'Describe the issue'
+                      : kind === 'safety'
+                        ? 'Tell us what they said or did *'
+                        : 'Anything else we should know? (optional)'}
+                    {kind === 'problem' && flow?.detailsRequired ? ' *' : ''}
+                  </label>
+                  <textarea
+                    id={id('details')}
+                    value={details}
+                    onChange={(e) => setDetails(e.target.value)}
+                    maxLength={4000}
+                    rows={3}
+                    placeholder={
+                      kind === 'problem' ? flow?.detailsPlaceholder || '' : kind === 'safety' ? 'Copy their message if you can.' : ''
+                    }
+                    className={inputCls}
+                  />
+                </div>
 
-            {showScreenshots ? (
-              <div>
-                <p className={labelCls}>
-                  Screenshots <span className="font-normal text-gray-400">(optional, up to {MAX_REPORT_SCREENSHOTS})</span>
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {shots.map((s, i) => (
-                    <div key={s.previewUrl} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200">
-                      <img src={s.previewUrl} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+                <div>
+                  <p className={labelCls}>
+                    Screenshots <span className="font-normal text-gray-500">(optional, up to {MAX_REPORT_SCREENSHOTS})</span>
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {shots.map((s, i) => (
+                      <div key={s.previewUrl} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200">
+                        <img src={s.previewUrl} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeShot(i)}
+                          className="absolute top-1 right-1 p-1.5 rounded-md bg-white/90 text-red-600 shadow"
+                          aria-label={`Remove screenshot ${i + 1}`}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    {shots.length < MAX_REPORT_SCREENSHOTS ? (
                       <button
                         type="button"
-                        onClick={() => removeShot(i)}
-                        className="absolute top-1 right-1 p-1 rounded-md bg-white/90 text-red-600 shadow"
-                        aria-label={`Remove screenshot ${i + 1}`}
+                        onClick={() => fileRef.current?.click()}
+                        disabled={shotBusy}
+                        className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:text-burgundy hover:border-burgundy/40 flex flex-col items-center justify-center gap-1 text-[12px] font-semibold disabled:opacity-60"
                       >
-                        <Trash2 size={12} />
+                        {shotBusy ? <Loader2 size={20} className="animate-spin" /> : <ImagePlus size={20} />}
+                        {shotBusy ? 'Adding…' : 'Add'}
                       </button>
-                    </div>
-                  ))}
-                  {shots.length < MAX_REPORT_SCREENSHOTS ? (
-                    <button
-                      type="button"
-                      onClick={() => fileRef.current?.click()}
-                      disabled={shotBusy}
-                      className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:text-burgundy hover:border-burgundy/40 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold disabled:opacity-60"
-                    >
-                      {shotBusy ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
-                      {shotBusy ? 'Adding…' : 'Add'}
-                    </button>
-                  ) : null}
+                    ) : null}
+                  </div>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => void addFiles(e.target.files)}
+                  />
                 </div>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => void addFiles(e.target.files)}
-                />
-              </div>
+
+                {kind !== 'content' ? (
+                  <div>
+                    <label className={labelCls} htmlFor={id('phone')}>
+                      Your phone number <span className="font-normal text-gray-500">(optional, so we can call you back)</span>
+                    </label>
+                    <input
+                      id={id('phone')}
+                      type="tel"
+                      inputMode="tel"
+                      value={reporterPhone}
+                      onChange={(e) => setReporterPhone(e.target.value)}
+                      maxLength={40}
+                      placeholder={REPORT_PHONE_PLACEHOLDER}
+                      className={inputCls}
+                    />
+                  </div>
+                ) : null}
+              </>
             ) : null}
 
-            {kind !== 'content' ? (
-              <div>
-                <label className={labelCls} htmlFor="plcc-report-phone">
-                  Your phone number <span className="font-normal text-gray-400">(optional, so we can call you back)</span>
-                </label>
-                <input
-                  id="plcc-report-phone"
-                  type="tel"
-                  inputMode="tel"
-                  value={reporterPhone}
-                  onChange={(e) => setReporterPhone(e.target.value)}
-                  maxLength={40}
-                  placeholder="+256…"
-                  className={inputCls}
-                />
-              </div>
-            ) : null}
-
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            {error ? <p className="text-[15px] text-red-600">{error}</p> : null}
 
             <button
               type="button"
               onClick={submit}
-              disabled={!canSend}
-              className="w-full min-h-[48px] rounded-xl bg-burgundy text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+              disabled={sending || shotBusy}
+              className={`w-full min-h-[52px] rounded-xl bg-burgundy text-white text-[16px] font-semibold flex items-center justify-center gap-2 disabled:opacity-50 ${
+                canSend ? '' : 'opacity-60'
+              }`}
             >
               {sending ? <Loader2 size={18} className="animate-spin" aria-hidden /> : null}
               {sending ? 'Sending…' : 'Send report'}

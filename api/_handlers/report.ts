@@ -43,21 +43,36 @@ const REASON_LABEL: Record<string, string> = {
 };
 
 const PROBLEM_LABEL: Record<string, string> = {
-  bug: 'Something is broken',
-  login: 'Sign-in or account',
-  huddle: 'Live Huddle / audio / video',
-  messages: 'Messages not sending or showing',
-  giving: 'Giving',
-  slow: 'Slow or not loading',
+  huddle: 'Live Huddle (audio / video)',
+  messages: 'Chat or messages',
+  notifications: 'Not getting phone alerts',
+  login: 'Signing in or account',
+  giving: 'Giving, tithes or payments',
+  events: 'Events, RSVP or check-in',
+  profile: 'Profile or household',
+  slow: 'Slow, stuck or not loading',
+  bug: 'Something is broken / error',
   idea: 'Suggestion',
   other: 'Other',
 };
+
+const MAX_ANSWERS = 15;
+
+/** Follow-up answers from the dropdown flow: [{ q, a }]. */
+function parseAnswers(raw: unknown): { q: string; a: string }[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .slice(0, MAX_ANSWERS)
+    .map((x: any) => ({ q: clip(x?.q, 150), a: clip(x?.a, 500) }))
+    .filter((x) => x.q && x.a);
+}
 
 const SAFETY_LABEL: Record<string, string> = {
   harassment: 'Harassment, bullying or threats',
   impersonation: 'Pretending to be a pastor, apostle, leader or member',
   money_request: 'Asking for money',
   money_send: 'Asking me to send or transfer money / pay a fee',
+  pin: 'Asking for my mobile money PIN or code',
   scam: 'Scam (fake link, prize, investment, job, account details)',
   inappropriate: 'Unwanted sexual or inappropriate messages',
   other: 'Something else',
@@ -234,13 +249,15 @@ export const handleReport = async (req: any, res: any) => {
   if (kind === 'problem') {
     const app = pick(APPS, body.app, 'canaan');
     const category = pick(PROBLEM_LABEL, body.category, 'other');
-    if (!details) return res.status(400).json({ ok: false, error: 'Please describe the problem' });
+    const answers = parseAnswers(body.answers);
+    if (!details && answers.length === 0) return res.status(400).json({ ok: false, error: 'Please describe the problem' });
     heading = `Problem report: ${APPS[app]}`;
     subject = `[${APPS[app]}] ${PROBLEM_LABEL[category]} — ${reporterName}`;
     rows = [
       row('App', APPS[app]),
       row('Category', PROBLEM_LABEL[category]),
-      row('What happened', details),
+      ...answers.map((x) => row(x.q, x.a)),
+      row('More details', details),
       row('Screenshots', shotNote),
       reporterRows,
       row('Device', userAgent),
@@ -254,7 +271,7 @@ export const handleReport = async (req: any, res: any) => {
     const impersonated = pick(IMPERSONATED_LABEL, body.impersonated, '');
     const where = pick(WHERE_LABEL, body.where, '');
     const moneySent = body.moneySent === 'yes' ? 'Yes' : body.moneySent === 'no' ? 'No' : '';
-    const askMoney = moneySent === 'Yes' || category === 'money_request' || category === 'money_send' || category === 'scam';
+    const askMoney = moneySent === 'Yes' || category === 'money_request' || category === 'money_send' || category === 'pin' || category === 'scam';
     heading = 'SAFETY REPORT — please review promptly';
     subject = `⚠️ PLCC safety report: ${SAFETY_LABEL[category]}${moneySent === 'Yes' ? ' — MONEY SENT' : ''}`;
     if (moneySent === 'Yes') {
