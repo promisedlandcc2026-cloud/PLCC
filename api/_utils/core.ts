@@ -68,6 +68,7 @@ import { handleFinance } from '../_handlers/finance.js';
 import { handleGiving } from '../_handlers/giving.js';
 import { handleStoreOrders } from '../_handlers/storeOrders.js';
 import { handleAskAdmin } from '../_handlers/askAdmin.js';
+import { handleReport } from '../_handlers/report.js';
 import { parseCookoutFoodContribution, parseRsvpContribution } from './cookoutFoodContribution.js';
 import {
     closedMessageForEvent,
@@ -9629,6 +9630,7 @@ const handleSettings = async (req: any, res: any) => {
             case 'giving': return await handleGiving(req, res);
             case 'store-orders': return await handleStoreOrders(req, res);
             case 'ask-admin': return await handleAskAdmin(req, res);
+            case 'report': return await handleReport(req, res);
             case 'vault-repair': {
                 const { handleVaultRepair } = await import('./vaultRepairHandler.js');
                 return handleVaultRepair(req, res);

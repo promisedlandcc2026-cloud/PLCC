@@ -15,11 +15,13 @@ import {
   Pin,
   Share2,
   Trash2,
+  Flag,
   Send,
   X,
 } from 'lucide-react';
 import { useNav } from '../../App';
 import { getAuthHeaders } from '../../lib/api';
+import { openReport } from '../../lib/report';
 import CommunityIdentityNav from '../../components/Community/CommunityIdentityNav';
 import FeedMentionComposer, {
   collectMentionedUserIds,
@@ -1029,6 +1031,27 @@ const CommunityFeedPage: React.FC = () => {
                           <Trash2 size={14} aria-hidden />
                         </button>
                       ) : null}
+                      {!isMine ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openReport({
+                              kind: 'content',
+                              contentType: 'feed_post',
+                              contentId: post.id,
+                              authorName: post.author?.name || 'Member',
+                              authorId: post.author?.id || null,
+                              contentPreview: post.content || (post.imageUrl ? '[Photo]' : ''),
+                              context: 'Community Feed',
+                            })
+                          }
+                          className="p-2 rounded-lg text-gray-300 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+                          aria-label="Report post"
+                          title="Report post"
+                        >
+                          <Flag size={14} aria-hidden />
+                        </button>
+                      ) : null}
                       {showModMenu ? (
                         <>
                           <button
@@ -1217,6 +1240,27 @@ const CommunityFeedPage: React.FC = () => {
                                 <span className="font-semibold text-gray-300"> · {formatWhen(c.created_at)}</span>
                                 {c.edited ? <span className="font-semibold text-gray-300"> · Edited</span> : null}
                               </p>
+                              {!cMine ? (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openReport({
+                                      kind: 'content',
+                                      contentType: 'feed_comment',
+                                      contentId: c.id,
+                                      authorName: c.author?.name || 'Member',
+                                      authorId: c.author?.id || null,
+                                      contentPreview: c.content,
+                                      context: 'Community Feed comment',
+                                    })
+                                  }
+                                  className="ml-auto p-1 rounded-md text-gray-300 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+                                  aria-label="Report comment"
+                                  title="Report comment"
+                                >
+                                  <Flag size={12} aria-hidden />
+                                </button>
+                              ) : null}
                               {cModRemove ? (
                                 <div className="relative shrink-0">
                                   <button

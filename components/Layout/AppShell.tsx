@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import MobileBottomNav from './MobileBottomNav';
+import ReportHost from '../common/ReportModal';
 import { useNav } from '../../App';
 import { useLocation } from 'react-router-dom';
 import { Section } from '../../types';
@@ -197,6 +198,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </div>
 
       <MobileBottomNav />
+      <ReportHost />
     </div>
   );
 };

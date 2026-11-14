@@ -3,9 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus, Hash, Info, Send, ArrowLeft, Smile, Paperclip, AtSign,
   X, Loader2, CornerDownLeft, Bot, Mic, ShieldCheck, MoreHorizontal,
-  Reply, Trash2, FileText, Image as ImageIcon, Users, ClipboardList,
+  Reply, Trash2, Flag, FileText, Image as ImageIcon, Users, ClipboardList,
   Link2, Upload, Check, Share2, ChevronDown,
 } from 'lucide-react';
+import { openReport } from '../../lib/report';
 import { ChatChannel } from '../../lib/communityStorage';
 import { highlightMentions } from '../../lib/mentions';
 import { useNav } from '../../App';
@@ -863,6 +864,19 @@ const ChatPage: React.FC = () => {
       setReactPickerFor(null);
       setMobileMenuFor(null);
     }
+  };
+
+  const reportMessage = (msg: UiMessage) => {
+    setMobileMenuFor(null);
+    openReport({
+      kind: 'content',
+      contentType: 'chat_message',
+      contentId: msg.id,
+      authorName: msg.userName,
+      authorId: msg.userId,
+      contentPreview: msg.text,
+      context: activeChannel?.name ? `#${activeChannel.name}` : 'Chat',
+    });
   };
 
   const handleDeleteMessage = async (msg: UiMessage) => {
@@ -1724,6 +1738,15 @@ const ChatPage: React.FC = () => {
                             >
                               <Trash2 size={14} />
                             </button>
+                          ) : !msg.isAi ? (
+                            <button
+                              type="button"
+                              className="p-1 rounded-md text-gray-300 hover:text-red-600 hover:bg-red-50"
+                              title="Report"
+                              onClick={() => reportMessage(msg)}
+                            >
+                              <Flag size={14} />
+                            </button>
                           ) : null}
                         </div>
                       )}
@@ -1767,6 +1790,14 @@ const ChatPage: React.FC = () => {
                             onClick={() => handleDeleteMessage(msg)}
                           >
                             Delete
+                          </button>
+                        ) : !msg.isAi ? (
+                          <button
+                            type="button"
+                            className="text-[10px] font-bold px-2 py-1 rounded-lg bg-white border border-red-100 text-red-600"
+                            onClick={() => reportMessage(msg)}
+                          >
+                            Report
                           </button>
                         ) : null}
                       </div>

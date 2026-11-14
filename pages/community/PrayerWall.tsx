@@ -18,6 +18,7 @@ import {
   User,
   Send,
   Trash2,
+  Flag,
   AlertCircle,
   ChevronRight
 } from 'lucide-react';
@@ -26,6 +27,7 @@ import { Role } from '../../types';
 import { canPerform } from '../../lib/permissions';
 import { fetchWithTimeout, getAuthHeaders, isAbortOrTimeoutError } from '../../lib/api';
 import AskAdminTitleLink from '../../components/common/AskAdminTitleLink';
+import { openReport } from '../../lib/report';
 import { usePrayerWatchAccess } from '../../lib/prayerWatch';
 import { Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -365,6 +367,26 @@ const PrayerWallPage: React.FC = () => {
                         <Trash2 size={14} className="md:w-4 md:h-4" />
                       </button>
                     </div>
+                  )}
+                  {!isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openReport({
+                          kind: 'content',
+                          contentType: 'prayer_request',
+                          contentId: prayer.id,
+                          authorName: prayer.member || 'Member',
+                          contentPreview: prayer.content,
+                          context: 'Prayer Wall',
+                        })
+                      }
+                      className="p-1.5 md:p-2 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-50 transition-all"
+                      aria-label="Report prayer request"
+                      title="Report"
+                    >
+                      <Flag size={14} className="md:w-4 md:h-4" />
+                    </button>
                   )}
                 </div>
               </div>

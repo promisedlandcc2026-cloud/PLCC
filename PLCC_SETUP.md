@@ -38,6 +38,7 @@ CONNECT_PUBLIC_ORIGIN=https://plcc-connect.vercel.app
 VITE_APP_URL=https://plcc-opal.vercel.app
 VITE_AUTH_REDIRECT_URL=https://plcc-opal.vercel.app
 RESEND_API_KEY=
+REPORT_NOTIFY_EMAILS=   # comma-separated inbox(es) for Report a problem + content reports
 VAPID_PUBLIC_KEY=
 VAPID_PRIVATE_KEY=
 VAPID_SUBJECT=mailto:admin@plcc.church

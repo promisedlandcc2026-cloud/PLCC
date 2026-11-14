@@ -16,10 +16,12 @@ import {
   Smile,
   AtSign,
   ChevronRight,
-  Loader2
+  Loader2,
+  Flag
 } from 'lucide-react';
 import { useNav } from '../../App';
 import { getAuthHeaders, vaultFetch } from '../../lib/api';
+import { openReport } from '../../lib/report';
 import { useVaultPoll } from '../../lib/useVaultPoll';
 import { shouldAutoScrollHuddleChat } from '../../api/_utils/huddleChat.js';
 import VoiceHuddle from '../../components/Community/VoiceHuddle';
@@ -531,6 +533,27 @@ const DirectAccessPage: React.FC = () => {
                       }`}>
                       {msg.text}
                     </div>
+                    {!(msg.userId === userId || msg.userName === userName) && msg.text ? (
+                      <button
+                        type="button"
+                        className="self-center shrink-0 p-1.5 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-50"
+                        title="Report message"
+                        aria-label="Report message"
+                        onClick={() =>
+                          openReport({
+                            kind: 'content',
+                            contentType: 'dm_message',
+                            contentId: msg.id,
+                            authorName: msg.userName,
+                            authorId: msg.userId,
+                            contentPreview: msg.text,
+                            context: 'Private message',
+                          })
+                        }
+                      >
+                        <Flag size={14} />
+                      </button>
+                    ) : null}
                   </div>
                 ))}
                 <div ref={scrollBottomRef} />

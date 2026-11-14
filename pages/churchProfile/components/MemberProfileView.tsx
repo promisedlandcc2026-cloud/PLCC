@@ -33,6 +33,7 @@ import {
   Radio,
   HeartHandshake,
   Smile,
+  Flag,
   type LucideIcon,
 } from 'lucide-react';
 import { useChurch } from '../context/ChurchContext';
@@ -43,6 +44,7 @@ import { formatBirthdayLabel, isVaultMemberId, mayHoldOwnContact } from '../lib/
 import { isUnchangedSampleProfile } from '../lib/realProfiles';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchAuthorized } from '../../../lib/api';
+import { openReport } from '../../../lib/report';
 import { useNav } from '../../../lib/NavContext';
 import { courtesyName } from '../../../lib/courtesyName';
 import { ProfileQrModal } from './ProfileQrModal';
@@ -992,6 +994,26 @@ export const MemberProfileView: React.FC = () => {
                   title={touchState === 'accepted' ? 'Open your private conversation' : 'Open Community messages'}
                 >
                   Message
+                </button>
+              )}
+              {!isSelf && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    openReport({
+                      kind: 'content',
+                      contentType: 'profile',
+                      contentId: selectedMember.id,
+                      authorName: selectedMember.fullName,
+                      authorId: selectedMember.id,
+                      context: 'Member profile',
+                    })
+                  }
+                  className="px-3 py-2 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-red-600 bg-white border border-gray-200 hover:border-red-200 rounded-2xl transition-colors inline-flex items-center gap-1.5"
+                  title="Report this profile"
+                >
+                  <Flag size={12} aria-hidden />
+                  Report
                 </button>
               )}
               {touchNote && otherAdult && (
