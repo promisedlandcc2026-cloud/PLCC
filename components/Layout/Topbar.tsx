@@ -11,6 +11,7 @@ import {
   Loader2,
   User,
   Flag,
+  ShieldAlert,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../../App';
@@ -276,6 +277,19 @@ const Topbar: React.FC = () => {
                   >
                     <Flag size={20} className="text-gray-500 shrink-0" aria-hidden />
                     <span className="flex-1 text-[15px] font-medium text-gray-800">Report a problem</span>
+                    <ChevronRight size={18} className="text-gray-300" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      openReport({ kind: 'safety' });
+                    }}
+                    className="w-full flex items-center gap-3.5 min-h-[52px] px-3 rounded-xl text-left hover:bg-red-50 active:bg-red-100 transition-colors"
+                  >
+                    <ShieldAlert size={20} className="text-red-500 shrink-0" aria-hidden />
+                    <span className="flex-1 text-[15px] font-medium text-gray-800">Report harassment or a scam</span>
                     <ChevronRight size={18} className="text-gray-300" aria-hidden />
                   </button>
                 </div>

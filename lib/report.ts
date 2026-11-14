@@ -1,6 +1,7 @@
 /**
  * Open the shared Report dialog from anywhere in PLCC Canaan.
  * The dialog itself (<ReportHost />) is mounted once in AppShell.
+ * (Shared types with PLCC Connect — keep the two copies in sync.)
  */
 
 export type ReportContentType =
@@ -11,8 +12,11 @@ export type ReportContentType =
   | 'prayer_request'
   | 'profile';
 
+export type ReportAppKey = 'chat' | 'canaan' | 'connect' | 'sanctum';
+
 export type ReportRequest =
-  | { kind: 'problem' }
+  | { kind: 'problem'; app?: ReportAppKey }
+  | { kind: 'safety'; offenderName?: string | null }
   | {
       kind: 'content';
       contentType: ReportContentType;
