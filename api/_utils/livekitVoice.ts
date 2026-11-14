@@ -84,8 +84,12 @@ export type VoiceTokenPlan = {
   grant: {
     roomJoin: true;
     room: string;
-    /** Includes audio + video + screen-share publish (Phase 3C/3D). */
+    /**
+     * Members: microphone + camera. Moderators and up: unrestricted (screen share,
+     * and the waiting-music track, which is neither mic, camera nor screen).
+     */
     canPublish: true;
+    canPublishSources?: TrackSource[];
     canSubscribe: true;
     canPublishData: true;
     canUpdateOwnMetadata: true;
@@ -101,6 +105,9 @@ export function planVoiceAccessToken(input: VoiceTokenClaimsInput): VoiceTokenPl
   if (!channelId) throw new Error('channelId is required');
   const roomName = voiceRoomNameForChannel(channelId);
   const ttlSeconds = Math.min(Math.max(input.ttlSeconds ?? VOICE_TOKEN_TTL_SECONDS, 60), 60 * 60 * 6);
+  const roomAdmin = input.roomAdmin !== undefined ? Boolean(input.roomAdmin) : Boolean(input.canModerate);
+  // Screen sharing is for moderators and up: channel moderators/creator, church leaders, huddle host/co-hosts.
+  const canScreenShare = Boolean(input.canModerate) || roomAdmin;
   return {
     identity: userId,
     name: String(input.displayName || '').trim() || 'Member',
@@ -110,13 +117,11 @@ export function planVoiceAccessToken(input: VoiceTokenClaimsInput): VoiceTokenPl
       roomJoin: true,
       room: roomName,
       canPublish: true,
+      ...(canScreenShare ? {} : { canPublishSources: huddlePublishSources(true, false) }),
       canSubscribe: true,
       canPublishData: true,
       canUpdateOwnMetadata: true,
-      roomAdmin:
-        input.roomAdmin !== undefined
-          ? Boolean(input.roomAdmin)
-          : Boolean(input.canModerate),
+      roomAdmin,
     },
   };
 }
@@ -362,11 +367,23 @@ export function isLiveKitMicrophoneTrackSource(source: unknown): boolean {
 
 const HUDDLE_MUSIC_TRACK_NAME = 'awc-huddle-music';
 
-/** Publish sources a muted member keeps (camera and screen share). Mic is omitted so it stays off. */
-export function huddlePublishSources(allowMicrophone: boolean): TrackSource[] {
-  const sources = [TrackSource.CAMERA, TrackSource.SCREEN_SHARE, TrackSource.SCREEN_SHARE_AUDIO];
+/**
+ * What a huddle member may publish: camera always, microphone unless muted by a
+ * moderator, screen share only for moderators and up.
+ */
+export function huddlePublishSources(allowMicrophone: boolean, allowScreenShare = false): TrackSource[] {
+  const sources = [TrackSource.CAMERA];
+  if (allowScreenShare) sources.push(TrackSource.SCREEN_SHARE, TrackSource.SCREEN_SHARE_AUDIO);
   if (allowMicrophone) sources.unshift(TrackSource.MICROPHONE);
   return sources;
+}
+
+/** Whether a member's current LiveKit permission includes screen share (empty list = legacy "everything"). */
+export function permissionAllowsScreenShare(sources: unknown): boolean {
+  if (!Array.isArray(sources) || sources.length === 0) return true;
+  return sources.some(
+    (s) => s === TrackSource.SCREEN_SHARE || s === 'SCREEN_SHARE' || Number(s) === Number(TrackSource.SCREEN_SHARE)
+  );
 }
 
 /**
@@ -411,17 +428,21 @@ async function setMicrophonePublishAllowed(
   svc: RoomServiceClient,
   roomName: string,
   identity: string,
-  participant: { permission?: { canPublishData?: boolean; canSubscribe?: boolean; canUpdateMetadata?: boolean } } | null | undefined,
+  participant: {
+    permission?: { canPublishData?: boolean; canSubscribe?: boolean; canUpdateMetadata?: boolean; canPublishSources?: unknown };
+  } | null | undefined,
   allowMicrophone: boolean
 ): Promise<void> {
   const existing = participant?.permission;
+  // Muting or unmuting the mic never adds or removes screen-share rights.
+  const allowScreenShare = permissionAllowsScreenShare(existing?.canPublishSources);
   await svc.updateParticipant(roomName, identity, {
     permission: {
       canSubscribe: existing?.canSubscribe !== false,
       canPublish: true,
       canPublishData: existing?.canPublishData !== false,
       canUpdateMetadata: existing?.canUpdateMetadata !== false,
-      canPublishSources: huddlePublishSources(allowMicrophone),
+      canPublishSources: huddlePublishSources(allowMicrophone, allowScreenShare),
     },
   });
 }

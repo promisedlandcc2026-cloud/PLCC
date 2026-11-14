@@ -168,12 +168,19 @@ export function tokenPlanAllowsScreenSharePublish(grant: {
   canSubscribe?: boolean;
   canPublishData?: boolean;
   canUpdateOwnMetadata?: boolean;
+  canPublishSources?: unknown[];
 }): boolean {
+  const sources = grant.canPublishSources;
+  const screenAllowed =
+    !Array.isArray(sources) ||
+    sources.length === 0 ||
+    sources.some((s) => String(s).toUpperCase().includes('SCREEN_SHARE') || Number(s) === 3);
   return (
     grant.canPublish === true &&
     grant.canSubscribe === true &&
     grant.canPublishData === true &&
-    grant.canUpdateOwnMetadata === true
+    grant.canUpdateOwnMetadata === true &&
+    screenAllowed
   );
 }
 

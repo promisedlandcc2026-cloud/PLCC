@@ -4010,7 +4010,8 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 )}
                 Video
               </button>
-              {!onDaily && screenShareSupported ? (
+              {/* Screen share: moderators and up (the server enforces this too). */}
+              {!onDaily && canModerate && screenShareSupported ? (
                 <button
                   type="button"
                   onClick={toggleScreenShare}
@@ -4024,7 +4025,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   {screenSharing ? <MonitorOff size={16} aria-hidden /> : <Monitor size={16} aria-hidden />}
                   {screenSharing ? 'Stop Share' : 'Share'}
                 </button>
-              ) : !onDaily ? (
+              ) : !onDaily && canModerate ? (
                 <button
                   type="button"
                   disabled

@@ -60,7 +60,8 @@ const plan = planVoiceAccessToken({
 });
 assert(plan.roomName.includes('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'), 'A: same LiveKit room from channel id');
 assert(plan.identity === 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'B: same authenticated participant identity');
-assert(tokenPlanAllowsScreenSharePublish(plan.grant), 'publish grants cover screen share via canPublish');
+assert(!tokenPlanAllowsScreenSharePublish(plan.grant), 'members cannot publish a screen share (moderators and up only)');
+assert(JSON.stringify(plan.grant.canPublishSources) === JSON.stringify([2, 1]), 'members publish microphone + camera only');
 assert(plan.grant.roomAdmin === false, 'R: roomAdmin unchanged for non-moderator');
 assert(HUDDLE_SCREEN_SHARE_DEFAULT_ON === false, 'C: screen share defaults OFF');
 assert(HUDDLE_SCREEN_SHARE_CAPTURE.resolution.frameRate <= 15, 'performance: screen share ≤15fps preference');
@@ -252,6 +253,8 @@ const modPlan = planVoiceAccessToken({
   canModerate: true,
 });
 assert(modPlan.grant.roomAdmin === true, 'R: roomAdmin still only for server-derived moderators');
+assert(tokenPlanAllowsScreenSharePublish(modPlan.grant), 'moderators and up can share their screen');
+assert(modPlan.grant.canPublishSources === undefined, 'moderators publish unrestricted (screen share + waiting music)');
 
 console.log('\nPhase 3D screen-share smoke — late remote publish (A–H)');
 
