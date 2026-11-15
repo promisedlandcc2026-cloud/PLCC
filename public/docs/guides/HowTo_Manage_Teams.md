@@ -56,7 +56,7 @@ Leader: Sarah Johnson
 - **Time Commitment**: Expected hours per month
 
 **Communication:**
-- **Team Email**: team-email@awc.org
+- **Team Email**: team-email@example.org
 - **Notification Preferences**: How team receives updates
 - **Chat Channel**: Enable team chat
 
@@ -557,7 +557,7 @@ Check-In (2 volunteers needed)
 **Support:**
 - Ministry Leaders Forum
 - Monthly training sessions
-- Email: support@awc.org
+- Email: the PLCC church office (or Report a problem in PLCC ONE)
 
 ---
 

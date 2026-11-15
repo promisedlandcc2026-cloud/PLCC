@@ -416,7 +416,7 @@ Type name → Touch family → Touch kid → Sign papers (first time) → See co
 
 **Church Office**
 - Call: (555) 123-4567
-- Email: kids@awc.church
+- Email: the PLCC children’s ministry team
 - They can walk you through it on the phone
 
 ---

@@ -258,8 +258,8 @@ HELP:
 
 **Contact:**
 - **Admin Office**: (555) 123-4567 ext. 101
-- **IT Support**: support@awc.org
-- **Training Videos**: awc.org/training
+- **IT Support**: the PLCC church office (or Report a problem in PLCC ONE)
+- **Training Videos**: Help & Support in PLCC ONE
 
 **Resources:**
 - Check-In System FAQ

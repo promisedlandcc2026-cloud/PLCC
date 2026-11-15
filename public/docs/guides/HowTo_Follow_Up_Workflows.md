@@ -446,7 +446,7 @@ Example: After welcome email:
 - Workflow Examples: Copy and customize
 
 **Support:**
-- Email: support@awc.org
+- Email: the PLCC church office (or Report a problem in PLCC ONE)
 - Training: Monthly workflow workshop
 - Documentation: Complete workflow guide
 

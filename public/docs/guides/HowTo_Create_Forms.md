@@ -465,7 +465,7 @@ Example: Show "Dietary Restrictions" only if "Attending Meal" is "Yes"
 **Resources:**
 - Video Tutorial: "Form Builder Basics" (10 min)
 - Template Library: Pre-built forms to customize
-- Support: support@awc.org
+- Support: the PLCC church office (or Report a problem in PLCC ONE)
 
 **Training:**
 - Monthly Form Builder Workshop

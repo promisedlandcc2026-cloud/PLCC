@@ -19,33 +19,25 @@ type GuideStep = {
   imageAlt?: string;
 };
 
-/** Shared steps through account creation (screenshots still match login portal). */
+/** Account creation steps (screenshots taken from the PLCC ONE sign-in pages). */
 const CREATE_STEPS: GuideStep[] = [
   {
-    title: 'Open the PLCC website',
-    body: 'Go to sanctum-live-nine.vercel.app. In the top navigation, select PLCC Canaan.',
+    title: 'Open PLCC ONE',
+    body: 'Go to plcc-opal.vercel.app. Under “New here?”, select Create an account. (If you already have an account, enter your email or phone and select Continue instead.)',
     image: '/docs/guides/member-setup/step-01.jpg',
-    imageAlt: 'PLCC website home page with PLCC Canaan in the navigation',
-  },
-  {
-    title: 'Choose the Members portal',
-    body: 'On the PLCC Canaan portal screen, select the Members card.',
-    image: '/docs/guides/member-setup/step-02.jpg',
-    imageAlt: 'PLCC Canaan portal selection showing Members',
-  },
-  {
-    title: 'Select Create account',
-    body: 'On Member Access, choose Create account (not Sign in). Use an email address whose inbox you can open.',
-    image: '/docs/guides/member-setup/step-03.jpg',
-    imageAlt: 'PLCC Canaan member access Create account screen',
+    imageAlt: 'PLCC ONE sign-in page with the Create an account link',
   },
   {
     title: 'Enter your name and phone',
-    body: 'Fill in your first name, last name, and phone number, then continue.',
+    body: 'Fill in your first name, last name and mobile number. Uganda (+256) is selected for you; if you live in another country, pick it from the list. Then select Continue.',
+    image: '/docs/guides/member-setup/step-02.jpg',
+    imageAlt: 'PLCC ONE Join Us screen with first name, last name and mobile number',
   },
   {
     title: 'Add email, password, and agree to terms',
-    body: 'Enter your email, choose a password, accept the terms, and create your account. After this, PLCC Canaan opens the welcome setup wizard.',
+    body: 'Enter your email (optional if you added a phone), choose a password, tick the box to agree to the terms, then select Create account. PLCC ONE then opens the welcome setup.',
+    image: '/docs/guides/member-setup/step-03.jpg',
+    imageAlt: 'PLCC ONE Security screen with email, password and Create account',
   },
 ];
 
@@ -186,14 +178,14 @@ const MemberSetupGuide: React.FC = () => {
         <section className="mt-10 rounded-2xl border border-[#0d1a14]/8 bg-white p-5 md:p-7">
           <h2 className="text-lg font-black mb-3">What you will do</h2>
           <ol className="space-y-2 text-sm text-gray-600 font-medium list-decimal list-inside">
-            <li>Open PLCC Canaan and choose the Members portal</li>
+            <li>Open PLCC ONE and select Create an account</li>
             <li>Create an account with name, phone, email, and password</li>
             <li>Choose New guest or Current member</li>
-            <li>Finish that short path, review, and enter PLCC Canaan</li>
+            <li>Finish that short path, review, and enter PLCC ONE</li>
           </ol>
           <p className="mt-4 text-xs text-gray-500 font-medium leading-relaxed flex items-start gap-2">
             <ShieldAlert size={14} className="shrink-0 mt-0.5 text-burgundy/60" />
-            Already have an account? Use Sign in on the login page (email code or passkey). This guide is for first-time Create account.
+            Already have an account? On the sign-in page, enter your email or phone and select Continue. This guide is for creating a new account.
           </p>
         </section>
 

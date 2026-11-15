@@ -43,7 +43,7 @@ The Servant Keeper integration allows you to:
 
 **Step 3:** Create Export Group
 - Click **Add Group**
-- Name it "AWC_Export_Members"
+- Name it "PLCC_Export_Members"
 - Set to list **Individuals** (not families)
 - Click **Save**
 
@@ -503,9 +503,9 @@ TROUBLESHOOTING:
 • Contact admin if needed
 
 SUPPORT:
-• Email: support@awc.org
+• Email: the PLCC church office (or Report a problem in PLCC ONE)
 • Phone: (555) 123-4567
-• Documentation: awc.org/help
+• Documentation: Help & Support in PLCC ONE
 ```
 
 ---
@@ -518,7 +518,7 @@ SUPPORT:
 - Field Mapping Guide
 
 **Support:**
-- Email: support@awc.org
+- Email: the PLCC church office (or Report a problem in PLCC ONE)
 - Training: Monthly integration workshop
 - Documentation: Complete integration guide
 
