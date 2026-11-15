@@ -5,6 +5,7 @@ import {
   Bell,
   CalendarDays,
   ChevronDown,
+  Flag,
   Flame,
   Globe2,
   HandHeart,
@@ -15,6 +16,7 @@ import {
   Menu,
   MessageCircle,
   Search,
+  ShieldAlert,
   Users,
   X,
   Zap,
@@ -24,6 +26,7 @@ import type { AwcOneAppId } from '../../lib/awcOne';
 import { authedFetch } from '../../lib/authedFetch';
 import { formatEventWhenLabel } from '../../lib/eventDate';
 import { upcoming, type HomeEvent } from './PlccHomeExtras';
+import { openReport } from '../../lib/report';
 import { PLCC_GOLD, PLCC_GREEN, PLCC_GREEN_DEEP, WORDMARK_IMG } from './PlccOneShell';
 
 /**
@@ -243,7 +246,7 @@ const ProfileMenu: React.FC<{ name: string; onSignOut: () => void; onDark?: bool
         <ChevronDown size={16} className={onDark ? 'opacity-80' : 'text-[#16251f]/70'} aria-hidden />
       </button>
       {open ? (
-        <div role="menu" className="absolute right-0 mt-2 w-52 rounded-xl bg-white shadow-xl border border-[#16251f]/10 py-1.5 z-40">
+        <div role="menu" className="absolute right-0 mt-2 w-64 rounded-xl bg-white shadow-xl border border-[#16251f]/10 py-1.5 z-40">
           <p className="px-4 pt-1.5 pb-2 text-xs font-bold text-[#16251f]/50 truncate">Signed in as {first}</p>
           <Link
             role="menuitem"
@@ -252,6 +255,29 @@ const ProfileMenu: React.FC<{ name: string; onSignOut: () => void; onDark?: bool
           >
             <HelpCircle size={16} aria-hidden /> Help
           </Link>
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              openReport({ kind: 'problem' });
+            }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#16251f] hover:bg-[#f6f1e6] focus:bg-[#f6f1e6] outline-none"
+          >
+            <Flag size={16} aria-hidden /> Report a problem
+          </button>
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              openReport({ kind: 'safety' });
+            }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#16251f] hover:bg-red-50 focus:bg-red-50 outline-none"
+          >
+            <ShieldAlert size={16} className="text-red-600" aria-hidden /> Report harassment or a scam
+          </button>
+          <div className="my-1 border-t border-[#16251f]/10" />
           <button
             role="menuitem"
             type="button"

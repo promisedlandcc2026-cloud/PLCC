@@ -4,7 +4,7 @@ import { useNav } from '../lib/NavContext';
 import { Section } from '../types';
 import { firstNameOf, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
 import { authedFetch } from '../lib/authedFetch';
-import { CalendarDays, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, Users } from 'lucide-react';
+import { CalendarDays, Flag, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, ShieldAlert, Users } from 'lucide-react';
 import { Role } from '../types';
 import { openReport } from '../lib/report';
 import { ReportHost } from '../components/common/ReportModal';
@@ -164,7 +164,9 @@ const AwcOneLauncherPage: React.FC = () => {
     ...(can('/giving') ? [{ label: 'Giving', Icon: HandHeart, onClick: () => go('/giving') }] : []),
     ...(can('/help/member-setup')
       ? [{ label: 'Help & Support', Icon: HelpCircle, onClick: () => go('/help/member-setup') }]
-      : [{ label: 'Help & Support', Icon: HelpCircle, onClick: () => openReport({ kind: 'problem' }) }]),
+      : []),
+    { label: 'Report a Problem', Icon: Flag, onClick: () => openReport({ kind: 'problem' }) },
+    { label: 'Report a Concern', Icon: ShieldAlert, onClick: () => openReport({ kind: 'safety' }) },
   ];
 
   const displayName = userName || first;
