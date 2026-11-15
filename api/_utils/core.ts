@@ -1018,7 +1018,7 @@ const handleUsers = async (req: any, res: any) => {
         );
 
         const logAudit = await getAudit();
-        await logAudit({ action: 'User Access Modified', details: updates, resourceType: 'user', resourceId: id, severity: updates.role ? 'critical' : 'warning', req });
+        await logAudit({ action: 'User Access Modified', details: updates?.role && existingUser?.role && existingUser.role !== updates.role ? { ...updates, previous_role: existingUser.role } : updates, resourceType: 'user', resourceId: id, severity: updates.role ? 'critical' : 'warning', req });
         await ensureAccountantFundraiserSwitch(supabaseAdmin, id, (safeUpdates as any).role, user?.id);
         return res.status(200).json({ ok: true, user: updatedUser });
     }
@@ -6956,7 +6956,22 @@ const handleCommunity = async (req: any, res: any) => {
 
             const { data, error } = await query;
             if (error) throw error;
-            const logs = data || [];
+            const logs: any[] = data || [];
+            // Name the person each member-account entry was about, so the page can say
+            // "Changed Grace's role…" instead of showing only the admin who did it.
+            const targetIds = Array.from(new Set(
+                logs.filter((l) => String(l.resource_type || '').toLowerCase() === 'user' && l.resource_id)
+                    .map((l) => String(l.resource_id))
+            ));
+            if (targetIds.length) {
+                const { data: targets } = await supabaseAdmin.from('users').select('id, name, email').in('id', targetIds);
+                const byId = new Map((targets || []).map((t: any) => [String(t.id), { name: t.name, email: t.email }]));
+                for (const l of logs) {
+                    if (String(l.resource_type || '').toLowerCase() === 'user' && l.resource_id) {
+                        l.target = byId.get(String(l.resource_id)) || null;
+                    }
+                }
+            }
             // Keep array response for older callers; wrap for the Settings Audit Log page.
             res.setHeader('X-PLCC-Audit-Count', String(logs.length));
             return res.status(200).json({ ok: true, logs, count: logs.length });

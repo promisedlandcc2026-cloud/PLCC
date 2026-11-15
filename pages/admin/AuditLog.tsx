@@ -32,7 +32,88 @@ interface AuditLogEntry {
   resource_type?: string | null;
   resource_id?: string | null;
   ip_address?: string | null;
+  /** Person the change was about (filled in by the server for member-account entries). */
+  target?: { name?: string | null; email?: string | null } | null;
 }
+
+/* ── Plain-English helpers ─────────────────────────────────────────────── */
+
+/** Severity wording admins see; stored values stay info / warning / critical. */
+const SEVERITY_LABEL: Record<string, string> = {
+  info: 'Routine',
+  warning: 'Review',
+  critical: 'High impact',
+};
+const severityLabel = (s: string) => SEVERITY_LABEL[s] || s;
+
+const titleCase = (raw: string) =>
+  raw
+    .replace(/[._]+/g, ' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .trim()
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+/** "kids_custody.checkin" → "Kids Custody Checkin"; already-readable actions stay as they are. */
+const friendlyAction = (action: string) => (/[._]|^[A-Z0-9_]+$/.test(action) ? titleCase(action) : action);
+
+const RESOURCE_LABEL: Record<string, string> = {
+  user: 'Member account',
+  users: 'Member account',
+  event: 'Event',
+  events: 'Event',
+  channel: 'Chat channel',
+  finance: 'Finance',
+  transaction: 'Finance',
+  manual: 'Note',
+};
+const friendlyResource = (r: string) => RESOURCE_LABEL[r.toLowerCase()] || titleCase(r);
+
+/** Role codes like ADMIN_STAFF → "Admin Staff". */
+const friendlyValue = (v: unknown): string => {
+  if (v == null || v === '') return '—';
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (typeof v === 'string') return /^[A-Z][A-Z0-9_]+$/.test(v) ? titleCase(v) : v;
+  if (Array.isArray(v)) return v.length ? `${v.length} item${v.length === 1 ? '' : 's'}` : 'None';
+  if (typeof v === 'object') return 'Updated';
+  return String(v);
+};
+
+const parseDetails = (details: AuditLogEntry['details']): Record<string, unknown> | string | null => {
+  if (details == null || details === '') return null;
+  if (typeof details === 'object') return details as Record<string, unknown>;
+  const t = details.trim();
+  if (t.startsWith('{')) {
+    try {
+      return JSON.parse(t);
+    } catch {
+      return details;
+    }
+  }
+  return details;
+};
+
+const targetName = (log: AuditLogEntry) =>
+  (log.target?.name || '').trim() || formatAccountContact(log.target?.email || '') || log.target?.email || '';
+
+/** One readable sentence for the row. */
+const summarize = (log: AuditLogEntry): string => {
+  const d = parseDetails(log.details);
+  const who = targetName(log);
+  if (log.action === 'User Access Modified' && d && typeof d === 'object') {
+    const person = who || 'a member';
+    if (d.role) {
+      const from = d.previous_role ? ` from ${friendlyValue(d.previous_role)}` : '';
+      return `Changed ${person}’s role${from} to ${friendlyValue(d.role)}`;
+    }
+    const fields = Object.keys(d).filter((k) => k !== 'previous_role').map((k) => titleCase(k).toLowerCase());
+    return fields.length ? `Updated ${person}’s ${fields.join(', ')}` : `Updated ${person}’s account`;
+  }
+  const base = detailsPreview(log.details);
+  if (who && base === '—') return `About ${who}`;
+  return who && !base.includes(who) ? `${base} · ${who}` : base;
+};
+
 
 const severityClass = (severity: string) => {
   if (severity === 'critical') return 'bg-red-50 text-red-700 border-red-100';
@@ -80,6 +161,24 @@ const formatDetailsJson = (details: AuditLogEntry['details']): string => {
   } catch {
     return String(details);
   }
+};
+
+const DetailsList: React.FC<{ log: AuditLogEntry }> = ({ log }) => {
+  const d = parseDetails(log.details);
+  if (d == null) return <p className="text-sm text-gray-600">No additional details.</p>;
+  if (typeof d === 'string') return <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{d}</p>;
+  const entries = Object.entries(d).filter(([, v]) => v !== undefined);
+  if (!entries.length) return <p className="text-sm text-gray-600">No additional details.</p>;
+  return (
+    <dl className="grid grid-cols-[minmax(110px,auto)_1fr] gap-x-4 gap-y-1.5 text-sm">
+      {entries.map(([k, v]) => (
+        <React.Fragment key={k}>
+          <dt className="text-gray-500 font-semibold">{k === 'previous_role' ? 'Previous role' : titleCase(k)}</dt>
+          <dd className="text-gray-800 break-words">{friendlyValue(v)}</dd>
+        </React.Fragment>
+      ))}
+    </dl>
+  );
 };
 
 const AuditLogPage: React.FC = () => {
@@ -134,6 +233,9 @@ const AuditLogPage: React.FC = () => {
       const haystack = [
         log.action,
         log.id,
+        targetName(log),
+        summarize(log),
+        severityLabel(log.severity),
         log.resource_type,
         log.resource_id,
         userName,
@@ -255,7 +357,7 @@ const AuditLogPage: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <input
               type="text"
-              placeholder="Search action, user, resource, or details…"
+              placeholder="Search by person, change, or details…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full h-11 pl-10 pr-3 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-burgundy/30 outline-none text-sm font-medium text-[#0d1a14]"
@@ -267,10 +369,10 @@ const AuditLogPage: React.FC = () => {
               onChange={(e) => setSeverityFilter(e.target.value as typeof severityFilter)}
               className="h-11 appearance-none pl-3 pr-9 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-burgundy/30 outline-none text-sm font-semibold text-[#0d1a14]"
             >
-              <option value="all">All severities</option>
-              <option value="info">Info</option>
-              <option value="warning">Warning</option>
-              <option value="critical">Critical</option>
+              <option value="all">All importance levels</option>
+              <option value="info">Routine</option>
+              <option value="warning">Review</option>
+              <option value="critical">High impact</option>
             </select>
             <ChevronDown
               size={14}
@@ -295,7 +397,7 @@ const AuditLogPage: React.FC = () => {
             <h3 className="text-base font-black text-[#0d1a14]">No audit entries yet</h3>
             <p className="text-sm text-gray-500 font-medium mt-1 max-w-md mx-auto">
               {search || severityFilter !== 'all'
-                ? 'Nothing matches this filter. Clear search or severity and try again.'
+                ? 'Nothing matches this filter. Clear the search or importance level and try again.'
                 : 'Actions like role changes, event edits, channel deletes, and finance approvals will appear here.'}
             </p>
           </div>
@@ -324,7 +426,6 @@ const AuditLogPage: React.FC = () => {
                     <div className="flex flex-col md:flex-row md:items-start gap-3 md:gap-5">
                       <div className="md:min-w-[150px] shrink-0">
                         <p className="text-sm font-bold text-[#0d1a14]">{formatWhen(log.created_at)}</p>
-                        <p className="text-[10px] font-mono text-gray-400 mt-1">{log.id.slice(0, 8)}</p>
                       </div>
 
                       <div className="flex items-center gap-3 md:min-w-[180px] shrink-0">
@@ -334,6 +435,7 @@ const AuditLogPage: React.FC = () => {
                         <div className="min-w-0">
                           <p className="text-sm font-bold text-[#0d1a14] truncate">{displayName}</p>
                           <p className="text-[11px] text-gray-500 truncate">
+                            {log.user ? 'Made the change · ' : ''}
                             {log.user?.email
                               ? formatAccountContact(log.user.email) || log.user.email
                               : log.user?.role || 'Unauthenticated'}
@@ -343,21 +445,21 @@ const AuditLogPage: React.FC = () => {
 
                       <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-bold text-gray-800">{log.action}</p>
+                          <p className="text-sm font-bold text-gray-800">{friendlyAction(log.action)}</p>
                           <span
                             className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${severityClass(
                               log.severity
                             )}`}
                           >
-                            {log.severity}
+                            {severityLabel(log.severity)}
                           </span>
                           {log.resource_type && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-gray-50 text-gray-600 border border-gray-100">
-                              {log.resource_type}
+                              {friendlyResource(log.resource_type)}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 font-medium truncate">{detailsPreview(log.details)}</p>
+                        <p className="text-sm text-gray-600 font-medium">{summarize(log)}</p>
                       </div>
 
                       <ChevronDown
@@ -372,15 +474,12 @@ const AuditLogPage: React.FC = () => {
                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
                         Details
                       </p>
-                      <pre className="text-[12px] leading-relaxed text-gray-700 font-mono whitespace-pre-wrap break-words">
-                        {formatDetailsJson(log.details)}
-                      </pre>
-                      {(log.resource_id || log.ip_address) && (
-                        <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-gray-500 font-medium">
-                          {log.resource_id && <span>Resource ID: {log.resource_id}</span>}
-                          {log.ip_address && <span>IP: {log.ip_address}</span>}
-                        </div>
-                      )}
+                      <DetailsList log={log} />
+                      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500 font-medium">
+                        {targetName(log) ? <span>Person: {targetName(log)}</span> : null}
+                        {log.ip_address ? <span>From IP: {log.ip_address}</span> : null}
+                        <span>Reference: {log.id.slice(0, 8)}</span>
+                      </div>
                     </div>
                   )}
                 </li>
