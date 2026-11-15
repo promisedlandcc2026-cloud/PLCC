@@ -1,13 +1,13 @@
 # How to Enable Connect Child Cards (One Click)
 **Promised Land Christian Center (PLCC)**  
-**For:** Staff who help parents see kids’ check-in cards in PLCC Connect  
+**For:** Staff who help parents see kids’ check-in cards in Tribes  
 **Time:** About 1–2 minutes
 
 ---
 
 ## What this does
 
-Parents use **PLCC Connect → My Family** to open each child’s **View Child Card & Code** (QR + desk code).
+Parents use **Tribes → My Family** to open each child’s **View Child Card & Code** (QR + desk code).
 
 Household membership alone is **not** enough. Staff must turn on **Family card access** for the parent.
 
@@ -41,7 +41,7 @@ That turns on **View Card**, **Check In**, and **Check Out** for every child/dep
 
 ## Check that it worked
 
-1. Ask the parent to open **PLCC Connect → My Family** (or refresh that page)
+1. Ask the parent to open **Tribes → My Family** (or refresh that page)
 2. Under **Children & Dependents**, each real child should show **Family card access authorized** and **View Child Card & Code**
 3. The parent’s own name should **not** appear under Children
 

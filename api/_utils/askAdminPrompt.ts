@@ -120,14 +120,14 @@ EVENTS & CHECK-IN
 • Consent (/admin/consent-management)
 
 GIVING
-• Give (/giving) → gives online through PLCC Tithe (card, bank, Zelle, Venmo, Cash App); every gift is recorded in the Digital Contribution Book
+• Give (/giving) → gives online through Firstfruits (card, bank, Zelle, Venmo, Cash App); every gift is recorded in the Digital Contribution Book
 • Fundraisers (/fundraisers) — e.g. 2nd Floor Building Fund: gifts, pledges, fun charges, who still owes
 • Finance → opens Digital Contribution Book (external) or (/finance/contribution-manager)
 
 CONNECT
 • Community (/community/feed)
 • Sermon Notes (/community/sermon-notes) · Sermon Manager (/community/sermons)
-• Daily Devotional (/community/daily-devotional) — staff write the devotional members read in PLCC Connect
+• Daily Devotional (/community/daily-devotional) — staff write the devotional members read in Tribes
 • Prayer (/community/prayer-wall)
 • Prayer Watch (/community/prayer-watch) — Intercessors' prayer requests + voice prayer call
 • Announcements (/communication/announcements)
@@ -204,7 +204,7 @@ EVENTS & CHECK-IN
 - Event settings (also Settings → Events): /events/settings or /settings?tab=events
 
 GIVING & TREASURY
-- Give (online via PLCC Tithe): /giving
+- Give (online via Firstfruits): /giving
 - Sunday cash and checks are counted and posted in the Digital Contribution Book (Finance), not in PLCC Canaan
 - Giving Insights: /giving/insights
 - Giving form designer: /giving-form
@@ -517,11 +517,11 @@ How do I change or remove one guest?
 - Remove: tap the trash button on their line. You can't remove a guest who has PAID or whose gift is still waiting for Finance to confirm — the button is greyed out.
 
 How do guests pay? (Pay Now)
-- On the public RSVP form a guest picks Pledge or Pay Now. Pay Now finishes on PLCC Tithe (card, bank, Zelle, Venmo, Cash App).
-- Each event has its own fund in PLCC Tithe, e.g. "PLCC GRAND FAMILY CELEBRATION 2026"; gifts are recorded in the Digital Contribution Book. Renaming an event in the calendar renames its fund in PLCC Canaan, PLCC Tithe and DCB too — earlier gifts stay with the event and old pay links keep working.
+- On the public RSVP form a guest picks Pledge or Pay Now. Pay Now finishes on Firstfruits (card, bank, Zelle, Venmo, Cash App).
+- Each event has its own fund in Firstfruits, e.g. "PLCC GRAND FAMILY CELEBRATION 2026"; gifts are recorded in the Digital Contribution Book. Renaming an event in the calendar renames its fund in PLCC Canaan, Firstfruits and DCB too — earlier gifts stay with the event and old pay links keep working.
 - The Gift column shows: Paid (green) · Sent — Finance to confirm (Zelle/Venmo/Cash App waiting) · Clearing (bank payment, about 4 business days) · Due · Pledged.
-- "Pay link" on a guest's line shares their own PLCC Tithe pay link (text/WhatsApp).
-- Paid status comes from PLCC Tithe automatically. Super Admin, Pastor, First Lady and Finance can also tap the gift to mark it paid by hand (this posts to the DCB).
+- "Pay link" on a guest's line shares their own Firstfruits pay link (text/WhatsApp).
+- Paid status comes from Firstfruits automatically. Super Admin, Pastor, First Lady and Finance can also tap the gift to mark it paid by hand (this posts to the DCB).
 
 How do I delete a whole event's RSVP?
 1. Event RSVPs (/events/cookout-rsvps) → pick the event → "Delete RSVP"
@@ -530,7 +530,7 @@ It is blocked while anyone on it has paid, pledged, or has a gift waiting for Fi
 
 How do I archive an event's RSVP? (keep the records)
 1. Event RSVPs (/events/cookout-rsvps) → pick the event → "Archive"
-2. Confirm. Nothing is erased: signups and paid records are kept, online signup turns off, it leaves the Event RSVPs list and the PLCC Connect home card.
+2. Confirm. Nothing is erased: signups and paid records are kept, online signup turns off, it leaves the Event RSVPs list and the Tribes home card.
 
 Where is the RSVP Archive? Who can see it?
 - Sidebar → Events & check-in → RSVP Archive (/events/rsvp-archive)
@@ -538,7 +538,7 @@ Where is the RSVP Archive? Who can see it?
 - Only Super Admin can tap "Restore" (it moves back to Event RSVPs and signup turns on again unless its sign-up date has passed).
 
 How do I change an event's time or date?
-Change it on the event in the calendar (/events/overview). The RSVP page and PLCC Connect use the calendar's time automatically.
+Change it on the event in the calendar (/events/overview). The RSVP page and Tribes use the calendar's time automatically.
 
 [CONSENT / E-SIGNATURE FORMS]
 - Sidebar → Consent (/admin/consent-management) or Forms → Consent / E-Sign
@@ -556,7 +556,7 @@ Change it on the event in the calendar (/events/overview). The RSVP page and PLC
 - Playbook: Building Custom Forms (/admin/policies)
 
 [GIVING & TREASURY]
-- Give (online via PLCC Tithe): (/giving)
+- Give (online via Firstfruits): (/giving)
 - Sunday cash: counted and posted in the Digital Contribution Book (Finance)
 - Contribution Manager: (/finance/contribution-manager) → New Batch → Counting Session (/finance/counting) → enter gifts → Post batch
 - Counting Session alone: (/finance/counting)
@@ -668,15 +668,15 @@ Sign in with a text code (no password):
 New to PLCC? Choose Join → name and mobile number → "No password? Text me a code." Email and password still work. A text code never creates a second account.
 
 Give by text — (855) 297-1920:
-- First time: text GIVE (or an amount like 50). You get a secure PLCC Tithe link — set up your card, bank, Zelle, Venmo or Cash App once.
+- First time: text GIVE (or an amount like 50). You get a secure Firstfruits link — set up your card, bank, Zelle, Venmo or Cash App once.
 - After that: just text an amount (e.g. 50). If you only text a number, you get "Which fund?" — reply with the number (1 = Tithes & Offerings, plus open event funds). Or text "50 tithe" / "40 grand".
 - Card gifts up to $2,000 charge right away; bank payments take a few business days to clear. Every gift gets an email receipt and goes to the Digital Contribution Book. Reply STOP to stop texts.
 
-Give page: Sidebar → Give (/giving) opens the PLCC Tithe-style Give page. Sunday cash and checks are counted in the Digital Contribution Book (Finance), not in PLCC Canaan.
+Give page: Sidebar → Give (/giving) opens the Firstfruits-style Give page. Sunday cash and checks are counted in the Digital Contribution Book (Finance), not in PLCC Canaan.
 
 Fundraisers (/fundraisers) — e.g. the 2nd Floor Building Fund:
 - Tracks gifts, pledges and "fun charges" (e.g. Coming in late $20, Leaving early $50), shows who still owes, and has a calculator.
-- Online PLCC Tithe gifts to that fund are added automatically.
+- Online Firstfruits gifts to that fund are added automatically.
 - Who can open it: Super Admin, Admin, Pastor, First Lady, Secretary, Asst. Secretary, Finance — and anyone else only if Super Admin turns on their "Fundraiser access" switch. The Accountant role sees Fundraisers only.
 
 Prayer requests & Prayer Watch:
@@ -687,28 +687,28 @@ Prayer requests & Prayer Watch:
 Live Huddle updates:
 - Everyone joins muted — tap the mic to talk.
 - Play Music works on iPhone and iPad (Safari).
-- Shared huddle links always open PLCC Connect for members (sign in to Connect first, then tap the link). Staff can still join from Canaan Chat.
+- Shared huddle links always open Tribes for members (sign in to Connect first, then tap the link). Staff can still join from Canaan Chat.
 - Emoji reactions: 🙏 Pray, ❤️ Love, 👏 Clap, 🙌 Praise, 👍 Like.
 - If the main line is out of minutes, huddles open on the backup line (Daily) — same channel, no app to install.
 
 Birthdays & anniversaries:
 - Adults' birthdays show month and day only. Each person can turn on "Include my birth year" on their profile (off by default). Children keep their full date of birth.
 - Members choose which anniversary their profile shows (wedding or other).
-- The Pastor's automatic greeting goes out on birthdays and anniversaries (PLCC Connect inbox + phone alert, email backup); kids' birthdays go to their parents.
+- The Pastor's automatic greeting goes out on birthdays and anniversaries (Tribes inbox + phone alert, email backup); kids' birthdays go to their parents.
 - Home (/dashboard) shows today's celebrations to the Pastor and Super Admin, with "Edit message" to change the greeting wording.
 
 Phone alerts & "Send an alert":
-- Members turn on free phone alerts in PLCC Connect (Me tab → Turn on alerts; on iPhone first Add to Home Screen).
+- Members turn on free phone alerts in Tribes (Me tab → Turn on alerts; on iPhone first Add to Home Screen).
 - Super Admin, Pastor and Ministry Leaders send one from Home (/dashboard) → Send an alert (e.g. "We're live!").
 
-Daily Devotional: staff write and schedule it at (/community/daily-devotional); members read it in PLCC Connect and can get a 7 AM reminder.
+Daily Devotional: staff write and schedule it at (/community/daily-devotional); members read it in Tribes and can get a 7 AM reminder.
 
 Canaan News (Home): Pastor, Ministry Leaders and Super Admin post church news, celebrations and sympathy, can mark a post as Live Huddle, and can correct or remove a post. Home shows the newest posts.
 
 Households (/households): new layout with family stats, filters, head of household and family roles; staff can merge duplicate households and tidy names.
 
 PLCC Ark (church games: Pong Plus, Breakout, Space Invaders, Tetris, Dove Defender):
-- Members open it in PLCC Connect (https://plcc-connect.vercel.app/ark/) or from the PLCC Ark card on the sign-in page.
+- Members open it in Tribes (https://plcc-connect.vercel.app/ark/) or from the PLCC Ark card on the sign-in page.
 - Kids earn PLCC Bucks: +2 first game of the day, +5 new personal best, +10/+6/+4 for the week's top 3 kids per game; up to 20 a week from playing (top-3 prizes are extra), inside the 100 Bucks weekly limit. Adults play and rank but don't earn Bucks.
 - Boards show first name + last initial; parents can hide a child's name ("Player K.").
 - Staff page (/events/ark): approve or remove scores held for checking; Super Admin settings (weekly Bucks limit, turn Ark Bucks off).

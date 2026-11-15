@@ -65,7 +65,7 @@ type Payment = {
   /** Cash / check sent to the DCB: posted, review, failed, before_link, not_sent, or null (waiting) */
   dcb_status?: string | null;
   dcb_error?: string | null;
-  /** Volunteer who recorded it, or "PLCC Tithe" */
+  /** Volunteer who recorded it, or "Firstfruits" */
   recorded_by_name?: string | null;
 };
 type Entry = {
@@ -211,7 +211,7 @@ function Stat(props: { label: string; value: string; sub?: string; tone?: 'gold'
 }
 
 function entryTypeLabel(e: Entry): string {
-  if (e.source_type === 'online') return 'Online · PLCC Tithe';
+  if (e.source_type === 'online') return 'Online · Firstfruits';
   if (e.source_type === 'game') return 'Game / event';
   if (e.kind === 'pledge') return 'Pledge';
   if (e.kind === 'charge') return `${e.charge_label || 'Fun charge'}${e.quantity > 1 ? ` × ${e.quantity}` : ''}`;
@@ -254,7 +254,7 @@ const FundraisersPage: React.FC = () => {
       const bits: string[] = [];
       if (data.tithe.applied) bits.push(`${data.tithe.applied} online payment${data.tithe.applied === 1 ? '' : 's'} applied to balances`);
       if (data.tithe.added) bits.push(`${data.tithe.added} new online gift${data.tithe.added === 1 ? '' : 's'} added`);
-      flash(`PLCC Tithe: ${bits.join(' · ')}.`);
+      flash(`Firstfruits: ${bits.join(' · ')}.`);
     }
   }, []);
 
@@ -329,7 +329,7 @@ const FundraisersPage: React.FC = () => {
       setNewTitle('');
       setNewGoal('');
       setTab('settings');
-      flash('Fundraiser created. Add your fun charges and link the PLCC Tithe fund in Settings.');
+      flash('Fundraiser created. Add your fun charges and link the Firstfruits fund in Settings.');
     } catch (err: any) {
       setError(err?.message || 'Could not create the fundraiser.');
     } finally {
@@ -567,7 +567,7 @@ function DcbCard(props: { full: Full; perms: Full['permissions']; busy: boolean;
       </div>
       <p className="text-sm text-gray-500 max-w-2xl">
         Every cash, check or other payment recorded here also goes to the Digital Contribution Book under <b>{(f.tithe_fund_name || f.title)}</b>, automatically.
-        Online gifts from PLCC Tithe go there through Tithe. Pledges and fun charges still owed are not money yet, so they stay here until paid.
+        Online gifts from Firstfruits go there through Tithe. Pledges and fun charges still owed are not money yet, so they stay here until paid.
       </p>
       <ul className="flex flex-col gap-1.5 text-sm">
         <li className="flex justify-between gap-3">
@@ -701,7 +701,7 @@ function CalculatorCard(props: {
           </div>
           <p className="text-sm text-[#C9B8A8] mt-1">
             Started {f.start_date}
-            {f.tithe_fund_name ? ` · Online gifts from PLCC Tithe: ${f.tithe_fund_name}` : ''}
+            {f.tithe_fund_name ? ` · Online gifts from Firstfruits: ${f.tithe_fund_name}` : ''}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 self-start">
@@ -1169,7 +1169,7 @@ function ToMatch(props: { full: Full; busy: boolean; onRun: RunFn; onError: (m: 
           <Globe size={18} /> Online gifts to match ({gifts.length})
         </h3>
         <p className="text-sm text-amber-900">
-          These came through PLCC Tithe without a "Pay my balance" link. If one is someone paying what they owe, pick them and
+          These came through Firstfruits without a "Pay my balance" link. If one is someone paying what they owe, pick them and
           tap Apply. If it's just a gift, tap Keep as gift.
         </p>
       </div>
@@ -1184,7 +1184,7 @@ function ToMatch(props: { full: Full; busy: boolean; onRun: RunFn; onError: (m: 
                 <span className="font-black tabular-nums text-[#16251f]">{formatCents(g.received_amount_cents)}</span>
               </div>
               <p className="text-[12px] text-gray-500">
-                {g.entry_date} · {paymentMethodLabel(g.payment_method)} · {g.notes || 'PLCC Tithe'}
+                {g.entry_date} · {paymentMethodLabel(g.payment_method)} · {g.notes || 'Firstfruits'}
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <select
@@ -1296,7 +1296,7 @@ function WhoOwes(props: { full: Full; busy: boolean; onRun: RunFn; onError: (m: 
             </p>
             {!linked && (
               <p className="text-[12px] text-gray-500 mt-1">
-                Pay links appear once a leader links an PLCC Tithe fund to this fundraiser.
+                Pay links appear once a leader links an Firstfruits fund to this fundraiser.
               </p>
             )}
           </div>
@@ -1690,7 +1690,7 @@ function EntriesTab(props: { full: Full; perms: Full['permissions']; busy: boole
                     )}
                   </div>
                 )}
-                {online && <p className="text-[12px] text-gray-500">From PLCC Tithe — fix or refund it in Tithe and it updates here.</p>}
+                {online && <p className="text-[12px] text-gray-500">From Firstfruits — fix or refund it in Tithe and it updates here.</p>}
 
                 {paying === e.id && <PayForm full={full} entry={e} busy={props.busy} onRun={props.onRun} onError={props.onError} onDone={() => setPaying(null)} />}
 
@@ -1779,7 +1779,7 @@ function EntriesTab(props: { full: Full; perms: Full['permissions']; busy: boole
 }
 
 // ---------------------------------------------------------------------------
-// Settings: PLCC Tithe link
+// Settings: Firstfruits link
 // ---------------------------------------------------------------------------
 function SettingsTab(props: { full: Full; perms: Full['permissions']; busy: boolean; onRun: RunFn; onError: (m: string) => void }) {
   const { full, perms } = props;
@@ -1804,7 +1804,7 @@ function SettingsTab(props: { full: Full; perms: Full['permissions']; busy: bool
         setFunds(data.funds || []);
         setFundWarning(data.warning || null);
       } catch (err: any) {
-        if (!cancelled) setFundWarning(err?.message || 'Could not load PLCC Tithe funds.');
+        if (!cancelled) setFundWarning(err?.message || 'Could not load Firstfruits funds.');
       } finally {
         if (!cancelled) setLoadingFunds(false);
       }
@@ -1818,17 +1818,17 @@ function SettingsTab(props: { full: Full; perms: Full['permissions']; busy: bool
     const fund = funds.find((x) => x.id === choice);
     await props.onRun(
       () => post('update', { fundraiserId: f.id, titheFundId: choice || null, titheFundName: fund?.name || null }),
-      choice ? `Linked to ${fund?.name || 'the PLCC Tithe fund'}. Online gifts will appear automatically.` : 'PLCC Tithe fund unlinked.'
+      choice ? `Linked to ${fund?.name || 'the Firstfruits fund'}. Online gifts will appear automatically.` : 'Firstfruits fund unlinked.'
     );
   };
 
   return (
     <section className="rounded-2xl border border-black/[0.06] bg-white p-5 flex flex-col gap-4">
       <div>
-        <h3 className="text-xl font-black text-[#16251f]">Online gifts from PLCC Tithe</h3>
+        <h3 className="text-xl font-black text-[#16251f]">Online gifts from Firstfruits</h3>
         <p className="text-sm text-gray-500 max-w-2xl">
-          Pick the PLCC Tithe fund for this fundraiser (for example, 2nd Floor Building Fund). Gifts to that fund appear here as
-          <b> Online · PLCC Tithe</b> once they are confirmed — card and bank by Flutterwave, MTN, Airtel and Sendwave after Finance verifies them in
+          Pick the Firstfruits fund for this fundraiser (for example, 2nd Floor Building Fund). Gifts to that fund appear here as
+          <b> Online · Firstfruits</b> once they are confirmed — card and bank by Flutterwave, MTN, Airtel and Sendwave after Finance verifies them in
           Tithe. They are read-only here and also go to the DCB as usual. Cash and check recorded here go to the DCB from PLCC Canaan.
         </p>
       </div>
@@ -1841,7 +1841,7 @@ function SettingsTab(props: { full: Full; perms: Full['permissions']; busy: bool
       {perms.canManage ? (
         <div className="flex flex-col sm:flex-row gap-2 sm:items-end">
           <label className={`${labelCls} flex-1`}>
-            PLCC Tithe fund
+            Firstfruits fund
             <select value={choice} onChange={(e) => setChoice(e.target.value)} className={fieldCls} disabled={loadingFunds}>
               <option value="">Not linked</option>
               {funds.map((x) => (
@@ -1856,17 +1856,17 @@ function SettingsTab(props: { full: Full; perms: Full['permissions']; busy: bool
             Save link
           </button>
           {f.tithe_fund_id && (
-            <button type="button" disabled={props.busy} onClick={() => void props.onRun(() => post('sync-tithe', { fundraiserId: f.id }), 'Checked PLCC Tithe for new gifts.')} className={btnGhost}>
+            <button type="button" disabled={props.busy} onClick={() => void props.onRun(() => post('sync-tithe', { fundraiserId: f.id }), 'Checked Firstfruits for new gifts.')} className={btnGhost}>
               <RefreshCw size={15} /> Check now
             </button>
           )}
         </div>
       ) : (
-        <p className="text-sm text-gray-500">Only a finance leader can change the PLCC Tithe link.</p>
+        <p className="text-sm text-gray-500">Only a finance leader can change the Firstfruits link.</p>
       )}
       {fundWarning && <p className="text-sm text-amber-800">{fundWarning}</p>}
       {perms.canManage && !loadingFunds && !fundWarning && funds.length === 0 && (
-        <p className="text-sm text-gray-500">No funds found in PLCC Tithe. Add a fund there first, then come back.</p>
+        <p className="text-sm text-gray-500">No funds found in Firstfruits. Add a fund there first, then come back.</p>
       )}
     </section>
   );
@@ -1957,7 +1957,7 @@ function AccessManager(props: { onError: (m: string) => void }) {
           {byRole.length ? `${byRole.join(', ')} have access by their role. ` : ''}
           Anyone else — members who run the fundraiser, Accountants — needs the switch below. They keep everything their role
           already has, and can start and run fundraisers (charges, entries, payments, reminders). Only leaders delete or link
-          PLCC Tithe.
+          Firstfruits.
         </p>
       </div>
 

@@ -64,7 +64,7 @@ type Registration = {
   food_contribution_intent?: GiftPaymentIntent | string | null;
   food_contribution_payment_method?: GiftPaymentMethod | string | null;
   food_contribution_posted_tx_id?: string | null;
-  /** From PLCC Tithe on this load only (not stored): gift started / sent but not confirmed yet. */
+  /** From Firstfruits on this load only (not stored): gift started / sent but not confirmed yet. */
   tithe_status?: 'started' | 'processing' | 'refunded' | null;
   /** Tithe payment method while not yet paid (zelle / cash_app / venmo wait for Finance). */
   tithe_method?: string | null;
@@ -292,7 +292,7 @@ const CookoutRsvpsPage: React.FC = () => {
   const [totals, setTotals] = useState<Totals>({ adults: 0, children: 0, guests: 0, funds: 0, fundsPaid: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  /** Result of checking PLCC Tithe for Pay Now gifts on this load. */
+  /** Result of checking Firstfruits for Pay Now gifts on this load. */
   const [titheNote, setTitheNote] = useState<{ updated: number; warning: string | null } | null>(null);
   const [editing, setEditing] = useState<Registration | null>(null);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
@@ -359,7 +359,7 @@ const CookoutRsvpsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId, optionsLoaded]);
 
-  // Paid status comes from PLCC Tithe: refresh quietly every minute while this list is open.
+  // Paid status comes from Firstfruits: refresh quietly every minute while this list is open.
   const editingOpenRef = useRef(false);
   editingOpenRef.current = Boolean(editing);
   useEffect(() => {
@@ -697,7 +697,7 @@ const CookoutRsvpsPage: React.FC = () => {
 
   const deleteRsvp = async (r: Registration) => {
     const paidNote = r.food_contribution_paid
-      ? `\n\nTheir ${formatFunds(r.food_contribution_amount)} gift is already paid. Removing the RSVP does NOT refund it — the gift stays recorded in PLCC Tithe and PLCC DCB.`
+      ? `\n\nTheir ${formatFunds(r.food_contribution_amount)} gift is already paid. Removing the RSVP does NOT refund it — the gift stays recorded in Firstfruits and PLCC DCB.`
       : '';
     const ok = window.confirm(
       `Remove this signup?\n\n${r.name}${r.phone ? ` · ${r.phone}` : ''}${paidNote}\n\nThis cannot be undone.`
@@ -731,7 +731,7 @@ const CookoutRsvpsPage: React.FC = () => {
     }
   };
 
-  /** Share (phone) or copy this guest's own PLCC Tithe pay link. Marked paid only when Tithe confirms. */
+  /** Share (phone) or copy this guest's own Firstfruits pay link. Marked paid only when Tithe confirms. */
   const sharePayLink = async (r: Registration) => {
     const amount = Number(r.food_contribution_amount) || 0;
     const method = r.food_contribution_payment_method as GiftPaymentMethod | null | undefined;
@@ -756,10 +756,10 @@ const CookoutRsvpsPage: React.FC = () => {
       returnUrl: rsvpReturnUrl('https://plcc-opal.vercel.app', eventCfg.eventId || eventId, r.id),
     });
     const first = String(r.name || '').trim().split(' ')[0] || 'there';
-    const text = `Hi ${first}, here is your link to give ${formatCurrency(amount)} for ${eventCfg.shortName || eventCfg.name} on PLCC Tithe:`;
+    const text = `Hi ${first}, here is your link to give ${formatCurrency(amount)} for ${eventCfg.shortName || eventCfg.name} on Firstfruits:`;
     try {
       if (typeof navigator !== 'undefined' && typeof (navigator as any).share === 'function') {
-        await (navigator as any).share({ title: 'PLCC Tithe', text, url });
+        await (navigator as any).share({ title: 'Firstfruits', text, url });
       } else {
         await navigator.clipboard.writeText(`${text} ${url}`);
       }
@@ -896,16 +896,16 @@ const CookoutRsvpsPage: React.FC = () => {
       return {
         label: 'Paid',
         tone: 'paid',
-        note: String(r.food_contribution_paid_by || '').startsWith('PLCC Tithe') ? 'Via PLCC Tithe' : 'Marked paid',
+        note: String(r.food_contribution_paid_by || '').startsWith('Firstfruits') ? 'Via Firstfruits' : 'Marked paid',
       };
     }
     if (r.tithe_status === 'processing') {
       const p2p = ['zelle', 'cash_app', 'venmo'].includes(String(r.tithe_method || ''));
       return { label: p2p ? 'Sent' : 'Clearing', tone: 'wait', note: p2p ? 'Finance to confirm' : 'Bank payment clearing' };
     }
-    if (r.tithe_status === 'refunded') return { label: 'Refunded', tone: 'due', note: 'Refunded on PLCC Tithe' };
-    if (r.food_contribution_intent === 'pledge') return { label: 'Pledged', tone: 'pledge', note: r.tithe_status === 'started' ? 'Started on PLCC Tithe' : '' };
-    return { label: 'Due', tone: 'due', note: r.tithe_status === 'started' ? 'Started on PLCC Tithe' : '' };
+    if (r.tithe_status === 'refunded') return { label: 'Refunded', tone: 'due', note: 'Refunded on Firstfruits' };
+    if (r.food_contribution_intent === 'pledge') return { label: 'Pledged', tone: 'pledge', note: r.tithe_status === 'started' ? 'Started on Firstfruits' : '' };
+    return { label: 'Due', tone: 'due', note: r.tithe_status === 'started' ? 'Started on Firstfruits' : '' };
   };
 
   const toneClass: Record<string, string> = {
@@ -1145,8 +1145,8 @@ const CookoutRsvpsPage: React.FC = () => {
       {titheNote && titheNote.updated > 0 && (
         <p className="mb-5 text-sm font-medium text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3">
           {titheNote.updated === 1
-            ? '1 Pay Now gift was confirmed on PLCC Tithe and marked paid.'
-            : `${titheNote.updated} Pay Now gifts were confirmed on PLCC Tithe and marked paid.`}
+            ? '1 Pay Now gift was confirmed on Firstfruits and marked paid.'
+            : `${titheNote.updated} Pay Now gifts were confirmed on Firstfruits and marked paid.`}
         </p>
       )}
       {titheNote?.warning && (
@@ -1345,8 +1345,8 @@ const CookoutRsvpsPage: React.FC = () => {
                           type="button"
                           onClick={() => void sharePayLink(r)}
                           className="inline-flex items-center gap-1.5 min-h-[38px] px-3 rounded-lg border border-black/[0.08] bg-white text-[#0d1a14] text-xs font-semibold hover:bg-[#F7F2F3] transition-colors"
-                          title="Share this guest's PLCC Tithe pay link"
-                          aria-label={`Share PLCC Tithe pay link for ${r.name}`}
+                          title="Share this guest's Firstfruits pay link"
+                          aria-label={`Share Firstfruits pay link for ${r.name}`}
                         >
                           {sharedLinkId === r.id ? <Check size={14} className="text-emerald-600" /> : <Link2 size={14} />}
                           {sharedLinkId === r.id ? 'Ready' : 'Pay link'}

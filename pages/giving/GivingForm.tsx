@@ -22,7 +22,7 @@ const GivingFormPage: React.FC = () => {
       setTimeout(() => setCopied(null), 2000);
    };
 
-   // PLCC has no text giving; MTN, Airtel and Sendwave gifts go; members give through PLCC Tithe.
+   // PLCC has no text giving; MTN, Airtel and Sendwave gifts go; members give through Firstfruits.
    const methods: Array<{ id: string; title: string; icon: React.ReactNode; value: string; action: string; description: string; color: string; qrValue: string }> = [];
 
    const onlineLinks = [
@@ -102,7 +102,7 @@ const GivingFormPage: React.FC = () => {
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/20 text-[#0d1a14] font-black text-[10px] uppercase tracking-widest mb-4">
                      <CreditCard size={12} /> Secure Portal
                   </div>
-                  <h2 className="text-3xl lg:text-4xl font-black text-[#0d1a14] mb-4">Online Giving via PLCC Tithe</h2>
+                  <h2 className="text-3xl lg:text-4xl font-black text-[#0d1a14] mb-4">Online Giving via Firstfruits</h2>
                   <p className="text-gray-500 font-medium text-lg leading-relaxed max-w-xl">
                      Manage your recurring gifts, tithes, and building fund contributions securely through our dedicated donor portal.
                   </p>

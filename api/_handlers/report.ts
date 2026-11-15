@@ -4,19 +4,19 @@ import { vaultFrom } from '../_utils/emailFrom.js';
 
 /**
  * POST /api/vault?resource=report
- * (PLCC Connect reaches this through its /api/report bridge.)
+ * (Tribes reaches this through its /api/report bridge.)
  *
  * Three kinds of report, all emailed to REPORT_NOTIFY_EMAILS
  * (comma-separated list, set in Vercel env):
- *   - kind: 'problem' — app issue in PLCC Chat / Canaan / Connect / Sanctum, with screenshots
+ *   - kind: 'problem' — app issue in Jordan / Canaan / Connect / Sanctum, with screenshots
  *   - kind: 'safety'  — harassment, impersonating a leader, asking for / sending money, scams
  *   - kind: 'content' — Report on a specific message, post, prayer request or profile
  */
 
 const APPS: Record<string, string> = {
-  chat: 'PLCC Chat',
+  chat: 'Jordan',
   canaan: 'PLCC Canaan',
-  connect: 'PLCC Connect',
+  connect: 'Tribes',
   sanctum: 'PLCC Sanctum',
 };
 
@@ -91,9 +91,9 @@ const IMPERSONATED_LABEL: Record<string, string> = {
 };
 
 const WHERE_LABEL: Record<string, string> = {
-  chat: 'PLCC Chat',
+  chat: 'Jordan',
   canaan: 'PLCC Canaan',
-  connect: 'PLCC Connect',
+  connect: 'Tribes',
   sanctum: 'PLCC Sanctum',
   whatsapp: 'WhatsApp',
   call_sms: 'Phone call or SMS',

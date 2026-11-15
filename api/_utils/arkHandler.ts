@@ -1,6 +1,6 @@
 /**
  * PLCC Ark — scores, leaderboards and PLCC Bucks for the church's retro games.
- * resource=ark&action=…   (PLCC Connect reaches it through its same-origin /api/ark bridge)
+ * resource=ark&action=…   (Tribes reaches it through its same-origin /api/ark bridge)
  *
  * Members:  GET me · GET board · POST score · POST privacy (hide a player's name on the boards)
  * Staff:    GET admin · POST remove · POST approve · PATCH settings
@@ -293,7 +293,7 @@ export async function handleArk(req: any, res: any, deps: Deps = DEFAULT_DEPS) {
       await settleLastWeek(supabase);
       const { players } = await loadPlayers(supabase, userId);
       if (!players.length) {
-        return fail(res, 403, 'unlinked', 'Finish your PLCC Connect profile to play in the Ark.');
+        return fail(res, 403, 'unlinked', 'Finish your Tribes profile to play in the Ark.');
       }
       const kids = players.filter((p) => p.isChild).map((p) => p.id);
       const [bests, bucks] = await Promise.all([bestScores(supabase, players.map((p) => p.id)), arkBucksThisWeek(supabase, kids)]);

@@ -1158,7 +1158,7 @@ const handleEvents = async (req: any, res: any) => {
     /**
      * GET ?subResource=rsvp-status&r=<registration id> — public, for the guest's own RSVP
      * confirmation (Tithe sends them back here after paying). The registration id is a random
-     * UUID only the guest has. Checks PLCC Tithe first, so a just-confirmed payment shows Paid.
+     * UUID only the guest has. Checks Firstfruits first, so a just-confirmed payment shows Paid.
      */
     if (subResource === 'rsvp-status') {
         res.setHeader('Cache-Control', 'private, no-store');
@@ -1240,7 +1240,7 @@ const handleEvents = async (req: any, res: any) => {
                 guests,
                 amount,
                 status,
-                paidVia: status === 'paid' && paidBy.startsWith('PLCC Tithe') ? paidBy.split('·')[1]?.trim() || 'PLCC Tithe' : null,
+                paidVia: status === 'paid' && paidBy.startsWith('Firstfruits') ? paidBy.split('·')[1]?.trim() || 'Firstfruits' : null,
                 payUrl,
             });
         } catch (err: any) {
@@ -1272,7 +1272,7 @@ const handleEvents = async (req: any, res: any) => {
      *   GET  ?subResource=rsvp-archive            — archived RSVPs with totals (Super Admin, Pastor, First Lady, Finance)
      *   POST ?subResource=rsvp-archive {eventId, action: 'archive' | 'restore'} — Super Admin only
      * Archiving keeps every signup and paid record, turns online signup off, and takes the
-     * RSVP off the active list and PLCC Connect. Restoring turns it back on.
+     * RSVP off the active list and Tribes. Restoring turns it back on.
      */
     if (subResource === 'rsvp-archive') {
         try {
@@ -1403,12 +1403,12 @@ const handleEvents = async (req: any, res: any) => {
             );
             const unpaidGifts = withGift.filter((r) => !r.food_contribution_paid);
             if (unpaidGifts.length) {
-                // Ask PLCC Tithe first: a gift may have been paid or sent since the list was loaded.
+                // Ask Firstfruits first: a gift may have been paid or sent since the list was loaded.
                 const check = await syncRsvpGiftsFromTithe(supabaseAdmin, unpaidGifts);
                 if (check.warning && !/not configured/i.test(check.warning)) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Could not check PLCC Tithe for gifts on this RSVP. Please try again in a minute.',
+                        error: 'Could not check Firstfruits for gifts on this RSVP. Please try again in a minute.',
                     });
                 }
                 if (check.updated > 0) {
@@ -1556,7 +1556,7 @@ const handleEvents = async (req: any, res: any) => {
                 // Staff "Add RSVP" from the Vault's RSVP list: Super Admin only. It works after
                 // signups close, and skips the guest-only rules (Pledge/Pay Now choice, gift
                 // minimum, T-shirts, adults-from-home limit). No money moves here — a Pay Now
-                // gift is still finished on PLCC Tithe and recorded in PLCC DCB the usual way.
+                // gift is still finished on Firstfruits and recorded in PLCC DCB the usual way.
                 const staffAdd = req.body?.staffAdd === true;
                 let staffAddedBy: string | null = null;
                 if (staffAdd) {
@@ -1589,7 +1589,7 @@ const handleEvents = async (req: any, res: any) => {
 
                 if (!name) return res.status(400).json({ ok: false, error: 'Please enter your name' });
                 if (!phone && !staffAdd) return res.status(400).json({ ok: false, error: 'Please enter a phone number' });
-                // Email is required on public RSVPs (confirmations and PLCC Tithe receipts); staff adding
+                // Email is required on public RSVPs (confirmations and Firstfruits receipts); staff adding
                 // someone in the Vault may leave it blank for a member who has no email.
                 if (!email && !staffAdd) return res.status(400).json({ ok: false, error: 'Please enter your email' });
                 if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
@@ -1778,7 +1778,7 @@ const handleEvents = async (req: any, res: any) => {
                     injury_signed_at: signedAt,
                 };
 
-                // Pay Now guests finish on PLCC Tithe: make sure the event's fund is there first
+                // Pay Now guests finish on Firstfruits: make sure the event's fund is there first
                 // (runs alongside the save; never blocks the signup).
                 const fundSetup =
                     giftIntent === 'pay_now'
@@ -1983,7 +1983,7 @@ const handleEvents = async (req: any, res: any) => {
                 if (error) throw error;
 
                 const rows = data || [];
-                // Pay Now gifts are finished on PLCC Tithe; mark the ones Tithe has confirmed.
+                // Pay Now gifts are finished on Firstfruits; mark the ones Tithe has confirmed.
                 const rsvpFund = eventFundName(cfg.eventId || eventId, cfg.name);
                 // Staff can share a guest's Tithe pay link from this list, so keep the event's fund set up.
                 const [titheSync] = await Promise.all([
@@ -2415,7 +2415,7 @@ const handleEvents = async (req: any, res: any) => {
                 const id = String(req.body?.id || req.query?.id || '').trim();
                 if (!id) return res.status(400).json({ ok: false, error: 'Registration id is required' });
 
-                // An RSVP with a gift attached can't be deleted: paid on PLCC Tithe, or sent
+                // An RSVP with a gift attached can't be deleted: paid on Firstfruits, or sent
                 // (Zelle / Venmo / Cash App waiting for Finance, or a bank payment clearing).
                 const { data: reg } = await supabaseAdmin
                     .from('event_registrations')
@@ -2435,7 +2435,7 @@ const handleEvents = async (req: any, res: any) => {
                     if (!reg.food_contribution_paid && check.warning && !/not configured/i.test(check.warning)) {
                         return res.status(503).json({
                             ok: false,
-                            error: 'Could not check PLCC Tithe for a gift on this signup. Please try again in a minute.',
+                            error: 'Could not check Firstfruits for a gift on this signup. Please try again in a minute.',
                         });
                     }
                 }
@@ -3199,7 +3199,7 @@ const handleEvents = async (req: any, res: any) => {
         if (out.rsvp_enabled !== undefined) {
             out.rsvp_enabled = Boolean(out.rsvp_enabled);
         }
-        // Payments (fellowship sign-ups): collect through PLCC Tithe, minimum, amount buttons, pledges.
+        // Payments (fellowship sign-ups): collect through Firstfruits, minimum, amount buttons, pledges.
         if (out.rsvp_payments_enabled !== undefined) {
             out.rsvp_payments_enabled = out.rsvp_payments_enabled == null ? null : Boolean(out.rsvp_payments_enabled);
         }
@@ -3343,8 +3343,8 @@ const handleEvents = async (req: any, res: any) => {
     };
 
     /**
-     * An event that collects RSVP payments gets its PLCC Tithe fund (named after the event) right away.
-     * When the event is renamed, the SAME fund is renamed in PLCC Tithe, DCB and the Vault ledger
+     * An event that collects RSVP payments gets its Firstfruits fund (named after the event) right away.
+     * When the event is renamed, the SAME fund is renamed in Firstfruits, DCB and the Vault ledger
      * (it follows the event id), so gifts made under the old name stay with the event.
      */
     const connectEventTitheFund = async (
@@ -4742,7 +4742,7 @@ const handleCommunity = async (req: any, res: any) => {
                 return res.status(200).json({ ok: true, archived: await listArchivedChats(supabaseAdmin, authUserId) });
             }
             if (chatType === 'dm-list') {
-                // PLCC Chat: your direct conversations from the server, so they show on every
+                // Jordan: your direct conversations from the server, so they show on every
                 // device and only for the account they belong to (newest first).
                 const { data: memberRows } = await supabaseAdmin
                     .from('chat_room_members')
@@ -6205,7 +6205,7 @@ const handleCommunity = async (req: any, res: any) => {
                 });
             }
             if (chatType === 'room-info' || chatType === 'room-mute') {
-                // PLCC Chat: live-update topic, Start-button hint and mute switch for one room.
+                // Jordan: live-update topic, Start-button hint and mute switch for one room.
                 const cid = String(req.body?.channelId || req.body?.channel_id || first(channelId) || '').trim();
                 if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
                 const channel = await fetchChannel(supabaseAdmin, cid);

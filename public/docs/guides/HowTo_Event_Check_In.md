@@ -6,7 +6,7 @@
 ---
 
 ## What You'll Learn
-This guide shows you how to use PLCC Connect's Event Check-In system to quickly check in members and track attendance at services and events.
+This guide shows you how to use Tribes's Event Check-In system to quickly check in members and track attendance at services and events.
 
 ---
 
@@ -24,7 +24,7 @@ That's it! The system handles the rest.
 
 ### Opening the Check-In Page
 
-**Step 1:** Log in to PLCC Connect
+**Step 1:** Log in to Tribes
 - Go to https://plcc-opal.vercel.app
 - Enter your email and password
 - Click "Sign In"

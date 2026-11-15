@@ -1,5 +1,5 @@
 /**
- * Event RSVP → PLCC Tithe: one-step "Sign up & pay", the guest's status after Tithe,
+ * Event RSVP → Firstfruits: one-step "Sign up & pay", the guest's status after Tithe,
  * and payment settings for any future event.
  * Run: npx tsx scripts/rsvp-tithe-flow-smoke.ts
  */
@@ -43,7 +43,7 @@ const url = new URL(
     returnUrl: back,
   })
 );
-assert(url.origin === 'https://plcc-tithe.vercel.app', 'goes to PLCC Tithe');
+assert(url.origin === 'https://plcc-tithe.vercel.app', 'goes to Firstfruits');
 assert(url.searchParams.get('ref') === `rsvp:${REG}`, 'ref ties the payment to the RSVP');
 assert(url.searchParams.get('amount') === '40.00', 'amount');
 assert(url.searchParams.get('fund') === 'Thanksgiving Dinner 2026', 'event fund');

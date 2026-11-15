@@ -1,5 +1,5 @@
 /**
- * PLCC Chat set 4 smoke: announcement-only rooms, pins, search (no Supabase required).
+ * Jordan set 4 smoke: announcement-only rooms, pins, search (no Supabase required).
  * Run: npx tsx scripts/chat-rooms-smoke.ts
  */
 import assert from 'node:assert/strict';

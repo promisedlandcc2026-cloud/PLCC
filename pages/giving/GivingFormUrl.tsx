@@ -53,7 +53,7 @@ const GivingFormUrlPage: React.FC = () => {
         </div>
         <h1 className="text-5xl font-extrabold text-[#0d1a14] mb-3 tracking-tighter">Direct Link Generator</h1>
         <p className="text-gray-400 font-medium max-w-lg mx-auto leading-relaxed">
-          Create scannable codes for your PLCC Tithe giving page.
+          Create scannable codes for your Firstfruits giving page.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ const GivingFormUrlPage: React.FC = () => {
                   <ExternalLink size={20} />
                 </div>
                 <div>
-                  <p className="font-bold text-[#0d1a14] text-sm">PLCC Tithe</p>
+                  <p className="font-bold text-[#0d1a14] text-sm">Firstfruits</p>
                   <p className="text-xs text-gray-400">plcc-tithe.vercel.app</p>
                 </div>
               </div>
@@ -130,7 +130,7 @@ const GivingFormUrlPage: React.FC = () => {
 
           <h3 className="relative z-10 text-2xl font-black text-white mb-2">Scan to Give</h3>
           <p className="relative z-10 text-gray-400 font-medium text-sm max-w-xs mx-auto mb-8">
-            Opens PLCC Tithe, Promised Land Christian Center's giving page.
+            Opens Firstfruits, Promised Land Christian Center's giving page.
           </p>
 
           <button

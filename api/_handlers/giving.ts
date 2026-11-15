@@ -11,7 +11,7 @@ export const handleGiving = async (req: any, res: any) => {
     if (!auth) return;
 
     // Gift records (donor names, emails, amounts) are finance-team data. Members give
-    // through PLCC Tithe and see their own history there, never through this endpoint.
+    // through Firstfruits and see their own history there, never through this endpoint.
     const role = String(auth.role || '').toUpperCase();
     if (!FINANCE_ROLES.has(role)) {
         return res.status(403).json({ ok: false, error: 'Giving records are limited to the finance team.' });

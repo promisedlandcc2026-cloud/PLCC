@@ -1,7 +1,7 @@
 /**
  * PLCC ONE — the app launcher. One sign-in (the Vault's) opens every PLCC app.
  *
- * Connect (and PLCC Ark, which Connect serves at /ark) and PLCC Chat share the Vault's
+ * Connect (and PLCC Ark, which Connect serves at /ark) and Jordan share the Vault's
  * Supabase tenant, so the launcher asks the Vault API for a single-use sign-in token
  * and the app finishes sign-in at its /auth/sso page. Tithe needs no sign-in to give.
  * Sanctum (corporate prayer rooms) runs on its own stack and keeps its own sign-in.
@@ -33,11 +33,11 @@ export const TITHE_URL = env.VITE_TITHE_URL || 'https://plcc-tithe.vercel.app/';
 const SSO_ENABLED = env.VITE_AWC_ONE_SSO !== 'false';
 
 export const AWC_ONE_APPS: AwcOneApp[] = [
-  { id: 'chat', name: 'PLCC Chat', blurb: 'Communication & Live Calls', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
+  { id: 'chat', name: 'Jordan', blurb: 'Messages, Prayer & Calls', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
   { id: 'vault', name: 'PLCC Canaan', blurb: 'Church Administration', icon: '/images/awc-one/icon-vault.webp', iconH: 54 },
-  { id: 'connect', name: 'PLCC Connect', blurb: 'Members & Community', icon: '/images/awc-one/icon-connect.webp', iconH: 46 },
+  { id: 'connect', name: 'Tribes', blurb: 'Community, Events & Groups', icon: '/images/awc-one/icon-connect.webp', iconH: 46 },
   { id: 'sanctum', name: 'PLCC Sanctum', blurb: 'Corporate Prayer Rooms', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
-  { id: 'tithe', name: 'PLCC Tithe', blurb: 'Giving & Contributions', icon: '/images/awc-one/icon-tithe.webp', iconH: 52 },
+  { id: 'tithe', name: 'Firstfruits', blurb: 'Tithe & Offerings', icon: '/images/awc-one/icon-tithe.webp', iconH: 52 },
 ];
 
 /** Where each app opens when there is no sign-on handoff. */
@@ -84,7 +84,7 @@ export async function signedInAppUrl(id: AwcOneAppId, signedIn: boolean, nextPat
 }
 
 /**
- * Chat moved to PLCC Chat. Off until VITE_CHAT_MOVED=true is set in Vercel (then redeploy);
+ * Chat moved to Jordan. Off until VITE_CHAT_MOVED=true is set in Vercel (then redeploy);
  * while off, the Vault keeps its own Chat. The old Chat stays at /community/chat-classic.
  */
 export const CHAT_MOVED = env.VITE_CHAT_MOVED === 'true';

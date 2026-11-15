@@ -1,5 +1,5 @@
 /**
- * PLCC Chat live updates + phone alerts.
+ * Jordan live updates + phone alerts.
  *
  * Instant messages: chat tables are server-only (RLS, no client policies), so
  * apps can't listen to the database. Instead the Vault broadcasts a tiny
@@ -166,7 +166,7 @@ export function chatAlertFor(opts: {
   const text = String(opts.content || '').replace(/\s+/g, ' ').trim() || 'New message';
   const isDm = vis === 'dm';
   return {
-    title: isDm ? author : String(opts.channel.name || 'PLCC Chat'),
+    title: isDm ? author : String(opts.channel.name || 'Jordan'),
     body: isDm ? text : `${author}: ${text}`,
     url: `/community/chat/${opts.channel.id}`,
     // One alert per room on the phone; a new message replaces the previous one.

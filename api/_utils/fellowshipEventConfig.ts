@@ -40,7 +40,7 @@ export type FellowshipEventConfig = {
   /** Send-to details shown when Pay Now is selected */
   paymentMethods?: RsvpPaymentMethodPublic[];
   /**
-   * Fund the event's payments are tracked under in PLCC Tithe and DCB.
+   * Fund the event's payments are tracked under in Firstfruits and DCB.
    * Other events use the event's own name (e.g. "Thanksgiving Dinner 2027").
    */
   fundName?: string;
@@ -161,7 +161,7 @@ export const FELLOWSHIP_EVENTS: Record<string, FellowshipEventConfig> = {
 };
 
 /**
- * Clean a fund name the same way PLCC Tithe does (plain text, 2–60 characters),
+ * Clean a fund name the same way Firstfruits does (plain text, 2–60 characters),
  * so the Give link, Tithe and DCB all use the exact same name.
  */
 export function cleanEventFundName(raw: unknown): string | null {
@@ -175,7 +175,7 @@ export function cleanEventFundName(raw: unknown): string | null {
 }
 
 /**
- * The fund an event's RSVP payments go to in PLCC Tithe and DCB: the event's own name
+ * The fund an event's RSVP payments go to in Firstfruits and DCB: the event's own name
  * (e.g. "Thanksgiving Dinner 2026"), or the kit's fundName for the built-in events.
  */
 export function eventFundName(eventId: string | null | undefined, eventName: string | null | undefined): string | null {

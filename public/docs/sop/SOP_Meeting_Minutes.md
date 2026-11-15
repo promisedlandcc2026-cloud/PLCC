@@ -129,7 +129,7 @@ Keep leadership informed and aligned:
 6. Save as draft
 
 **What Happens:**
-- Minutes are entered into PLCC Connect
+- Minutes are entered into Tribes
 - Document is stored in database
 - Signature tracking is configured
 

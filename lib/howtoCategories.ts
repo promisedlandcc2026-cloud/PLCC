@@ -22,7 +22,7 @@ export const HOWTO_CATEGORIES: HowToCategoryMeta[] = [
   },
   {
     key: 'connect',
-    label: 'PLCC Connect (The APP)',
+    label: 'Tribes (The APP)',
     blurb: 'Mobile app guides for everyday members',
   },
   {
@@ -33,7 +33,7 @@ export const HOWTO_CATEGORIES: HowToCategoryMeta[] = [
   },
   {
     key: 'tithe',
-    label: 'PLCC Tithe',
+    label: 'Firstfruits',
     blurb: 'Giving and tithe walkthroughs',
   },
 ];

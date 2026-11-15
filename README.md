@@ -1,5 +1,5 @@
 
-# PLCC Connect Ecosystem
+# Tribes Ecosystem
 
 ## Mobile Responsiveness Contract
 To maintain a high-quality user experience across all devices, all new features MUST adhere to this contract.

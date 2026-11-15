@@ -48,7 +48,7 @@ Protect church assets throughout the process:
    - Calculator
    - Deposit slips
    - Counting sheets
-   - Laptop with PLCC Connect access
+   - Laptop with Tribes access
 2. Verify two authorized counters are present:
    - Finance team member
    - Secretary or Assistant Secretary

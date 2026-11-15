@@ -5,7 +5,7 @@ import { signedInAppUrl } from '../../lib/awcOne';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Post an event or Serve need into an PLCC Chat room as a card (opens PLCC Chat signed in). */
+/** Post an event or Serve need into an Jordan room as a card (opens Jordan signed in). */
 export const ShareToAwcChat: React.FC<{ kind: 'event' | 'serve'; id: string | null | undefined; compact?: boolean }> = ({ kind, id, compact }) => {
   const { isAuthenticated } = useNav();
   const [busy, setBusy] = useState(false);
@@ -30,7 +30,7 @@ export const ShareToAwcChat: React.FC<{ kind: 'event' | 'serve'; id: string | nu
       }
     >
       {busy ? <Loader2 size={13} className="animate-spin" aria-hidden /> : <MessageCircle size={13} aria-hidden />}
-      Share to PLCC Chat
+      Share to Jordan
     </button>
   );
 };

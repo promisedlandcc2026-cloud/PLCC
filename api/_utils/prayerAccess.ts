@@ -1,5 +1,5 @@
 /**
- * Prayer Wall rules (Vault API, used by the Vault and PLCC Connect).
+ * Prayer Wall rules (Vault API, used by the Vault and Tribes).
  *
  * - Prayer team (prayer.manage roles) sees everything, approves, hides and deletes.
  * - Signed-in members: their public prayers go straight on the wall (Published);

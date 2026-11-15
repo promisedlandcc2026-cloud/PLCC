@@ -1,8 +1,8 @@
 import { isUgandanE164, toE164Intl } from './ugPhone.js';
 /**
- * Text sign-in codes for the Vault and PLCC Connect, sent and checked by Twilio
+ * Text sign-in codes for the Vault and Tribes, sent and checked by Twilio
  * Verify (Twilio's own pre-approved senders — the church's (855) text-to-give
- * number is not used). Same Verify service as PLCC Tithe.
+ * number is not used). Same Verify service as Firstfruits.
  *
  * Env: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID.
  */

@@ -4,22 +4,43 @@ import { useNav } from '../lib/NavContext';
 import { Section } from '../types';
 import { firstNameOf, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
 import { authedFetch } from '../lib/authedFetch';
-import {
-  PLCC_CREAM,
-  PlccAppCards,
-  PlccFooter,
-  PlccTopBar,
-  PlccWelcomeBanner,
-} from '../components/awcone/PlccOneShell';
+import { CalendarDays, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, Users } from 'lucide-react';
+import { Role } from '../types';
+import { openReport } from '../lib/report';
+import { ReportHost } from '../components/common/ReportModal';
+import { PLCC_CREAM, PlccFooter, PlccTopBar } from '../components/awcone/PlccOneShell';
 import { PlccHomeExtras } from '../components/awcone/PlccHomeExtras';
+import {
+  CANAAN,
+  CanaanFeature,
+  FIRSTFRUITS,
+  JORDAN,
+  NextGathering,
+  PlccAppList,
+  PlccDesktopBar,
+  PlccHero,
+  PlccQuickActions,
+  PlccSidebar,
+  SANCTUM,
+  SanctumFeature,
+  TRIBES,
+  type QuickAction,
+  type SearchItem,
+} from '../components/awcone/PlccOneHome';
+
+/** Member-side roles: they get the prayer rooms as the featured card instead of Canaan. */
+const MEMBER_ROLES = new Set<string>([
+  Role.GUEST, Role.MEMBER, Role.PARENT, Role.TEACHER, Role.YOUTH, Role.PENDING, Role.USER,
+]);
 
 /**
  * PLCC ONE launcher — the home screen after signing in.
- * Every member and staff role sees all four apps; the Vault opens in place,
- * the others open signed in through the one sign-on handoff.
+ * Staff see Canaan (church administration) as the featured card; members see
+ * the Sanctum prayer rooms there and Canaan in the app list. Canaan opens in
+ * place; the others open signed in through the one sign-on handoff.
  */
 const AwcOneLauncherPage: React.FC = () => {
-  const { userName, isAuthenticated, setActiveSection, logout } = useNav();
+  const { userName, userRole, isAuthenticated, setActiveSection, logout } = useNav();
   const navigate = useNavigate();
   const [busyId, setBusyId] = useState<AwcOneAppId | null>(null);
   const [note, setNote] = useState('');
@@ -59,7 +80,7 @@ const AwcOneLauncherPage: React.FC = () => {
     };
   }, []);
 
-  // Unread PLCC Chat messages on the Chat tile (same read marks PLCC Chat uses).
+  // Unread Jordan messages on the Chat tile (same read marks Jordan uses).
   const [chatUnread, setChatUnread] = useState(0);
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -97,21 +118,67 @@ const AwcOneLauncherPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  const isStaff = !MEMBER_ROLES.has(String(userRole || ''));
+  const listApps = isStaff ? [JORDAN, TRIBES, SANCTUM, FIRSTFRUITS] : [JORDAN, TRIBES, FIRSTFRUITS, { ...CANAAN, tags: 'My church account' }];
+
+  const quick: QuickAction[] = [
+    { label: 'View Calendar', Icon: CalendarDays, run: () => navigate('/events/overview') },
+    { label: 'Prayer Wall', Icon: Heart, run: () => navigate('/community/prayer-wall') },
+    { label: 'Find a Group', Icon: Users, run: () => void open('connect') },
+    { label: 'Get Support', Icon: Headphones, run: () => openReport({ kind: 'problem' }) },
+  ];
+
+  const searchItems: SearchItem[] = [
+    ...[JORDAN, TRIBES, SANCTUM, FIRSTFRUITS, CANAAN].map((a) => ({
+      label: a.name,
+      hint: a.tags,
+      run: () => void open(a.id),
+    })),
+    ...quick.map((q) => ({ label: q.label, hint: 'Quick action', run: q.run })),
+    { label: 'Giving', hint: 'Give, tithe, MTN, Airtel, Sendwave', run: () => navigate('/giving') },
+    { label: 'Notifications', hint: 'Alerts and messages', run: () => navigate('/notifications') },
+    { label: 'Report a safety concern', hint: 'Harassment, scams, impersonation', run: () => openReport({ kind: 'safety' }) },
+    { label: 'Help', hint: 'Member setup and how-to videos', run: () => navigate('/help/member-setup') },
+  ];
+
+  const sideNav = [
+    { label: 'Home', Icon: Home, active: true, onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+    { label: 'Community', Icon: Users, onClick: () => void open('connect') },
+    { label: 'Prayer', Icon: Globe2, onClick: () => void open('sanctum') },
+    { label: 'Giving', Icon: HandHeart, onClick: () => navigate('/giving') },
+    { label: 'Help & Support', Icon: HelpCircle, onClick: () => navigate('/help/member-setup') },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col font-inter" style={{ background: PLCC_CREAM, color: '#16251f' }}>
-      <PlccTopBar name={userName || first} onSignOut={logout} />
-      <main className="flex-1 mx-auto w-full max-w-6xl px-4 sm:px-8 py-6 sm:py-10">
-        <PlccWelcomeBanner first={first} />
-        <h2 className="mt-10 mb-4 text-2xl font-semibold text-[#16251f]" style={{ fontFamily: "'Fraunces', Georgia, serif" }}>
-          Your apps
-        </h2>
-        <PlccAppCards onOpen={open} busyId={busyId} badges={{ chat: chatUnread }} />
-        {note ? (
-          <p role="alert" className="mt-4 text-center text-sm font-bold text-red-700">{note}</p>
-        ) : null}
-        <PlccHomeExtras enabled={isAuthenticated} />
-      </main>
-      <PlccFooter onSignOut={logout} />
+    <div className="min-h-screen lg:flex font-inter" style={{ background: PLCC_CREAM, color: '#16251f' }}>
+      <PlccSidebar items={sideNav} />
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
+        <div className="lg:hidden">
+          <PlccTopBar name={userName || first} onSignOut={logout} />
+        </div>
+        <PlccDesktopBar name={userName || first} items={searchItems} onSignOut={logout} />
+        <main className="flex-1 mx-auto w-full max-w-[1180px] px-4 sm:px-8 py-5 sm:py-8 space-y-5">
+          <PlccHero />
+          <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr] items-start">
+            <div className="space-y-5">
+              {isStaff ? (
+                <CanaanFeature onOpen={() => void open('vault')} busy={busyId === 'vault'} />
+              ) : (
+                <SanctumFeature onOpen={() => void open('sanctum')} busy={busyId === 'sanctum'} />
+              )}
+              <NextGathering enabled={isAuthenticated} />
+            </div>
+            <PlccAppList apps={listApps} onOpen={(id) => void open(id)} busyId={busyId} badges={{ chat: chatUnread }} />
+          </div>
+          {note ? (
+            <p role="alert" className="text-center text-sm font-bold text-red-700">{note}</p>
+          ) : null}
+          <PlccQuickActions actions={quick} />
+          <PlccHomeExtras enabled={isAuthenticated} />
+        </main>
+        <PlccFooter onSignOut={logout} />
+      </div>
+      <ReportHost />
     </div>
   );
 };

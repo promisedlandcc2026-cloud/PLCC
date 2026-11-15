@@ -263,7 +263,7 @@ const Sidebar: React.FC = () => {
 
   useVaultPoll(
     async () => {
-      // After Chat moves to PLCC Chat, count by PLCC Chat's own read marks (no local timestamp).
+      // After Chat moves to Jordan, count by Jordan's own read marks (no local timestamp).
       const lastRead = CHAT_MOVED ? '' : localStorage.getItem('last_chat_read') || '';
       const [chatRes, inboxRes] = await Promise.all([
         fetchAuthorized(

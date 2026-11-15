@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, CalendarDays, HandHeart, Heart, Megaphone, MapPin } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, Megaphone, MapPin } from 'lucide-react';
 import { authedFetch } from '../../lib/authedFetch';
 import { eventCalendarYmd, eventLocalNoon, formatEventWhenLabel, toEventYmd } from '../../lib/eventDate';
 import { PLCC_GOLD, PLCC_GREEN } from './PlccOneShell';
@@ -13,7 +13,7 @@ import { PLCC_GOLD, PLCC_GREEN } from './PlccOneShell';
 
 const serif = { fontFamily: "'Fraunces', Georgia, serif" } as const;
 
-type HomeEvent = { id?: string; title: string; date?: string; start_time?: string; time?: string; location?: string | null };
+export type HomeEvent = { id?: string; title: string; date?: string; start_time?: string; time?: string; location?: string | null };
 type Inspiration = { text: string; reference?: string | null };
 type Announcement = { id?: string; title: string; content?: string | null };
 
@@ -33,7 +33,7 @@ function todaysFallback(): Inspiration {
   return FALLBACK_VERSES[day % FALLBACK_VERSES.length];
 }
 
-function upcoming(raw: any): HomeEvent[] {
+export function upcoming(raw: any): HomeEvent[] {
   const list: any[] = Array.isArray(raw?.events) ? raw.events : Array.isArray(raw) ? raw : [];
   const cutoff = Date.now() - 12 * 60 * 60 * 1000;
   return list
@@ -100,12 +100,6 @@ export const PlccHomeExtras: React.FC<{ enabled: boolean }> = ({ enabled }) => {
   }, [enabled]);
 
   const verse = word || todaysFallback();
-  const quick = [
-    { label: 'Prayer', Icon: Heart, to: '/community/prayer-wall' },
-    { label: 'Calendar', Icon: CalendarDays, to: '/events/overview' },
-    { label: 'Give', Icon: HandHeart, to: '/giving' },
-  ];
-
   return (
     <div className="hidden lg:block mt-10 space-y-6" aria-label="Church home">
       <div className="grid grid-cols-2 gap-6">
@@ -186,23 +180,6 @@ export const PlccHomeExtras: React.FC<{ enabled: boolean }> = ({ enabled }) => {
         )}
       </section>
 
-      {/* Quick access */}
-      <section className="rounded-[24px] p-8" style={{ background: '#ebe3d5' }}>
-        <h2 className="text-2xl font-semibold text-[#16251f] mb-5" style={serif}>Quick Access</h2>
-        <div className="grid grid-cols-3 gap-5">
-          {quick.map(({ label, Icon, to }) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => navigate(to)}
-              className="rounded-2xl bg-white py-6 flex flex-col items-center gap-2 text-[#16251f] font-semibold hover:shadow-[0_10px_30px_rgba(22,37,31,0.10)] hover:-translate-y-0.5 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d372c]"
-            >
-              <Icon size={24} style={{ color: PLCC_GREEN }} aria-hidden />
-              {label}
-            </button>
-          ))}
-        </div>
-      </section>
     </div>
   );
 };

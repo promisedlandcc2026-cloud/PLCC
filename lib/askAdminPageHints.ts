@@ -17,7 +17,7 @@ export const ASK_ADMIN_PAGE_HINTS: Record<string, string> = {
   '/events/cookout-rsvps': 'How do I add a guest, see who paid, or delete or archive an event RSVP?',
   '/events/rsvp-archive': 'What is the RSVP Archive, and who can see or restore it?',
   '/events/alerts': 'How do I send an alert to the check-in stations?',
-  '/community/daily-devotional': 'How do I write and schedule the Daily Devotional for PLCC Connect?',
+  '/community/daily-devotional': 'How do I write and schedule the Daily Devotional for Tribes?',
   '/thanksgiving-rsvp': 'How do I RSVP for the Grand Family Celebration?',
   '/grand-family-celebration-rsvp': 'How do I RSVP for the Grand Family Celebration?',
   '/marrieds-dinner-rsvp': 'How do I RSVP for the Marrieds Dinner?',

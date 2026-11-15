@@ -2,14 +2,14 @@
  * Fundraisers (moved from DCB).  resource=fundraisers&action=…
  *
  * Gifts, pledges, fun charges ("Coming in late" $20 …), game/event cash and online gifts
- * from PLCC Tithe, with a running calculator of what's raised and who still owes.
+ * from Firstfruits, with a running calculator of what's raised and who still owes.
  *
  * Access (checked here, server-side):
  *   use     — by role: SUPER_ADMIN, ADMIN, PASTOR, FIRST_LADY, SECRETARY, ASST_SECRETARY, FINANCE;
  *             anyone else (Members, Accountants…) only with users.fundraiser_access switched on
  *   use     — includes starting, editing, closing/reopening a fundraiser and its fun charge prices,
  *             so the people who run the fundraiser don't depend on anyone else
- *   manage  — PLCC Tithe fund link (it shows donor names) and who has the switch:
+ *   manage  — Firstfruits fund link (it shows donor names) and who has the switch:
  *             SUPER_ADMIN, ADMIN, PASTOR, FIRST_LADY, FINANCE
  *   delete  — fundraisers, entries, payments: SUPER_ADMIN, ADMIN, PASTOR, FIRST_LADY
  * Online gifts from Tithe are read-only here; fix or refund them in Tithe.
@@ -201,7 +201,7 @@ async function loadFull(db: Db, id: string) {
     const { data } = await db.from('users').select('id, name, email').in('id', ids.slice(i, i + 150));
     for (const u of data || []) names.set(u.id, String(u.name || u.email || '').trim() || 'Staff');
   }
-  const recordedBy = (row: any) => (row.external_ref ? 'PLCC Tithe' : row.entered_by ? names.get(row.entered_by) || 'Staff' : null);
+  const recordedBy = (row: any) => (row.external_ref ? 'Firstfruits' : row.entered_by ? names.get(row.entered_by) || 'Staff' : null);
 
   const byEntry = new Map<string, any[]>();
   for (const p of payments) {
@@ -253,7 +253,7 @@ async function loadPaymentsFor(db: Db, entryIds: string[]): Promise<any[]> {
 }
 
 // ---------------------------------------------------------------------------
-// PLCC Tithe online gifts
+// Firstfruits online gifts
 //
 // Every row created from one Tithe gift carries external_ref 'tithe:<transaction>'.
 // A gift paid through a "Pay my balance" link (frm:/fre: reference) goes onto that
@@ -339,7 +339,7 @@ async function applyTitheGift(
 ): Promise<{ appliedCents: number; giftCents: number }> {
   const entryDate = dateOr(String(g.contributedAt || '').slice(0, 10), today());
   const method = titheMethod(g.paymentMethod);
-  const note = g.receiptNumber ? `PLCC Tithe receipt ${g.receiptNumber}` : 'PLCC Tithe';
+  const note = g.receiptNumber ? `Firstfruits receipt ${g.receiptNumber}` : 'Firstfruits';
   const { allocations, remainderCents } = allocatePayment(targets, netCents);
   for (const a of allocations) {
     const { error } = await db.from('fundraiser_payments').insert({
@@ -381,7 +381,7 @@ async function applyTitheGift(
       payment_date: entryDate,
       amount_cents: remainderCents,
       payment_method: method,
-      notes: 'PLCC Tithe',
+      notes: 'Firstfruits',
       external_ref: ref,
     });
     if (pErr) throw pErr;
@@ -397,7 +397,7 @@ async function syncTitheGifts(db: Db, fundraiser: any, force = false): Promise<S
     return none;
   }
   if (!deps.isTitheSyncConfigured()) {
-    return { ...none, warning: 'PLCC Tithe link not configured (set AWC_TITHE_VAULT_KEY), so online gifts are not added yet.' };
+    return { ...none, warning: 'Firstfruits link not configured (set AWC_TITHE_VAULT_KEY), so online gifts are not added yet.' };
   }
   let gifts: any[];
   try {
@@ -405,7 +405,7 @@ async function syncTitheGifts(db: Db, fundraiser: any, force = false): Promise<S
     gifts = Array.isArray(data.gifts) ? data.gifts : [];
   } catch (err: any) {
     console.error('[fundraisers] Tithe sync failed:', err?.message || err);
-    return { ...none, warning: 'Could not reach PLCC Tithe to check online gifts. Showing saved entries.' };
+    return { ...none, warning: 'Could not reach Firstfruits to check online gifts. Showing saved entries.' };
   }
 
   const entries = await loadLiveEntries(db, fundraiser.id);
@@ -635,13 +635,13 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
       }
 
       if (action === 'tithe-funds') {
-        if (!canManage) return fail(res, 403, 'Only finance leaders can link an PLCC Tithe fund.', 'forbidden');
-        if (!deps.isTitheSyncConfigured()) return res.status(200).json({ ok: true, funds: [], warning: 'PLCC Tithe link not configured (set AWC_TITHE_VAULT_KEY).' });
+        if (!canManage) return fail(res, 403, 'Only finance leaders can link an Firstfruits fund.', 'forbidden');
+        if (!deps.isTitheSyncConfigured()) return res.status(200).json({ ok: true, funds: [], warning: 'Firstfruits link not configured (set AWC_TITHE_VAULT_KEY).' });
         try {
           const data = await deps.titheSignedPost<{ funds: any[] }>('funds', {});
           return res.status(200).json({ ok: true, funds: data.funds || [] });
         } catch (err: any) {
-          return res.status(200).json({ ok: true, funds: [], warning: 'Could not reach PLCC Tithe. Try again in a minute.' });
+          return res.status(200).json({ ok: true, funds: [], warning: 'Could not reach Firstfruits. Try again in a minute.' });
         }
       }
 
@@ -756,7 +756,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
         patch.closed_at = body.status === 'closed' ? new Date().toISOString() : null;
       }
       if (body.titheFundId !== undefined) {
-        if (!canManage) return fail(res, 403, 'Only finance leaders can link an PLCC Tithe fund.', 'forbidden');
+        if (!canManage) return fail(res, 403, 'Only finance leaders can link an Firstfruits fund.', 'forbidden');
         const fundId = cleanText(body.titheFundId, 100);
         patch.tithe_fund_id = fundId;
         patch.tithe_fund_name = fundId ? cleanText(body.titheFundName, 120) : null;
@@ -955,7 +955,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
 
     const entryId = first(body.entryId);
 
-    // Put an online gift (from PLCC Tithe) onto someone's pledges / fun charges.
+    // Put an online gift (from Firstfruits) onto someone's pledges / fun charges.
     if (action === 'match-online') {
       if (!UUID_RE.test(entryId)) return fail(res, 400, 'Pick the online gift.');
       const gift = await loadEntryRow(db, fundraiserId, entryId);
@@ -975,7 +975,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
           payment_date: gift.entry_date,
           amount_cents: a.amountCents,
           payment_method: method,
-          notes: `${gift.notes || 'PLCC Tithe'} · matched from ${gift.display_name}`,
+          notes: `${gift.notes || 'Firstfruits'} · matched from ${gift.display_name}`,
           external_ref: gift.external_ref,
           entered_by: userId || null,
         });
@@ -989,7 +989,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
           await db.from('fundraiser_payments').update({ amount_cents: remainderCents, external_ref: gift.external_ref }).eq('id', keep.id);
         }
         await recomputeReceived(db, gift.id);
-        await db.from('fundraiser_entries').update({ notes: `${gift.notes || 'PLCC Tithe'} · part applied to a balance` }).eq('id', gift.id);
+        await db.from('fundraiser_entries').update({ notes: `${gift.notes || 'Firstfruits'} · part applied to a balance` }).eq('id', gift.id);
       } else {
         await db.from('fundraiser_entries').delete().eq('id', gift.id); // its payment row goes with it
       }
@@ -1022,7 +1022,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
       const entry = await loadEntryRow(db, fundraiserId, entryId);
       if (!entry) return fail(res, 404, 'Entry not found.');
       if (entry.source_type === 'online') {
-        return fail(res, 400, 'Online gifts come from PLCC Tithe. Fix or refund them in Tithe and they update here.');
+        return fail(res, 400, 'Online gifts come from Firstfruits. Fix or refund them in Tithe and they update here.');
       }
       const owed = Number(entry.owed_amount_cents || 0);
       const received = Number(entry.received_amount_cents || 0);
@@ -1152,7 +1152,7 @@ export async function handleFundraisers(req: any, res: any, injected?: Partial<F
         if (pErr) throw pErr;
         if (!payment) return fail(res, 404, 'Payment not found.');
         if (payment.external_ref) {
-          return fail(res, 400, 'This payment came from PLCC Tithe. Refund it in Tithe and it comes off here automatically.');
+          return fail(res, 400, 'This payment came from Firstfruits. Refund it in Tithe and it comes off here automatically.');
         }
         await outOfDcb([payment], entry, 'Payment removed in PLCC Canaan fundraiser');
         const { error } = await db.from('fundraiser_payments').delete().eq('id', paymentId);

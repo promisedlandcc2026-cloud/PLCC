@@ -6,7 +6,7 @@
 ---
 
 ## What You'll Learn
-This guide shows you how to create ministry teams, manage members, process applications, and coordinate volunteers using PLCC Connect.
+This guide shows you how to create ministry teams, manage members, process applications, and coordinate volunteers using Tribes.
 
 ---
 

@@ -26,11 +26,11 @@ export type RsvpPaymentMethodPublic = {
   action?: string;
 };
 
-/** PLCC Tithe — the church's giving site. Every RSVP "Pay Now" gift is finished there. */
+/** Firstfruits — the church's giving site. Every RSVP "Pay Now" gift is finished there. */
 export const AWC_TITHE_URL = 'https://plcc-tithe.vercel.app/';
 
 /**
- * Pay Now options for fellowship dinner RSVPs. All of them finish on PLCC Tithe:
+ * Pay Now options for fellowship dinner RSVPs. All of them finish on Firstfruits:
  * card/bank is confirmed by Stripe; Zelle, Cash App and Venmo get a memo code
  * there and count only after Finance verifies them. Send-to details live in
  * Tithe so there is one source of truth.
@@ -39,8 +39,8 @@ export const FELLOWSHIP_RSVP_PAYMENT_METHODS: RsvpPaymentMethodPublic[] = [
   {
     id: 'card',
     title: 'Card or bank',
-    value: 'PLCC Tithe',
-    description: 'Pay securely by card, Apple Pay, Google Pay or bank account on PLCC Tithe.',
+    value: 'Firstfruits',
+    description: 'Pay securely by card, Apple Pay, Google Pay or bank account on Firstfruits.',
     live: true,
   },
   {
@@ -48,22 +48,22 @@ export const FELLOWSHIP_RSVP_PAYMENT_METHODS: RsvpPaymentMethodPublic[] = [
     // still pass; PLCC shows them as MTN, Airtel and Sendwave.
     id: 'zelle',
     title: 'MTN Mobile Money',
-    value: 'PLCC Tithe',
-    description: 'PLCC Tithe shows the church MTN number and a reference code to include.',
+    value: 'Firstfruits',
+    description: 'Firstfruits shows the church MTN number and a reference code to include.',
     live: true,
   },
   {
     id: 'cashapp',
     title: 'Airtel Money',
-    value: 'PLCC Tithe',
-    description: 'PLCC Tithe shows the church Airtel number and a reference code to include.',
+    value: 'Firstfruits',
+    description: 'Firstfruits shows the church Airtel number and a reference code to include.',
     live: true,
   },
   {
     id: 'venmo',
     title: 'Sendwave',
-    value: 'PLCC Tithe',
-    description: 'Giving from abroad? PLCC Tithe shows who to send to on Sendwave and a reference code.',
+    value: 'Firstfruits',
+    description: 'Giving from abroad? Firstfruits shows who to send to on Sendwave and a reference code.',
     live: true,
   },
 ];
@@ -77,7 +77,7 @@ const TITHE_METHOD: Record<GiftPaymentMethod, string> = {
 };
 
 /**
- * Link that opens PLCC Tithe pre-filled for this RSVP's gift. The donor still
+ * Link that opens Firstfruits pre-filled for this RSVP's gift. The donor still
  * reviews and confirms there; the RSVP is marked paid only when Tithe reports
  * the payment confirmed (see titheRsvpSync.ts) — never on this click.
  */
@@ -233,7 +233,7 @@ export function parseGiftPaymentChoice(body: {
   if (rawIntent === 'pledge') {
     return { ok: true, intent: 'pledge', method: null };
   }
-  // The guest picks card / bank / Zelle / Cash App / Venmo on PLCC Tithe now; an older
+  // The guest picks card / bank / Zelle / Cash App / Venmo on Firstfruits now; an older
   // form may still send one, which is kept as a hint.
   if (rawMethod == null || rawMethod === '') {
     return { ok: true, intent: 'pay_now', method: null };

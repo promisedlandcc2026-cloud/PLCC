@@ -2,7 +2,7 @@
  * Automatic birthday & wedding-anniversary greetings from the Pastor.
  *
  * Every morning at 7 AM (church time) the daily cron calls runCelebrationGreetings():
- *   - Adults with PLCC Connect → inbox notice + phone alert ("celebration"); Connect opens
+ *   - Adults with Tribes → inbox notice + phone alert ("celebration"); Connect opens
  *     it as a birthday card with the church header and seal.
  *   - Anyone with an email (Connect or not) also gets the same card by email, with the seal,
  *     while "Email the card" is on (emailFallback).

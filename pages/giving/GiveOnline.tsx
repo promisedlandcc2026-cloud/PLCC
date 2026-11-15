@@ -13,7 +13,7 @@ import { TITHE_URL } from '../../lib/simpleNav';
 /**
  * Member Give page.
  *
- * The Vault does not take payments itself. Every gift is made on PLCC Tithe,
+ * The Vault does not take payments itself. Every gift is made on Firstfruits,
  * which processes it, emails the receipt, and records it in the Digital
  * Contribution Book (DCB). One payment system means one set of receipts and
  * one ledger — nothing given here can bypass the DCB.
@@ -44,7 +44,7 @@ const WAYS_TO_GIVE = [
 const GiveOnlinePage: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto pb-24 pt-4 px-4 space-y-8 animate-in fade-in duration-700">
-      {/* Hero — mirrors PLCC Tithe's look */}
+      {/* Hero — mirrors Firstfruits's look */}
       <section
         className="relative overflow-hidden rounded-[2rem] text-white shadow-2xl"
         style={{
@@ -63,7 +63,7 @@ const GiveOnlinePage: React.FC = () => {
               <p className="text-lg leading-tight" style={serif}>
                 Promised Land Christian Center
               </p>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#e6c766]">PLCC Tithe</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#e6c766]">Firstfruits</p>
             </div>
           </div>
 

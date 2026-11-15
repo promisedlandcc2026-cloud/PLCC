@@ -41,7 +41,7 @@ Create a welcoming and efficient check-in process:
 
 ### Step 1: Search for Family
 **Staff Action:**
-- Open the Kids Check-In page in PLCC Connect.
+- Open the Kids Check-In page in Tribes.
 - Search using one of three methods:
   - **Family Name**: Type the household name (e.g., "Smith Family").
   - **Parent/Child Name**: Type any family member's first or last name.

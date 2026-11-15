@@ -8,7 +8,7 @@ import PhoneInput from '../common/PhoneInput';
  * number once (a texted code), so "Text me a code" on the sign-in page works for them.
  * The number on the profile alone is never enough: anyone can type a number there.
  *
- * Shared by the Vault profile; PLCC Connect calls the same API (resource=auth-phone-code).
+ * Shared by the Vault profile; Tribes calls the same API (resource=auth-phone-code).
  */
 type Status = { enabled: boolean; phone: string | null };
 
@@ -93,7 +93,7 @@ export default function TextSignInCard({ defaultPhone }: { defaultPhone?: string
         <div>
           <h2 className="text-base font-semibold text-stone-900">Sign in by text</h2>
           <p className="text-sm text-stone-600 mt-0.5 leading-relaxed">
-            Get a 6-digit code by text instead of typing a password. Works in PLCC Canaan and PLCC Connect.
+            Get a 6-digit code by text instead of typing a password. Works in PLCC Canaan and Tribes.
           </p>
         </div>
       </div>

@@ -47,7 +47,7 @@ export type EventRsvpRuntimeConfig = {
   giftPerPerson: boolean;
   /** Members may pledge (pay later / at the event) instead of paying now. */
   allowPledge: boolean;
-  /** Fund in PLCC Tithe, the Vault ledger and DCB (the event's own name). */
+  /** Fund in Firstfruits, the Vault ledger and DCB (the event's own name). */
   fundName: string | null;
   /** True when sourced from fellowship kit (or kit overlay) */
   fromKit: boolean;

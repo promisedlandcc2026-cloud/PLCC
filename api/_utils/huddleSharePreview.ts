@@ -44,7 +44,7 @@ export const HUDDLE_SHARE_PREVIEWS: Record<string, HuddleSharePreview> = {
 const DEFAULT_PREVIEW: Omit<HuddleSharePreview, 'channelId'> = {
   slug: 'awc-huddle-default',
   title: 'PLCC Live Huddle',
-  description: 'Join the Live Huddle on PLCC Connect.',
+  description: 'Join the Live Huddle on Tribes.',
   ext: 'jpg',
 };
 
@@ -111,7 +111,7 @@ export function resolveHuddleShareCard(opts: {
   const description =
     registered?.description ||
     (label
-      ? `Join the Live Huddle in ${label.startsWith('#') ? label : `#${label}`} on PLCC Connect.`
+      ? `Join the Live Huddle in ${label.startsWith('#') ? label : `#${label}`} on Tribes.`
       : DEFAULT_PREVIEW.description);
 
   const dbImage = String(opts.shareImageUrl || '').trim();
@@ -166,7 +166,7 @@ export function renderHuddleSharePreviewHtml(card: {
   previewShareUrl: string;
   appInviteUrl: string;
   /**
-   * Same huddle in PLCC Connect (member app). When set, browsers go to Connect
+   * Same huddle in Tribes (member app). When set, browsers go to Connect
    * unless this browser is signed in to the Vault (staff) — both apps join the
    * same live call, this only picks which app opens.
    */
@@ -184,7 +184,7 @@ export function renderHuddleSharePreviewHtml(card: {
   const connectUrl = card.connectInviteUrl ? escapeHtml(card.connectInviteUrl) : '';
   const connectJs = card.connectInviteUrl ? JSON.stringify(card.connectInviteUrl) : 'null';
   /*
-   * Browsers: show two buttons (PLCC Connect / The Vault) and let people pick —
+   * Browsers: show two buttons (Tribes / The Vault) and let people pick —
    * both join the same call. ?app=connect|vault skips straight to that app.
    */
   const redirectJs = card.connectInviteUrl
@@ -196,9 +196,9 @@ if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})(
     <img src="${imageUrl}" alt="" width="120" height="120" style="width:120px;height:120px;border-radius:24px;object-fit:cover" />
     <p class="kicker">Live Huddle</p>
     <h1>${title.replace(/\s*·\s*Live Huddle$/, '')}</h1>
-    <p class="signin">Sign in to PLCC Connect or PLCC Canaan, then tap the huddle link. It opens right into the prayer call.</p>
+    <p class="signin">Sign in to Tribes or PLCC Canaan, then tap the huddle link. It opens right into the prayer call.</p>
     <p class="q" style="margin-top:20px">Join the huddle on:</p>
-    <a class="btn gold" href="${connectUrl}">PLCC Connect<small>Most members</small></a>
+    <a class="btn gold" href="${connectUrl}">Tribes<small>Most members</small></a>
     <a class="btn plain" href="${appInviteUrl}">PLCC Canaan<small>Church staff</small></a>
     <p class="note">Either way, you're in the same prayer call.</p>
   </main>`

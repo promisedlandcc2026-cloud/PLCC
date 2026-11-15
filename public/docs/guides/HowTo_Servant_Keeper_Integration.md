@@ -6,15 +6,15 @@
 ---
 
 ## What You'll Learn
-This guide shows you how to sync data between Servant Keeper 8 and PLCC Connect using bidirectional CSV import/export.
+This guide shows you how to sync data between Servant Keeper 8 and Tribes using bidirectional CSV import/export.
 
 ---
 
 ## Overview
 
 The Servant Keeper integration allows you to:
-- **Import** member, contribution, and attendance data from Servant Keeper into PLCC Connect
-- **Export** PLCC Connect data back to Servant Keeper format
+- **Import** member, contribution, and attendance data from Servant Keeper into Tribes
+- **Export** Tribes data back to Servant Keeper format
 - **Track** all sync operations with detailed history
 - **Resolve** conflicts when data doesn't match between systems
 
@@ -23,7 +23,7 @@ The Servant Keeper integration allows you to:
 ## Quick Start
 
 1. Export CSV from Servant Keeper 8
-2. Import CSV into PLCC Connect
+2. Import CSV into Tribes
 3. Review sync results
 4. Export PLCC data back to Servant Keeper (optional)
 
@@ -130,11 +130,11 @@ The Servant Keeper integration allows you to:
 
 ---
 
-## Part 2: Importing into PLCC Connect
+## Part 2: Importing into Tribes
 
 ### Accessing the Integration
 
-**Step 1:** Log in to PLCC Connect
+**Step 1:** Log in to Tribes
 - Go to https://plcc-opal.vercel.app
 - Enter your credentials
 - Click **Sign In**
@@ -207,7 +207,7 @@ System configuration issue. Contact admin.
 
 ---
 
-## Part 3: Exporting from PLCC Connect
+## Part 3: Exporting from Tribes
 
 ### Exporting Data
 
@@ -315,7 +315,7 @@ Each entry shows:
 
 **Error: "Duplicate record found"**
 **Solution:**
-- Record already exists in PLCC Connect
+- Record already exists in Tribes
 - System will update existing record
 - Check if IndividualID matches
 - Review sync mapping
@@ -340,7 +340,7 @@ Each entry shows:
 
 **Error: "No records found to export"**
 **Solution:**
-- Check that data exists in PLCC Connect
+- Check that data exists in Tribes
 - Verify entity type is correct
 - Check date range filters
 - Ensure you have permission to view data
@@ -375,7 +375,7 @@ Each entry shows:
 ## Best Practices
 
 ### Before Importing
-- [ ] Backup your PLCC Connect database
+- [ ] Backup your Tribes database
 - [ ] Review CSV file for accuracy
 - [ ] Check for duplicate records
 - [ ] Verify required fields are present
@@ -389,7 +389,7 @@ Each entry shows:
 - [ ] Check for failed records
 
 ### After Import
-- [ ] Verify data in PLCC Connect
+- [ ] Verify data in Tribes
 - [ ] Check member profiles
 - [ ] Review contribution totals
 - [ ] Test attendance records
@@ -407,7 +407,7 @@ Each entry shows:
 
 ### Member Fields
 
-| Servant Keeper | PLCC Connect | Type | Required |
+| Servant Keeper | Tribes | Type | Required |
 |:---|:---|:---|:---|
 | IndividualID | id | Text | No |
 | FirstName | first_name | Text | Yes |
@@ -428,7 +428,7 @@ Each entry shows:
 
 ### Contribution Fields
 
-| Servant Keeper | PLCC Connect | Type | Required |
+| Servant Keeper | Tribes | Type | Required |
 |:---|:---|:---|:---|
 | ContributionID | id | Text | No |
 | IndividualID | member_id | Text | Yes |
@@ -443,7 +443,7 @@ Each entry shows:
 
 ### Attendance Fields
 
-| Servant Keeper | PLCC Connect | Type | Required |
+| Servant Keeper | Tribes | Type | Required |
 |:---|:---|:---|:---|
 | AttendanceID | id | Text | No |
 | IndividualID | member_id | Text | Yes |
@@ -480,7 +480,7 @@ Each entry shows:
 ```
 IMPORT PROCESS:
 1. Export CSV from Servant Keeper
-2. Go to PLCC Connect → Servant Keeper Integration
+2. Go to Tribes → Servant Keeper Integration
 3. Click Import tab
 4. Select entity type
 5. Upload CSV file
@@ -488,7 +488,7 @@ IMPORT PROCESS:
 7. Review results
 
 EXPORT PROCESS:
-1. Go to PLCC Connect → Servant Keeper Integration
+1. Go to Tribes → Servant Keeper Integration
 2. Click Export tab
 3. Select entity type
 4. Click Export Data

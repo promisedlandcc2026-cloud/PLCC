@@ -6,7 +6,7 @@
 ---
 
 ## What You'll Learn
-This guide shows you how to create custom forms for event registration, surveys, applications, and more using PLCC Connect's Form Builder.
+This guide shows you how to create custom forms for event registration, surveys, applications, and more using Tribes's Form Builder.
 
 ---
 

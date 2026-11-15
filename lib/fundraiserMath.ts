@@ -2,7 +2,7 @@ import { formatCurrency } from '../utils/formatters.js';
 /**
  * Fundraiser calculator — pure functions shared by the Vault API and the page.
  *
- *   Given now      = paid gifts + game/event cash + online gifts (PLCC Tithe)
+ *   Given now      = paid gifts + game/event cash + online gifts (Firstfruits)
  *   Promised       = pledges + fun charges (what people owe)
  *   Total raised   = everything received (given now + payments on pledges/charges)
  *   Still owed     = promised − paid toward promises
@@ -262,7 +262,7 @@ export function allocatePayment(items: OpenItem[], amountCents: number): {
 }
 
 // ---------------------------------------------------------------------------
-// "Pay my balance" — a link to PLCC Tithe that Tithe hands back with the gift
+// "Pay my balance" — a link to Firstfruits that Tithe hands back with the gift
 // ---------------------------------------------------------------------------
 
 export const AWC_TITHE_GIVE_URL = 'https://plcc-tithe.vercel.app/';

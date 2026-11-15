@@ -1,5 +1,5 @@
 /**
- * Built-in starter devotionals for PLCC Connect's Daily page.
+ * Built-in starter devotionals for Tribes's Daily page.
  * Used for any day Pastor or staff have not written one in the Vault, so Daily
  * is never empty. Verse text is not stored: Connect shows the exact KJV text for
  * `ref` from its bundled Bible.

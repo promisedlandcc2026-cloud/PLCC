@@ -23,14 +23,14 @@ const PRESETS: Preset[] = [
     label: 'RSVP reminder',
     icon: <CalendarClock className="w-4 h-4" />,
     title: 'Grand Family Celebration RSVP closes Friday',
-    body: "Let us know you're coming. Tap to RSVP in PLCC Connect.",
+    body: "Let us know you're coming. Tap to RSVP in Tribes.",
     url: '/events',
     inbox: true,
   },
 ];
 
 /**
- * Staff: send a phone alert to everyone who turned on alerts in PLCC Connect.
+ * Staff: send a phone alert to everyone who turned on alerts in Tribes.
  * Pastor, Ministry Leader, and Super Admin only (the server checks too).
  */
 const SendAlertCard: React.FC = () => {
@@ -116,7 +116,7 @@ const SendAlertCard: React.FC = () => {
         <h2 className="text-lg font-black text-slate-900 dark:text-white">Send an alert</h2>
       </div>
       <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
-        Goes to the phone of everyone who turned on alerts in PLCC Connect. Canaan News posts already send an alert on their own.
+        Goes to the phone of everyone who turned on alerts in Tribes. Canaan News posts already send an alert on their own.
       </p>
 
       {!enabled ? (

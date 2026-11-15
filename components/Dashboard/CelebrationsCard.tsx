@@ -172,7 +172,7 @@ const CelebrationsCard: React.FC = () => {
             {data.setupNeeded
               ? 'Automatic greetings are not set up yet. Run celebration_greetings.sql in Supabase, then reload.'
               : s?.enabled
-                ? `A greeting from ${s.signature} goes out automatically at 7 AM — in PLCC Connect (with a phone alert)${s.emailFallback ? ', plus the same card by email' : ''}. Kids' birthdays go to their parents.`
+                ? `A greeting from ${s.signature} goes out automatically at 7 AM — in Tribes (with a phone alert)${s.emailFallback ? ', plus the same card by email' : ''}. Kids' birthdays go to their parents.`
                 : 'Automatic greetings are turned off.'}
           </p>
 

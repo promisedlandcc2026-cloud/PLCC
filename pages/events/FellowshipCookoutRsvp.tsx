@@ -43,7 +43,7 @@ import {
 
 import { formatCurrency } from '../../utils/formatters';
 import PhoneInput from '../../components/common/PhoneInput';
-/** Display serif (Fraunces, loaded in index.html) — matches PLCC Tithe's amounts. */
+/** Display serif (Fraunces, loaded in index.html) — matches Firstfruits's amounts. */
 const SERIF: React.CSSProperties = { fontFamily: "'Fraunces', Georgia, serif" };
 
 type PublicRsvpConfig = {
@@ -255,9 +255,9 @@ const FellowshipCookoutRsvp: React.FC = () => {
   const [foodContribution, setFoodContribution] = useState('');
   const [giftIntent, setGiftIntent] = useState<GiftPaymentIntent | ''>('pay_now');
   const [amountMode, setAmountMode] = useState<'preset' | 'other'>('preset');
-  /** Saved and on the way to PLCC Tithe to pay. */
+  /** Saved and on the way to Firstfruits to pay. */
   const [redirectingToTithe, setRedirectingToTithe] = useState<string | null>(null);
-  /** Back from PLCC Tithe (or opened from a pay link): show this signup's status. */
+  /** Back from Firstfruits (or opened from a pay link): show this signup's status. */
   const returnRegistrationId = searchParams.get('r');
   const [allergiesNone, setAllergiesNone] = useState(false);
   const [menuAvoid, setMenuAvoid] = useState<string[]>([]);
@@ -268,7 +268,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
   const [parentSignName, setParentSignName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  /** Saved RSVP id — the PLCC Tithe link carries it so the gift can be matched back. */
+  /** Saved RSVP id — the Firstfruits link carries it so the gift can be matched back. */
   const [registrationId, setRegistrationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -404,7 +404,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
     setFoodContribution(String(eventCfg.giftMin * giftPeople));
   }, [eventCfg.giftPerPerson, eventCfg.giftMin, giftPeople]);
 
-  /** PLCC Tithe link for this signup: amount, event fund, name and email filled in, and a way back. */
+  /** Firstfruits link for this signup: amount, event fund, name and email filled in, and a way back. */
   const titheLinkFor = (regId: string, amount: number): string =>
     buildTitheRsvpPayUrl({
       registrationId: regId,
@@ -546,7 +546,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
             guests_invited: Math.floor(guests),
             food_contribution_amount: contributionAmount,
             food_contribution_intent: eventCfg.paymentChoiceEnabled ? giftIntent || null : null,
-            // Card, bank, MTN, Airtel or Sendwave is chosen on PLCC Tithe.
+            // Card, bank, MTN, Airtel or Sendwave is chosen on Firstfruits.
             food_contribution_payment_method: null,
             allergies: allergiesValue,
             tshirt_sizes: !isSimple && eventCfg.tshirtsEnabled ? tshirtSummary : null,
@@ -562,7 +562,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
       const savedId = data.registration?.id ? String(data.registration.id) : null;
       setRegistrationId(savedId);
       if (savedId && eventCfg.paymentChoiceEnabled && giftIntent === 'pay_now' && contributionAmount) {
-        // One step: straight on to PLCC Tithe in this tab; it brings them back here when done.
+        // One step: straight on to Firstfruits in this tab; it brings them back here when done.
         const url = titheLinkFor(savedId, contributionAmount);
         setRedirectingToTithe(url);
         window.location.assign(url);
@@ -616,7 +616,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
               />
               <img
                 src="/images/awc-connect-logo.png"
-                alt="PLCC Connect"
+                alt="Tribes"
                 className="w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] rounded-full object-contain bg-white shadow-sm ring-1 ring-[#1d372c]/10"
               />
             </div>
@@ -646,13 +646,13 @@ const FellowshipCookoutRsvp: React.FC = () => {
                 <Loader2 className="mx-auto animate-spin text-[#1d372c]" size={30} />
                 <h2 className="text-2xl font-black tracking-tight">You’re signed up</h2>
                 <p className="text-gray-600 font-medium leading-relaxed max-w-sm mx-auto">
-                  Taking you to PLCC Tithe to pay {formatCurrency(Number(foodContribution || 0))}…
+                  Taking you to Firstfruits to pay {formatCurrency(Number(foodContribution || 0))}…
                 </p>
                 <a
                   href={redirectingToTithe}
                   className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#0d1a14] px-5 text-sm font-bold text-amber-50 hover:bg-[#12231c]"
                 >
-                  Continue to PLCC Tithe <ArrowRight size={16} />
+                  Continue to Firstfruits <ArrowRight size={16} />
                 </a>
               </div>
             ) : submitted ? (
@@ -675,7 +675,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                         href={titheLinkFor(registrationId, Number(foodContribution) || 0)}
                         className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl border border-[#0d1a14]/15 bg-white px-4 text-sm font-bold text-[#0d1a14] hover:bg-[#F7F2F3]"
                       >
-                        Pay now on PLCC Tithe <ArrowRight size={15} />
+                        Pay now on Firstfruits <ArrowRight size={15} />
                       </a>
                     ) : null}
                   </div>
@@ -952,7 +952,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                               {
                                 id: 'pay_now' as const,
                                 title: 'Pay now',
-                                blurb: 'Card, bank, MTN, Airtel or Sendwave, on PLCC Tithe',
+                                blurb: 'Card, bank, MTN, Airtel or Sendwave, on Firstfruits',
                               },
                               ...(eventCfg.allowPledge
                                 ? [
@@ -991,7 +991,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                             <p className="flex items-start gap-2 rounded-xl bg-[#EFE7DA] px-3.5 py-3 text-[13px] leading-relaxed text-[#3D2A22]">
                               <ArrowRight size={16} className="mt-0.5 shrink-0 text-[#112019]" aria-hidden />
                               <span>
-                                Next you'll finish on <span className="font-bold">PLCC Tithe</span>, the church's giving site.
+                                Next you'll finish on <span className="font-bold">Firstfruits</span>, the church's giving site.
                                 Your name and email are filled in for you, and you'll come right back here.
                               </span>
                             </p>
@@ -1250,7 +1250,7 @@ const FellowshipCookoutRsvp: React.FC = () => {
                 </button>
                 {!isSimple && eventCfg.paymentChoiceEnabled && giftIntent === 'pay_now' ? (
                   <p className="-mt-2 flex items-center justify-center gap-1.5 text-xs text-gray-500">
-                    <Lock size={12} aria-hidden /> Secure checkout on PLCC Tithe
+                    <Lock size={12} aria-hidden /> Secure checkout on Firstfruits
                   </p>
                 ) : null}
               </form>
@@ -1282,7 +1282,7 @@ type RsvpStatusData = {
 };
 
 const STATUS_PILL: Record<RsvpPayStatus, { label: string; className: string; line: string }> = {
-  paid: { label: 'Paid', className: 'bg-[#E3F1E8] text-[#1F5C38]', line: 'Thank you. Your receipt was emailed by PLCC Tithe.' },
+  paid: { label: 'Paid', className: 'bg-[#E3F1E8] text-[#1F5C38]', line: 'Thank you. Your receipt was emailed by Firstfruits.' },
   waiting: {
     label: 'Waiting',
     className: 'bg-[#FCEFD6] text-[#7A4A00]',
@@ -1294,11 +1294,11 @@ const STATUS_PILL: Record<RsvpPayStatus, { label: string; className: string; lin
     line: 'Your bank payment is clearing. That usually takes 2 to 4 business days.',
   },
   pledged: { label: 'Pledged', className: 'bg-[#EFE7DA] text-[#112019]', line: 'Pay at the event, or online anytime before then.' },
-  due: { label: 'Not paid yet', className: 'bg-[#F5EFF0] text-[#1d372c]', line: 'Your spot is saved. Finish your payment on PLCC Tithe whenever you’re ready.' },
+  due: { label: 'Not paid yet', className: 'bg-[#F5EFF0] text-[#1d372c]', line: 'Your spot is saved. Finish your payment on Firstfruits whenever you’re ready.' },
 };
 
 /**
- * The guest's own signup after PLCC Tithe sends them back (?r=<registration id>):
+ * The guest's own signup after Firstfruits sends them back (?r=<registration id>):
  * Paid / Waiting / Processing / Pledged / Not paid yet, with a Pay link when it's still owed.
  */
 const RsvpStatusPanel: React.FC<{ registrationId: string }> = ({ registrationId }) => {
@@ -1423,7 +1423,7 @@ const RsvpStatusPanel: React.FC<{ registrationId: string }> = ({ registrationId 
             href={data.payUrl}
             className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-[#0d1a14] px-4 text-[15px] font-bold text-amber-50 hover:bg-[#12231c]"
           >
-            Pay {formatCurrency(data.amount)} on PLCC Tithe <ArrowRight size={16} />
+            Pay {formatCurrency(data.amount)} on Firstfruits <ArrowRight size={16} />
           </a>
         ) : null}
         {data.status === 'waiting' || data.status === 'processing' || data.status === 'due' ? (

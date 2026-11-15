@@ -19,7 +19,7 @@ import {
 } from '../../lib/reportConfig';
 
 /**
- * The Report dialog. Same as in AWC Vault, PLCC Canaan and PLCC Connect;
+ * The Report dialog. Same as in AWC Vault, PLCC Canaan and Tribes;
  * church wording lives in lib/reportConfig.ts. The host passes `send`.
  *
  * Problem reports: the member picks what's wrong from a dropdown, then gets

@@ -1,5 +1,5 @@
 /**
- * PLCC Chat live updates + phone alerts smoke (no Supabase/Realtime required).
+ * Jordan live updates + phone alerts smoke (no Supabase/Realtime required).
  * Run: npx tsx scripts/chat-live-smoke.ts
  */
 import assert from 'node:assert/strict';
@@ -117,7 +117,7 @@ async function main() {
     assert.equal(muted.has('later'), true);
   });
 
-  await check('PLCC Chat phones can subscribe to chat only; Connect keeps church alerts', () => {
+  await check('Jordan phones can subscribe to chat only; Connect keeps church alerts', () => {
     assert.deepEqual(cleanTopics(['chat']), ['chat']);
     assert.ok(cleanTopics(['prayer']).includes('church'));
     assert.ok(!cleanTopics(undefined).includes('chat'), 'chat is never on by default for Connect');

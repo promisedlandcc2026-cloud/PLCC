@@ -133,7 +133,7 @@ function buildTotpUri(secret: string, email: string): string {
   const cleanSecret = String(secret || '').replace(/\s+/g, '').toUpperCase();
   const account = (email || 'member').replace(/\s+/g, '');
   const label = encodeURIComponent(`AWCVault:${account}`);
-  const issuer = encodeURIComponent('AWCVault');
+  const issuer = encodeURIComponent('PLCC ONE');
   return `otpauth://totp/${label}?secret=${cleanSecret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
 }
 

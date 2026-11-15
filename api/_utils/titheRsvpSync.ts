@@ -1,5 +1,5 @@
 /**
- * PLCC Canaan ⇄ PLCC Tithe — event RSVP "Pay Now" gifts.
+ * PLCC Canaan ⇄ Firstfruits — event RSVP "Pay Now" gifts.
  *
  * The RSVP form sends donors to Tithe with ref=rsvp:<registration id>. When an
  * admin opens the RSVP list, the Vault asks Tithe (HMAC-signed) which of the
@@ -57,10 +57,10 @@ const METHOD_LABEL: Record<string, string> = {
   venmo: 'Venmo',
 };
 
-/** Signed POST to an PLCC Tithe Vault-integration endpoint (funds, fund-gifts, ref-status). */
+/** Signed POST to an Firstfruits Vault-integration endpoint (funds, fund-gifts, ref-status). */
 export async function titheSignedPost<T = any>(path: string, payload: unknown, timeoutMs = TITHE_TIMEOUT_MS): Promise<T> {
   const key = titheKey();
-  if (!key) throw new Error('PLCC Tithe link not configured (set AWC_TITHE_VAULT_KEY).');
+  if (!key) throw new Error('Firstfruits link not configured (set AWC_TITHE_VAULT_KEY).');
   const body = JSON.stringify(payload ?? {});
   const timestamp = String(Date.now());
   const res = await fetch(`${titheBaseUrl()}/api/integrations/vault/${path}`, {
@@ -76,7 +76,7 @@ export async function titheSignedPost<T = any>(path: string, payload: unknown, t
   });
   const data: any = await res.json().catch(() => ({}));
   if (!res.ok || !data?.ok) {
-    throw new Error(data?.error ? `PLCC Tithe: ${data.error}` : `PLCC Tithe returned ${res.status}`);
+    throw new Error(data?.error ? `Firstfruits: ${data.error}` : `Firstfruits returned ${res.status}`);
   }
   return data as T;
 }
@@ -100,13 +100,13 @@ export async function fetchTitheRefStatuses(refs: string[]): Promise<TitheRefSta
   });
   const data: any = await res.json().catch(() => ({}));
   if (!res.ok || !data?.ok) {
-    throw new Error(data?.error ? `PLCC Tithe: ${data.error}` : `PLCC Tithe returned ${res.status}`);
+    throw new Error(data?.error ? `Firstfruits: ${data.error}` : `Firstfruits returned ${res.status}`);
   }
   return Array.isArray(data.statuses) ? data.statuses : [];
 }
 
 /**
- * Make sure PLCC Tithe has the event's fund (e.g. "Thanksgiving Dinner 2026") so Pay Now
+ * Make sure Firstfruits has the event's fund (e.g. "Thanksgiving Dinner 2026") so Pay Now
  * gifts land there and reach DCB under that name. Never throws — returns a warning.
  *
  * The fund follows the Vault event id: after the event is renamed, Tithe renames the same
@@ -120,7 +120,7 @@ export async function ensureTitheEventFund(
   const name = String(fundName || '').trim();
   if (!name) return { ok: false };
   if (!isTitheSyncConfigured()) {
-    return { ok: false, warning: 'PLCC Tithe link not configured (set AWC_TITHE_VAULT_KEY) — event fund not set up in Tithe.' };
+    return { ok: false, warning: 'Firstfruits link not configured (set AWC_TITHE_VAULT_KEY) — event fund not set up in Tithe.' };
   }
   try {
     const out: any = await titheSignedPost(
@@ -135,7 +135,7 @@ export async function ensureTitheEventFund(
     return { ok: true, renamed: Boolean(out?.renamed) };
   } catch (err: any) {
     console.warn('[RSVP] Tithe event fund setup failed:', err?.message || err);
-    return { ok: false, warning: `Could not set up "${name}" in PLCC Tithe. Gifts may land in the default fund.` };
+    return { ok: false, warning: `Could not set up "${name}" in Firstfruits. Gifts may land in the default fund.` };
   }
 }
 
@@ -161,7 +161,7 @@ export async function syncRsvpGiftsFromTithe(
   if (!isTitheSyncConfigured()) {
     return {
       updated: 0,
-      warning: 'PLCC Tithe link not configured (set AWC_TITHE_VAULT_KEY) — Pay Now gifts must be marked paid by hand.',
+      warning: 'Firstfruits link not configured (set AWC_TITHE_VAULT_KEY) — Pay Now gifts must be marked paid by hand.',
     };
   }
 
@@ -170,7 +170,7 @@ export async function syncRsvpGiftsFromTithe(
     statuses = await fetchTitheRefStatuses(unpaid.map((r) => rsvpGiftReferenceId(r.id)));
   } catch (err: any) {
     console.error('[RSVP] Tithe status check failed:', err?.message || err);
-    return { updated: 0, warning: 'Could not reach PLCC Tithe to check Pay Now gifts. Showing saved status.' };
+    return { updated: 0, warning: 'Could not reach Firstfruits to check Pay Now gifts. Showing saved status.' };
   }
   const paidByRef = new Map(statuses.filter((s) => s.status === 'paid').map((s) => [s.ref, s]));
   // Not paid yet, but started on Tithe — shown as a hint on the RSVP list (not saved).
@@ -193,11 +193,11 @@ export async function syncRsvpGiftsFromTithe(
   for (const row of unpaid) {
     const hit = paidByRef.get(rsvpGiftReferenceId(row.id));
     if (!hit) continue;
-    const method = METHOD_LABEL[String(hit.paymentMethod || '')] || 'PLCC Tithe';
+    const method = METHOD_LABEL[String(hit.paymentMethod || '')] || 'Firstfruits';
     const patch: Record<string, any> = {
       food_contribution_paid: true,
       food_contribution_paid_at: hit.paidAt || new Date().toISOString(),
-      food_contribution_paid_by: `PLCC Tithe · ${method}${hit.receiptNumber ? ` · ${hit.receiptNumber}` : ''}`,
+      food_contribution_paid_by: `Firstfruits · ${method}${hit.receiptNumber ? ` · ${hit.receiptNumber}` : ''}`,
       // Tithe already delivered this gift to DCB; this stops the Vault re-posting it.
       food_contribution_dcb_voucher_id: `tithe:${hit.receiptNumber || rsvpGiftReferenceId(row.id)}`,
     };
@@ -259,7 +259,7 @@ export async function syncRsvpGiftsFromTithe(
 }
 
 /**
- * Move this event's RSVP gifts that PLCC Tithe filed under the wrong fund (Give-page bug
+ * Move this event's RSVP gifts that Firstfruits filed under the wrong fund (Give-page bug
  * before Oct 29, 2026) into the event's fund. Tithe moves gifts DCB doesn't have yet and
  * lists the ones DCB already recorded. Never throws.
  */

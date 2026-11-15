@@ -1,5 +1,5 @@
 /**
- * Kids View by guardian cardRef (PLCC Connect bridge).
+ * Kids View by guardian cardRef (Tribes bridge).
  * Run from Vault: node --test scripts/test-kids-view-card-ref.mjs
  *
  * Source-contract only. Does not apply SQL or touch live data.

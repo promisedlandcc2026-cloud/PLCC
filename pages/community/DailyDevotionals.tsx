@@ -4,7 +4,7 @@ import AskAdminTitleLink from '../../components/common/AskAdminTitleLink';
 import { fetchWithTimeout, getAuthHeaders } from '../../lib/api';
 
 /**
- * Daily devotionals for PLCC Connect's Daily page.
+ * Daily devotionals for Tribes's Daily page.
  * Pastor / Ministry Leader / Super Admin write any day; days left alone use the
  * built-in starter devotional, so members always have something to read.
  */
@@ -159,10 +159,10 @@ const DailyDevotionalsPage: React.FC = () => {
             <h1 className="text-4xl md:text-5xl font-semibold leading-tight" style={SERIF}>
               Daily Devotional
             </h1>
-            <AskAdminTitleLink prompt="How do I write the daily devotional for PLCC Connect?" />
+            <AskAdminTitleLink prompt="How do I write the daily devotional for Tribes?" />
           </div>
           <p className={`mt-2 text-[17px] leading-relaxed ${MUTED}`}>
-            What members read on the Daily page in PLCC Connect. Write any day you like — days you leave alone use a built-in starter devotional.
+            What members read on the Daily page in Tribes. Write any day you like — days you leave alone use a built-in starter devotional.
           </p>
         </header>
 

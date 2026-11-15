@@ -236,7 +236,7 @@ export const PATH_PERMISSIONS: Record<string, Role[]> = {
   '/finance/contribution-manager': FINANCE_LINK_ROLES,
   '/community/feed': ALL_APP_ROLES,
   '/community/sermon-notes': ALL_APP_ROLES,
-  // Writes what members read on PLCC Connect's Daily page (server checks the role too).
+  // Writes what members read on Tribes's Daily page (server checks the role too).
   '/community/daily-devotional': [Role.SUPER_ADMIN, Role.ADMIN, Role.PASTOR, Role.MINISTRY_LEADER],
   '/community/prayer-wall': ALL_APP_ROLES,
   // Page checks the Intercessor Channel membership itself (server-enforced).

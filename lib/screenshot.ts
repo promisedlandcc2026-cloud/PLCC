@@ -1,7 +1,7 @@
 /**
  * Shrink a picture the member picked so it can be emailed with a report.
  * Phone screenshots are often 2–5 MB; this brings them to roughly 150–500 KB.
- * (Shared with PLCC Connect — keep the two copies in sync.)
+ * (Shared with Tribes — keep the two copies in sync.)
  */
 
 export type ReportScreenshot = {

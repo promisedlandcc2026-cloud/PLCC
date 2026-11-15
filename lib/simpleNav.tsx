@@ -31,7 +31,7 @@ import {
   DEFAULT_FELLOWSHIP_EVENT_ID,
 } from '../api/_utils/fellowshipEventConfig';
 
-/** PLCC Tithe — the church's online giving site. Gifts made there are recorded in the DCB. */
+/** Firstfruits — the church's online giving site. Gifts made there are recorded in the DCB. */
 export const TITHE_URL = 'https://plcc-tithe.vercel.app/';
 
 export type SimpleNavLink = NavItem & {

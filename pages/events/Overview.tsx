@@ -69,7 +69,7 @@ interface ChurchEvent {
   rsvpEnabled?: boolean;
   rsvpTemplate?: 'simple' | 'fellowship' | null;
   rsvpCloseAt?: string | null;
-  /** Payments through PLCC Tithe (fellowship sign-ups). Null = use the event's defaults. */
+  /** Payments through Firstfruits (fellowship sign-ups). Null = use the event's defaults. */
   rsvpPaymentsEnabled?: boolean | null;
   rsvpGiftMin?: number | null;
   rsvpGiftOptions?: number[] | null;
@@ -205,7 +205,7 @@ const EventsOverview: React.FC = () => {
   const [newGiftOption, setNewGiftOption] = useState('');
 
   /**
-   * Payments for a fellowship sign-up, through PLCC Tithe. Unset values fall back to the
+   * Payments for a fellowship sign-up, through Firstfruits. Unset values fall back to the
    * built-in event (Thanksgiving / Marrieds) or, for a new event, payments on with $20 minimum.
    */
   const payments = useMemo(() => {
@@ -659,7 +659,7 @@ const EventsOverview: React.FC = () => {
         } else if (data.warning) {
           showToast(data.warning, 'info');
         } else if (data.titheFund) {
-          showToast(`Saved. Payments go to “${data.titheFund}” in PLCC Tithe.`);
+          showToast(`Saved. Payments go to “${data.titheFund}” in Firstfruits.`);
         } else if (createdPending) {
           showToast('Event request submitted for approval');
         } else {
@@ -1824,7 +1824,7 @@ const EventsOverview: React.FC = () => {
                             <div>
                               <p className="text-sm font-bold text-[#0d1a14]">Payments</p>
                               <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                                Collect contributions through PLCC Tithe. Paid sign-ups update on their own.
+                                Collect contributions through Firstfruits. Paid sign-ups update on their own.
                               </p>
                             </div>
                             <label className="flex shrink-0 items-center gap-2 text-xs font-bold text-[#0d1a14] cursor-pointer">
@@ -1930,7 +1930,7 @@ const EventsOverview: React.FC = () => {
                                 </span>
                               </label>
                               <p className="text-[11px] text-gray-500 leading-relaxed">
-                                PLCC Tithe fund:{' '}
+                                Firstfruits fund:{' '}
                                 <span className="font-bold text-[#0d1a14]">
                                   {eventFundName(editingEvent?.event.id, formData.title) || 'the event name'}
                                 </span>

@@ -1,5 +1,5 @@
 /**
- * Chat media: photos, voice notes, videos and documents (PLCC Chat / Connect / Vault).
+ * Chat media: photos, voice notes, videos and documents (Jordan / Connect / Vault).
  *
  * Big files can't pass through Vercel functions (~4.5 MB request limit), so:
  *   1. App sends the message (caption or "📷 Photo") → messageId

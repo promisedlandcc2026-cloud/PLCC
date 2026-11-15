@@ -1,6 +1,6 @@
 /**
  * Event RSVP payments are tracked under each event's own fund
- * (e.g. "Thanksgiving Dinner 2026") in the Vault, PLCC Tithe and DCB.
+ * (e.g. "Thanksgiving Dinner 2026") in the Vault, Firstfruits and DCB.
  *
  * Run: npx tsx scripts/rsvp-event-fund-smoke.ts
  */

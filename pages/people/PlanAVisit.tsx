@@ -90,7 +90,7 @@ const PlanAVisit: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
                     <h1 className="text-4xl font-extrabold text-[#0d1a14] mb-2 tracking-tight">Plan a Visit</h1>
-                    <p className="text-gray-400 font-medium">Manage and follow up with guests who planned their visit via PLCC Connect.</p>
+                    <p className="text-gray-400 font-medium">Manage and follow up with guests who planned their visit via Tribes.</p>
                 </div>
             </div>
 
@@ -209,7 +209,7 @@ const PlanAVisit: React.FC = () => {
                         <UserPlus size={32} className="text-gray-200" />
                     </div>
                     <h3 className="text-xl font-black text-[#0d1a14] mb-2">No registrations found</h3>
-                    <p className="text-gray-400 font-medium max-w-xs mx-auto">New registrations from PLCC Connect will appear here automatically.</p>
+                    <p className="text-gray-400 font-medium max-w-xs mx-auto">New registrations from Tribes will appear here automatically.</p>
                 </div>
             )}
         </div>

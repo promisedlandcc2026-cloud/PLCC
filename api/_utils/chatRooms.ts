@@ -1,5 +1,5 @@
 /**
- * PLCC Chat set 4: announcement-only rooms, pinned messages, message search.
+ * Jordan set 4: announcement-only rooms, pinned messages, message search.
  *
  * "Room leaders" = the people who can start a room's Live Huddle
  * (huddleStartPolicy): church-wide leaders, the room's moderators and creator,

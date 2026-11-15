@@ -1,5 +1,5 @@
 /**
- * Daily devotional for PLCC Connect (resource=daily).
+ * Daily devotional for Tribes (resource=daily).
  *
  *   GET  action=week&date=YYYY-MM-DD   → Mon–Sun containing that date (public; no sign-in needed)
  *   GET  action=admin&from=YYYY-MM-DD  → next 14 days, written vs starter (Pastor / Ministry Leader / Super Admin)

@@ -1,5 +1,5 @@
 /**
- * PLCC Chat — event and Serve cards in a chat  (see supabase/migrations/chat_cards.sql)
+ * Jordan — event and Serve cards in a chat  (see supabase/migrations/chat_cards.sql)
  * resource=community&subResource=card-*
  *
  *   GET  card-options                     — upcoming approved events + open Serve needs (picker)
@@ -12,8 +12,8 @@
  *   POST card-going { eventId, going }    — your own "I'll be there" (public.attendance_plans,
  *        the same list as Connect's Home ticket)
  *
- * Serve sign-up itself goes through PLCC Connect's /api/serve (staff-verified eligibility
- * gate + serve_signup_opportunity RPC); PLCC Chat's bridge forwards the member's token there.
+ * Serve sign-up itself goes through Tribes's /api/serve (staff-verified eligibility
+ * gate + serve_signup_opportunity RPC); Jordan's bridge forwards the member's token there.
  */
 import { normalizeEventStatus } from './eventApprovalLogic.js';
 

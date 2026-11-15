@@ -744,7 +744,7 @@ async function updateDependent(
   });
 }
 
-/** Opaque child card selector used by PLCC Connect (never members.id). */
+/** Opaque child card selector used by Tribes (never members.id). */
 const CARD_REF_RE = /^AWCD\.[0-9a-f]{64}$/;
 
 async function childIdForCardRef(supabase: any, cardRef: string): Promise<string | null> {

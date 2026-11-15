@@ -1,5 +1,5 @@
 /**
- * PLCC Chat requests — who may do what, and the tracking flow against an in-memory DB.
+ * Jordan requests — who may do what, and the tracking flow against an in-memory DB.
  * Run: npx tsx scripts/chat-requests-smoke.ts
  */
 import { readFileSync } from 'node:fs';

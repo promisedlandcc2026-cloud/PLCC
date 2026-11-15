@@ -63,7 +63,7 @@ function letterhead(doc: jsPDF, seal: string | null, subtitle: string) {
 export type ReminderOptions = {
   /** How to pay — printed on every letter */
   payInstructions?: string[];
-  /** Personal "Pay my balance" link (PLCC Tithe) for each person, when a Tithe fund is linked */
+  /** Personal "Pay my balance" link (Firstfruits) for each person, when a Tithe fund is linked */
   payLinkFor?: (person: PersonBalance) => string | null;
 };
 
@@ -168,7 +168,7 @@ type ReportEntry = {
 };
 
 function kindLabel(e: ReportEntry): string {
-  if (e.source_type === 'online') return 'Online (PLCC Tithe)';
+  if (e.source_type === 'online') return 'Online (Firstfruits)';
   if (e.source_type === 'game') return 'Game / event';
   if (e.kind === 'pledge') return 'Pledge';
   if (e.kind === 'charge') return `${e.charge_label || 'Fun charge'}${(e.quantity || 1) > 1 ? ` × ${e.quantity}` : ''}`;
@@ -188,7 +188,7 @@ export async function downloadFundraiserReport(
 
   const rows: Array<[string, string]> = [
     ['Given now (gifts, games, online)', formatCents(summary.givenNowCents)],
-    ['   of which online through PLCC Tithe', formatCents(summary.onlineCents)],
+    ['   of which online through Firstfruits', formatCents(summary.onlineCents)],
     ['   of which games & events', formatCents(summary.gameCents)],
     ['Pledged', formatCents(summary.pledgedCents)],
     ['   paid on pledges', formatCents(summary.pledgePaidCents)],

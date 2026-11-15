@@ -87,9 +87,9 @@ assert(
   'L: thanksgiving has Zelle'
 );
 assert(
-  // Send-to details (Cash App, Zelle) live in PLCC Tithe now — one source of truth.
-  tg.paymentMethods!.some((m) => m.id === 'cashapp' && m.value === 'PLCC Tithe'),
-  'L: thanksgiving Cash App goes through PLCC Tithe'
+  // Send-to details (Cash App, Zelle) live in Firstfruits now — one source of truth.
+  tg.paymentMethods!.some((m) => m.id === 'cashapp' && m.value === 'Firstfruits'),
+  'L: thanksgiving Cash App goes through Firstfruits'
 );
 assert(
   tg.paymentMethods!.some((m) => m.id === 'venmo' && m.live),
@@ -143,8 +143,8 @@ assert(
   'L: marrieds has Cash App'
 );
 assert(
-  marrieds.paymentMethods!.some((m) => m.id === 'zelle' && m.value === 'PLCC Tithe'),
-  'L: marrieds Zelle goes through PLCC Tithe'
+  marrieds.paymentMethods!.some((m) => m.id === 'zelle' && m.value === 'Firstfruits'),
+  'L: marrieds Zelle goes through Firstfruits'
 );
 assert(
   marrieds.paymentMethods!.some((m) => m.id === 'venmo' && m.live),

@@ -1,7 +1,7 @@
 /**
  * Open the shared Report dialog from anywhere in PLCC Canaan.
  * The dialog itself (<ReportHost />) is mounted once in AppShell.
- * (Shared types with PLCC Connect — keep the two copies in sync.)
+ * (Shared types with Tribes — keep the two copies in sync.)
  */
 
 export type ReportContentType =

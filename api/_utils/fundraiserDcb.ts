@@ -5,7 +5,7 @@
  * income records match what the fundraiser team collected. The fundraiser team never needs DCB
  * access: the Vault server sends it with the same signed service link as RSVP "Mark Paid".
  *
- * - Online gifts from PLCC Tithe are NOT sent from here (Tithe already sent them to the DCB).
+ * - Online gifts from Firstfruits are NOT sent from here (Tithe already sent them to the DCB).
  * - Pledges and fun charges that are still owed are NOT money yet, so nothing goes to the DCB
  *   until a payment is recorded against them.
  * - A payment removed or changed in the Vault is taken back out through the DCB's void route,
@@ -52,7 +52,7 @@ export function dcbVoucherFor(paymentId: string): string {
   return `PLCC-FR-${String(paymentId).replace(/[^a-zA-Z0-9]/g, '').slice(0, 12).toUpperCase()}`;
 }
 
-/** The DCB fund: the linked PLCC Tithe fund (so online and cash land together), else the fundraiser's name. */
+/** The DCB fund: the linked Firstfruits fund (so online and cash land together), else the fundraiser's name. */
 export function dcbFundName(fundraiser: any): string {
   return String(fundraiser?.tithe_fund_name || fundraiser?.title || 'Fundraiser').trim().slice(0, 80);
 }

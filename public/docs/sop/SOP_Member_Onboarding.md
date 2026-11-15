@@ -136,7 +136,7 @@ Connect new members with ministry opportunities:
 **What Happens:**
 - User receives welcome email
 - Account is created in authentication system
-- Member can log in to PLCC Connect
+- Member can log in to Tribes
 
 ---
 

@@ -1,7 +1,7 @@
 /**
- * Phone alerts for PLCC Connect (web push).
+ * Phone alerts for Tribes (web push).
  *
- * Members turn alerts on in PLCC Connect; Connect forwards the browser's push
+ * Members turn alerts on in Tribes; Connect forwards the browser's push
  * subscription here (resource=push). Every member-facing inbox notification
  * (Canaan News, announcements, prayer requests, mentions, huddles, PLCC Bucks)
  * is also pushed to that person's phones, and staff can send a one-off alert
@@ -20,7 +20,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import webpush from 'web-push';
 import { getSupabaseAdmin, requireAuth } from './auth.js';
 
-/** 'chat' = new messages in PLCC Chat (only PLCC Chat subscribes to it). */
+/** 'chat' = new messages in Jordan (only Jordan subscribes to it). */
 export type PushTopic = 'church' | 'prayer' | 'community' | 'daily' | 'chat';
 export const PUSH_TOPICS: PushTopic[] = ['church', 'prayer', 'community', 'daily', 'chat'];
 /** New phones get these; the 7 AM devotional reminder ('daily') is opt-in from the Daily page. */
@@ -115,7 +115,7 @@ function clip(s: unknown, max: number): string {
 
 function payloadFor(msg: PushMessage): string {
   return JSON.stringify({
-    title: clip(msg.title, 80) || 'PLCC Connect',
+    title: clip(msg.title, 80) || 'Tribes',
     body: clip(msg.body, 180),
     url: msg.url || '/',
     tag: msg.tag || undefined,
@@ -239,7 +239,7 @@ export async function pushToEveryone(
 }
 
 /**
- * PLCC Chat: alert the people in a room (or, for open rooms, everyone with chat
+ * Jordan: alert the people in a room (or, for open rooms, everyone with chat
  * alerts on), skipping the author and anyone who muted the room. Never throws.
  */
 export async function pushChatAlert(
@@ -333,7 +333,7 @@ export function parseSubscription(raw: any): { endpoint: string; p256dh: string;
 export function cleanTopics(raw: unknown): PushTopic[] {
   if (!Array.isArray(raw)) return [...DEFAULT_TOPICS];
   const set = new Set(raw.map((t) => String(t)).filter((t): t is PushTopic => (PUSH_TOPICS as string[]).includes(t)));
-  // PLCC Chat phones subscribe to chat messages only (church alerts already go to Connect).
+  // Jordan phones subscribe to chat messages only (church alerts already go to Connect).
   if (set.size === 1 && set.has('chat')) return ['chat'];
   set.add('church'); // church alerts are the reason to turn this on; always included
   return PUSH_TOPICS.filter((t) => set.has(t));
@@ -438,7 +438,7 @@ export async function handlePush(req: any, res: any) {
   if (action === 'test') {
     const r = await pushToUsers(supabase, [userId], 'church', {
       title: 'Alerts are on',
-      body: 'This is how PLCC Connect alerts will look. God bless!',
+      body: 'This is how Tribes alerts will look. God bless!',
       url: '/',
       tag: 'test',
     });

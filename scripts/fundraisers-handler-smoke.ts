@@ -1,5 +1,5 @@
 /**
- * Fundraisers API handler — in-memory Supabase, fake auth and fake PLCC Tithe. No network.
+ * Fundraisers API handler — in-memory Supabase, fake auth and fake Firstfruits. No network.
  * Run: npx tsx scripts/fundraisers-handler-smoke.ts
  */
 import { randomUUID } from 'crypto';
@@ -305,7 +305,7 @@ const MEMBER_B = randomUUID();
   ok(over?.received_amount_cents === 1000, 'the extra $10 is kept as an online gift', over);
   ok(r.body.summary.stillOwedCents === owedBefore - 4000, 'still owed drops by $40');
   const peterCharge2 = r.body.entries.find((e: any) => e.display_name === 'Peter Mukasa' && e.kind === 'charge');
-  ok(peterCharge2.payments.some((p: any) => p.recorded_by_name === 'PLCC Tithe'), 'Tithe payments show "PLCC Tithe" as the recorder');
+  ok(peterCharge2.payments.some((p: any) => p.recorded_by_name === 'Firstfruits'), 'Tithe payments show "Firstfruits" as the recorder');
   const snapshot = JSON.stringify(r.body.summary);
   r = await call('ACCOUNTANT', 'POST', 'sync-tithe', { fundraiserId: F });
   ok(JSON.stringify(r.body.summary) === snapshot, 'checking Tithe again changes nothing');
@@ -352,7 +352,7 @@ const MEMBER_B = randomUUID();
     ok(dcbPosts.length > 0, 'hand-entered payments were sent to the DCB');
     ok(
       dcbPosts.every((x) => { const p: any = byId.get(String(x.transactionId).replace('fundraiser:', '')); return !p || !p.external_ref; }),
-      'online gifts from PLCC Tithe are never sent from PLCC Canaan (Tithe already sent them)'
+      'online gifts from Firstfruits are never sent from PLCC Canaan (Tithe already sent them)'
     );
     ok(pays.filter((p: any) => p.external_ref).every((p: any) => p.dcb_status == null), 'Tithe payment rows carry no DCB status');
     ok(pays.filter((p: any) => !p.external_ref && p.amount_cents >= 100).every((p: any) => p.dcb_status === 'posted'), 'every cash/check payment is marked In DCB', pays.map((p: any) => p.dcb_status));

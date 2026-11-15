@@ -1298,7 +1298,7 @@ const LoginPortal: React.FC = () => {
                 )}
                 <p className="text-white/30 text-[10px] font-medium leading-relaxed">
                   {method === 'phone'
-                    ? 'No text in a minute? Text sign-in has to be turned on once: sign in with your email, open your profile, and tap "Turn on text sign-in" (in PLCC Connect it’s under Account). Then this works every time.'
+                    ? 'No text in a minute? Text sign-in has to be turned on once: sign in with your email, open your profile, and tap "Turn on text sign-in" (in Tribes it’s under Account). Then this works every time.'
                     : 'No email yet? Check spam/junk, wait a minute, then tap Resend. If it still does not arrive, SMTP may need a check in Supabase.'}
                 </p>
                 <button

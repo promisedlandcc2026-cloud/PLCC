@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, ExternalLink, Gamepad2, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { getAuthHeaders } from '../../lib/api';
 
-/** PLCC Ark lives at PLCC Connect's /ark (its own site, same sign-in). */
+/** PLCC Ark lives at Tribes's /ark (its own site, same sign-in). */
 export const ARK_URL = 'https://plcc-connect.vercel.app/ark/';
 
 const GAME_TITLE: Record<string, string> = {

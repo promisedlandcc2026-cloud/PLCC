@@ -49,7 +49,7 @@ function absoluteImageUrl(url: string): string {
 
 /** Quick picks for the destination box (it starts empty so pastes never merge). */
 const DESTINATION_PRESETS = [
-  { label: 'PLCC Connect', url: 'https://plcc-connect.vercel.app/welcome' },
+  { label: 'Tribes', url: 'https://plcc-connect.vercel.app/welcome' },
   { label: 'Grand Family Celebration RSVP', url: '/#/events/86ac9498-ee56-4c6a-baae-079832b0ea73/rsvp' },
 ];
 
@@ -486,7 +486,7 @@ const FlyerSharePage: React.FC = () => {
               onChange={(e) => setShareMessage(e.target.value)}
               rows={6}
               maxLength={1500}
-              placeholder={'e.g. Good morning, PLCC Family! Today is the last day for our other platforms. Get PLCC Connect here:'}
+              placeholder={'e.g. Good morning, PLCC Family! Today is the last day for our other platforms. Get Tribes here:'}
               className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 border border-transparent focus:bg-white focus:border-gold outline-none text-sm text-[#0d1a14] leading-relaxed"
             />
             <p className="text-xs text-gray-400">
