@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../lib/NavContext';
 import { Section } from '../types';
-import { BIBLE_URL, firstNameOf, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
+import { BIBLE_URL, SANCTUM_URL, firstNameOf, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
 import { authedFetch } from '../lib/authedFetch';
 import { BookOpen, CalendarDays, Flag, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, ShieldAlert, Users } from 'lucide-react';
 import { Role } from '../types';
@@ -59,6 +59,15 @@ const AwcOneLauncherPage: React.FC = () => {
     if (id === 'vault') {
       setActiveSection(Section.Dashboard);
       navigate('/dashboard');
+      return;
+    }
+    if (id === 'sanctum') {
+      // PLCC Sanctum (prayer rooms + moderators) opens in its own tab so PLCC ONE stays open.
+      // Sanctum has its own sign-in, so there's no handoff to wait for (and no popup blocker).
+      // (No 'noopener' flag: with it, window.open always returns null and we couldn't tell a block.)
+      const tab = window.open(SANCTUM_URL, '_blank');
+      if (tab) tab.opener = null;
+      else window.location.assign(SANCTUM_URL);
       return;
     }
     setBusyId(id);
