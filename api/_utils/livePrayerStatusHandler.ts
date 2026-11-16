@@ -6,9 +6,11 @@ import { mergeDailyIntoHuddleStatuses } from './huddleProvider.js';
 
 /**
  * GET /api/vault?resource=live-prayer — public, no sign-in.
- * Answers only "is a prayer huddle live in an open room right now?" so the church
- * website can show its "Live now" dot. No room names, people or counts leave here,
- * and private, ministry and direct-message rooms are never checked.
+ * Answers "is a prayer huddle live in an open room right now?" so the church
+ * website can show its "Live now" dot. With &rooms=1 it also lists the open
+ * (everyone) rooms by name with live yes/no, for the website's Huddles page.
+ * Private, ministry and direct-message rooms are never checked or listed, and
+ * no people or headcounts leave here.
  */
 export async function handleLivePrayerStatus(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -22,17 +24,23 @@ export async function handleLivePrayerStatus(req: any, res: any) {
   if (!supabase) return res.status(200).json({ ok: true, live: false });
   try {
     const { data } = await supabase.from('chat_channels').select('id, name, type, visibility').limit(500);
-    const openIds = (data || [])
-      .filter((c: any) => normalizeVisibility(c) === 'open')
-      .map((c: any) => String(c.id));
-    if (!openIds.length) return res.status(200).json({ ok: true, live: false });
+    const open = (data || []).filter((c: any) => normalizeVisibility(c) === 'open');
+    const openIds = open.map((c: any) => String(c.id));
+    const wantRooms = String(req.query?.rooms || '') === '1';
+    if (!openIds.length) return res.status(200).json({ ok: true, live: false, ...(wantRooms ? { rooms: [] } : {}) });
 
     const daily = await countDailyRoomParticipantsForChannels(getDailyApiKey(), openIds).catch(() => ({} as Record<string, number>));
     const lk = getLiveKitServerConfig();
     const liveKit = lk ? await listVoiceHuddleStatusesForChannels(lk, openIds).catch(() => ({})) : {};
     const merged = mergeDailyIntoHuddleStatuses(liveKit, daily, openIds);
-    const live = Object.values(merged).some((s: any) => s?.active && Number(s?.participantCount) > 0);
-    return res.status(200).json({ ok: true, live });
+    const isLive = (id: string) => Boolean((merged as any)[id]?.active) && Number((merged as any)[id]?.participantCount) > 0;
+    const live = openIds.some(isLive);
+    if (!wantRooms) return res.status(200).json({ ok: true, live });
+    const rooms = open
+      .map((c: any) => ({ id: String(c.id), name: String(c.name || '').trim(), live: isLive(String(c.id)) }))
+      .filter((r: any) => r.name)
+      .sort((a: any, b: any) => Number(b.live) - Number(a.live) || a.name.localeCompare(b.name));
+    return res.status(200).json({ ok: true, live, rooms });
   } catch (err: any) {
     console.warn('[live-prayer] status failed', err?.message || err);
     return res.status(200).json({ ok: true, live: false });
