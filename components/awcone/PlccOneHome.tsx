@@ -664,6 +664,41 @@ export const NextGathering: React.FC<{ enabled: boolean }> = ({ enabled }) => {
   );
 };
 
+/* ── Bible (opens the reader on the church website) ───────────────────── */
+
+export const BIBLE_LEFT_IMG = '/images/awc-one/bible-left.webp';
+export const BIBLE_RIGHT_IMG = '/images/awc-one/bible-right.webp';
+
+export const BibleFeature: React.FC<{ href: string }> = ({ href }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener"
+    aria-label="Open the Bible (opens the church website in a new tab)"
+    className={`group relative isolate block overflow-hidden rounded-[22px] text-white shadow-[0_10px_30px_rgba(22,37,31,0.18)] hover:shadow-[0_18px_44px_rgba(201,163,90,0.32)] ${LIFT} ${FOCUS}`}
+    style={{ background: '#063220' }}
+  >
+    <img src={BIBLE_LEFT_IMG} alt="" width={700} height={724} decoding="async" className="absolute inset-y-0 left-0 -z-10 h-full w-auto max-w-none" />
+    <img src={BIBLE_RIGHT_IMG} alt="" width={1352} height={724} decoding="async" className="absolute inset-y-0 right-0 -z-10 hidden h-full w-auto max-w-none sm:block" />
+    <div className="flex flex-col gap-4 px-6 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-8 sm:pl-[clamp(140px,16vw,220px)]">
+      <div className="max-w-xl">
+        <p className="text-xs font-extrabold uppercase tracking-[0.22em]" style={{ color: GOLD_SOFT }}>The Bible</p>
+        <p className="mt-1 text-[30px] sm:text-[36px] leading-tight font-light" style={serif}>Read the Word</p>
+        <p className="mt-1 text-[15px] leading-snug text-white/80">
+          Luganda, Kiswahili, English and more. Compare two languages verse by verse and share a verse on WhatsApp.
+        </p>
+      </div>
+      <span
+        aria-hidden
+        className="shrink-0 self-start sm:self-center inline-flex items-center gap-2 h-11 px-5 rounded-full font-bold text-[#16251f] group-hover:gap-3 transition-all motion-reduce:transition-none"
+        style={{ background: `linear-gradient(90deg, ${GOLD_SOFT}, ${PLCC_GOLD})` }}
+      >
+        Open the Bible <ArrowRight size={18} />
+      </span>
+    </div>
+  </a>
+);
+
 /* ── Quick actions ────────────────────────────────────────────────────── */
 
 export type QuickAction = { label: string; Icon: LucideIcon; run: () => void };

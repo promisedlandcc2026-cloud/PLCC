@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../lib/NavContext';
 import { Section } from '../types';
-import { firstNameOf, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
+import { BIBLE_URL, firstNameOf, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
 import { authedFetch } from '../lib/authedFetch';
-import { CalendarDays, Flag, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, ShieldAlert, Users } from 'lucide-react';
+import { BookOpen, CalendarDays, Flag, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, ShieldAlert, Users } from 'lucide-react';
 import { Role } from '../types';
 import { openReport } from '../lib/report';
 import { ReportHost } from '../components/common/ReportModal';
@@ -12,6 +12,7 @@ import { PLCC_CREAM, PlccFooter } from '../components/awcone/PlccOneShell';
 import { hasPermission } from '../lib/permissions';
 import { PlccHomeExtras } from '../components/awcone/PlccHomeExtras';
 import {
+  BibleFeature,
   CANAAN,
   CanaanFeature,
   FIRSTFRUITS,
@@ -150,6 +151,7 @@ const AwcOneLauncherPage: React.FC = () => {
       .map((a) => ({ label: a.name, hint: a.soon ? `${a.tags} • Coming soon` : a.tags, run: () => void open(a.id) })),
     ...(canCanaan ? [{ label: 'Canaan', hint: 'Church administration', run: () => go('/dashboard') }] : []),
     ...quick.map((q) => ({ label: q.label, hint: 'Quick action', run: q.run })),
+    { label: 'Bible', hint: 'Read the Word in Luganda, Kiswahili, English and more', run: () => window.open(BIBLE_URL, '_blank', 'noopener') },
     ...(can('/giving') ? [{ label: 'Giving', hint: 'Give and tithe: MTN, Airtel, Sendwave', run: () => go('/giving') }] : []),
     ...(can('/notifications') ? [{ label: 'Notifications', hint: 'Alerts and messages', run: () => go('/notifications') }] : []),
     { label: 'Report a problem', hint: 'Something not working in an app', run: () => openReport({ kind: 'problem' }) },
@@ -161,6 +163,7 @@ const AwcOneLauncherPage: React.FC = () => {
     { label: 'Home', Icon: Home, active: true, onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
     { label: 'Community', Icon: Users, onClick: () => void open('connect') },
     { label: 'Prayer', Icon: Globe2, onClick: () => void open('sanctum') },
+    { label: 'Bible', Icon: BookOpen, onClick: () => window.open(BIBLE_URL, '_blank', 'noopener') },
     ...(can('/giving') ? [{ label: 'Giving', Icon: HandHeart, onClick: () => go('/giving') }] : []),
     ...(can('/help/member-setup')
       ? [{ label: 'Help & Support', Icon: HelpCircle, onClick: () => go('/help/member-setup') }]
@@ -194,6 +197,7 @@ const AwcOneLauncherPage: React.FC = () => {
           {note ? (
             <p role="alert" className="text-center text-sm font-bold text-red-700">{note}</p>
           ) : null}
+          <BibleFeature href={BIBLE_URL} />
           <PlccQuickActions actions={quick} />
           <PlccHomeExtras enabled={isAuthenticated} />
         </main>

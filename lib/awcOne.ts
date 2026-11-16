@@ -25,6 +25,9 @@ const env = import.meta.env;
 const trimSlash = (s: string) => s.replace(/\/+$/, '');
 
 export const CONNECT_ORIGIN = trimSlash(env.VITE_CONNECT_ORIGIN || 'https://plcc-connect.vercel.app');
+/** The church website (Bible reader, sermons, events). */
+export const SITE_ORIGIN = trimSlash(env.VITE_SITE_ORIGIN || 'https://sanctum-live-nine.vercel.app');
+export const BIBLE_URL = `${SITE_ORIGIN}/bible`;
 export const CHAT_ORIGIN = trimSlash(env.VITE_CHAT_ORIGIN || 'https://plcc-chat.vercel.app');
 /** Sanctum Live — PLCC's corporate prayer rooms (its own sign-in for now). */
 export const SANCTUM_URL = env.VITE_SANCTUM_URL || 'https://plcc-sanctum.onrender.com/dashboard';
