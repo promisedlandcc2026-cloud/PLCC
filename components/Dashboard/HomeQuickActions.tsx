@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BIBLE_URL } from '../../lib/awcOne';
 import {
   QrCode,
   Video,
@@ -48,6 +49,14 @@ const ACTIONS = [
     tone: 'bg-white text-burgundy border-gray-100',
   },
   {
+    label: 'Bible',
+    hint: 'Read & study',
+    path: '/bible',
+    href: BIBLE_URL,
+    icon: BookOpen,
+    tone: 'bg-white text-burgundy border-gray-100',
+  },
+  {
     label: 'Community',
     hint: 'Feed & chat',
     path: '/community/feed',
@@ -61,7 +70,7 @@ const ACTIONS = [
     icon: Clapperboard,
     tone: 'bg-white text-burgundy border-gray-100',
   },
-] as const;
+] as const satisfies ReadonlyArray<{ label: string; hint: string; path: string; href?: string; icon: unknown; tone: string }>;
 
 const HomeQuickActions: React.FC = () => {
   const navigate = useNavigate();
@@ -75,7 +84,8 @@ const HomeQuickActions: React.FC = () => {
             <button
               key={a.path}
               type="button"
-              onClick={() => navigate(a.path)}
+              aria-label={'href' in a ? `${a.label}: ${a.hint} (opens in a new tab)` : undefined}
+              onClick={() => ('href' in a ? window.open(a.href, '_blank', 'noopener') : navigate(a.path))}
               className={`snap-start shrink-0 w-[120px] sm:w-[140px] rounded-2xl border p-3.5 sm:p-4 text-left shadow-sm hover:shadow-md transition-all active:scale-[0.98] ${a.tone}`}
             >
               <div

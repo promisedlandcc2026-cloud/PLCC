@@ -34,6 +34,7 @@ import {
   ShieldAlert,
   DollarSign,
   BookOpen,
+  BookMarked,
   Shield,
   ShoppingBag,
   AlertTriangle,
@@ -41,6 +42,7 @@ import {
   ListChecks,
   Coins,
 } from 'lucide-react';
+import { BIBLE_URL } from './awcOne';
 import { Section, NavItem } from '../types';
 
 export const NAV_BY_SECTION: Record<string, NavItem[]> = {
@@ -141,6 +143,7 @@ export const NAV_BY_SECTION: Record<string, NavItem[]> = {
     { label: 'Prayer Wall', path: '/community/prayer-wall', icon: <Heart size={18} /> },
     { label: 'Meeting Minutes', path: '/communication/minutes', icon: <ClipboardList size={18} /> },
     { label: 'Sermon Notes', path: '/community/sermon-notes', icon: <BookOpen size={18} /> },
+    { label: 'Bible', href: BIBLE_URL, icon: <BookMarked size={18} /> },
     { label: 'Sermon Manager', path: '/community/sermons', icon: <FileEdit size={18} /> },
     { label: 'Daily Devotional', path: '/community/daily-devotional', icon: <BookOpen size={18} /> },
     { label: 'Worship Tools', path: '/community/worship-tools', icon: <Music size={18} /> },

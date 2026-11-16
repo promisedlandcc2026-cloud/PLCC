@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ArrowLeft, BookOpen, ExternalLink, Loader2, Maximize2, RefreshCw, Search, X } from 'lucide-react';
 import AskAdminTitleLink from '../../components/common/AskAdminTitleLink';
+import { ScriptureText } from '../../lib/scriptureLinks';
 import { fetchWithTimeout, getAuthHeaders } from '../../lib/api';
 
 type GuideCard = {
@@ -352,14 +353,18 @@ function GuideReading({ guide, onBack }: { guide: StudyGuide; onBack: () => void
             “{guide.keyVerse.trim().replace(/^[“"]|[”"]$/g, '')}”
           </blockquote>
           {guide.keyVerseReference ? (
-            <figcaption className={`mt-3 text-[16px] font-semibold ${GOLD_TEXT}`}>{guide.keyVerseReference}</figcaption>
+            <figcaption className={`mt-3 text-[16px] font-semibold ${GOLD_TEXT}`}>
+              <ScriptureText text={guide.keyVerseReference} strict={false} icon />
+            </figcaption>
           ) : null}
         </figure>
       ) : null}
 
       <div className="mt-10 space-y-10 max-w-[68ch]">
         {guide.centralMessage ? (
-          <p className="text-[19px] leading-[1.7] font-medium">{guide.centralMessage}</p>
+          <p className="text-[19px] leading-[1.7] font-medium">
+            <ScriptureText text={guide.centralMessage} />
+          </p>
         ) : null}
         {guide.summary ? <Prose title="Summary" text={guide.summary} /> : null}
         <ItemList title="Key points" items={guide.keyPoints} ordered />
@@ -369,9 +374,17 @@ function GuideReading({ guide, onBack }: { guide: StudyGuide; onBack: () => void
             <ul className="space-y-3">
               {scriptures.map((s, i) => (
                 <li key={`${s.reference}-${i}`} className="text-[17px] leading-[1.7]">
-                  {s.reference ? <span className="font-semibold">{s.reference}</span> : null}
+                  {s.reference ? (
+                    <span className="font-semibold">
+                      <ScriptureText text={s.reference} strict={false} icon />
+                    </span>
+                  ) : null}
                   {s.reference && s.note ? <span className={MUTED}>: </span> : null}
-                  {s.note ? <span className={MUTED}>{s.note}</span> : null}
+                  {s.note ? (
+                    <span className={MUTED}>
+                      <ScriptureText text={s.note} />
+                    </span>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -532,7 +545,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Prose({ title, text }: { title: string; text: string }) {
   return (
     <Section title={title}>
-      <p className="text-[17px] leading-[1.75] whitespace-pre-wrap">{text}</p>
+      <p className="text-[17px] leading-[1.75] whitespace-pre-wrap">
+        <ScriptureText text={text} />
+      </p>
     </Section>
   );
 }
@@ -553,7 +568,9 @@ function ItemList({ title, items, ordered = false }: { title: string; items: str
             ) : (
               <span className="shrink-0 mt-[0.7em] w-1.5 h-1.5 rounded-full bg-[#C9A35A]" aria-hidden="true" />
             )}
-            <span>{item}</span>
+            <span>
+              <ScriptureText text={item} />
+            </span>
           </li>
         ))}
       </ListTag>
@@ -602,7 +619,7 @@ function DayPanel({ day }: { day: GuideDay }) {
           ) : null}
           {day.scriptureReference ? (
             <figcaption className={`${day.scriptureText ? 'mt-2' : ''} text-[15px] font-semibold ${GOLD_TEXT}`}>
-              {day.scriptureReference}
+              <ScriptureText text={day.scriptureReference} strict={false} icon />
             </figcaption>
           ) : null}
         </figure>
@@ -612,7 +629,9 @@ function DayPanel({ day }: { day: GuideDay }) {
         {parts.map(([label, text]) => (
           <div key={label}>
             <h4 className="text-[17px] font-semibold">{label}</h4>
-            <p className="mt-1 text-[17px] leading-[1.75] whitespace-pre-wrap">{text}</p>
+            <p className="mt-1 text-[17px] leading-[1.75] whitespace-pre-wrap">
+              <ScriptureText text={text} />
+            </p>
           </div>
         ))}
       </div>
