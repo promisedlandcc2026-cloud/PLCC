@@ -290,6 +290,17 @@ const PrayerWallPage: React.FC = () => {
             </div>
           )}
 
+          {isAdmin && activeTab === 'vetting' && (
+            <p className="text-xs text-gray-500 font-medium px-1">
+              Requests from visitors who aren't signed in wait here for approval. Signed-in members' requests go straight to the Wall.
+            </p>
+          )}
+          {isAdmin && activeTab === 'pastor' && (
+            <p className="text-xs text-gray-500 font-medium px-1">
+              Private requests sent to the Pastor only. They never appear on the Wall.
+            </p>
+          )}
+
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gold transition-colors" size={16} />
             <input
