@@ -20,7 +20,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import webpush from 'web-push';
 import { getSupabaseAdmin, requireAuth } from './auth.js';
 
-/** 'chat' = new messages in Jordan (only Jordan subscribes to it). */
+/** 'chat' = new messages in Ka Link (only Ka Link subscribes to it). */
 export type PushTopic = 'church' | 'prayer' | 'community' | 'daily' | 'chat';
 export const PUSH_TOPICS: PushTopic[] = ['church', 'prayer', 'community', 'daily', 'chat'];
 /** New phones get these; the 7 AM devotional reminder ('daily') is opt-in from the Daily page. */
@@ -239,7 +239,7 @@ export async function pushToEveryone(
 }
 
 /**
- * Jordan: alert the people in a room (or, for open rooms, everyone with chat
+ * Ka Link: alert the people in a room (or, for open rooms, everyone with chat
  * alerts on), skipping the author and anyone who muted the room. Never throws.
  */
 export async function pushChatAlert(
@@ -333,7 +333,7 @@ export function parseSubscription(raw: any): { endpoint: string; p256dh: string;
 export function cleanTopics(raw: unknown): PushTopic[] {
   if (!Array.isArray(raw)) return [...DEFAULT_TOPICS];
   const set = new Set(raw.map((t) => String(t)).filter((t): t is PushTopic => (PUSH_TOPICS as string[]).includes(t)));
-  // Jordan phones subscribe to chat messages only (church alerts already go to Connect).
+  // Ka Link phones subscribe to chat messages only (church alerts already go to Connect).
   if (set.size === 1 && set.has('chat')) return ['chat'];
   set.add('church'); // church alerts are the reason to turn this on; always included
   return PUSH_TOPICS.filter((t) => set.has(t));

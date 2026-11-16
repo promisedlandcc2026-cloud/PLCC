@@ -8,13 +8,13 @@ import { vaultFrom } from '../_utils/emailFrom.js';
  *
  * Three kinds of report, all emailed to REPORT_NOTIFY_EMAILS
  * (comma-separated list, set in Vercel env):
- *   - kind: 'problem' — app issue in Jordan / Canaan / Connect / Sanctum, with screenshots
+ *   - kind: 'problem' — app issue in Ka Link / Canaan / Connect / Sanctum, with screenshots
  *   - kind: 'safety'  — harassment, impersonating a leader, asking for / sending money, scams
  *   - kind: 'content' — Report on a specific message, post, prayer request or profile
  */
 
 const APPS: Record<string, string> = {
-  chat: 'Jordan',
+  chat: 'Ka Link',
   canaan: 'PLCC Canaan',
   connect: 'Tribes',
   sanctum: 'PLCC Sanctum',
@@ -91,7 +91,7 @@ const IMPERSONATED_LABEL: Record<string, string> = {
 };
 
 const WHERE_LABEL: Record<string, string> = {
-  chat: 'Jordan',
+  chat: 'Ka Link',
   canaan: 'PLCC Canaan',
   connect: 'Tribes',
   sanctum: 'PLCC Sanctum',

@@ -72,7 +72,7 @@ export const PlccLoginHeading: React.FC = () => (
     <h1 className="mt-3 text-[34px] sm:text-[40px] leading-[1.1] font-semibold" style={{ ...serif, color: PLCC_GREEN_DEEP }}>
       Welcome to PLCC ONE
     </h1>
-    <p className="mt-3 text-base text-[#16251f]/70">Sign in to Jordan, Tribes, Sanctum, Firstfruits and Canaan.</p>
+    <p className="mt-3 text-base text-[#16251f]/70">Sign in to Ka Link, Tribes, Sanctum, Firstfruits and Canaan.</p>
   </div>
 );
 
@@ -192,7 +192,7 @@ export const PlccWelcomeBanner: React.FC<{ first: string }> = ({ first }) => (
 );
 
 const APP_CARDS: { id: AwcOneAppId; name: string; blurb: string; Icon: LucideIcon }[] = [
-  { id: 'chat', name: 'Jordan', blurb: 'Messages and live calls', Icon: MessageCircle },
+  { id: 'chat', name: 'Ka Link', blurb: 'Messages and live calls', Icon: MessageCircle },
   { id: 'vault', name: 'PLCC Canaan', blurb: 'Church administration', Icon: Landmark },
   { id: 'connect', name: 'Tribes', blurb: 'Members and community', Icon: Users },
   { id: 'sanctum', name: 'PLCC Sanctum', blurb: 'Corporate prayer rooms', Icon: Flame },

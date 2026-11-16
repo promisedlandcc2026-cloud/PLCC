@@ -748,7 +748,7 @@ const App: React.FC = () => {
           <Route path="/community/sermon-notes" element={<ProtectedRoute><AppShell><SermonNotesPage /></AppShell></ProtectedRoute>} />
           <Route path="/community/sermons" element={<ProtectedRoute><AppShell><SermonManager /></AppShell></ProtectedRoute>} />
           <Route path="/community/worship-tools" element={<ProtectedRoute><AppShell><WorshipToolsPage /></AppShell></ProtectedRoute>} />
-          {/* Chat moves to Jordan when VITE_CHAT_MOVED=true; the old Vault chat stays at /community/chat-classic. */}
+          {/* Chat moves to Ka Link when VITE_CHAT_MOVED=true; the old Vault chat stays at /community/chat-classic. */}
           <Route path="/community/chat" element={<ProtectedRoute><AppShell>{CHAT_MOVED ? <OpenAwcChat /> : <ChatPage />}</AppShell></ProtectedRoute>} />
           <Route path="/community/chat/dm" element={<ProtectedRoute><AppShell>{CHAT_MOVED ? <OpenAwcChat /> : <DMPage />}</AppShell></ProtectedRoute>} />
           <Route path="/community/chat-classic" element={<ProtectedRoute><AppShell><ChatPage /></AppShell></ProtectedRoute>} />

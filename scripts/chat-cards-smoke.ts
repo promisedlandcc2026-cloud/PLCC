@@ -1,5 +1,5 @@
 /**
- * Jordan event & Serve cards — rules and handler checks against an in-memory DB.
+ * Ka Link event & Serve cards — rules and handler checks against an in-memory DB.
  * Run: npx tsx scripts/chat-cards-smoke.ts
  */
 import { readFileSync } from 'node:fs';

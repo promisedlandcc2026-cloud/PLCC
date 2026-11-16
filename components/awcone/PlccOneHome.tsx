@@ -66,7 +66,7 @@ export function KenteBand({ className = '', style }: { className?: string; style
 
 export type HomeApp = { id: AwcOneAppId; name: string; tags: string; Icon: LucideIcon; soon?: boolean };
 
-export const JORDAN: HomeApp = { id: 'chat', name: 'Jordan', tags: 'Messages • Prayer • Calls', Icon: MessageCircle };
+export const JORDAN: HomeApp = { id: 'chat', name: 'Ka Link', tags: 'Messages • Prayer • Calls', Icon: MessageCircle };
 export const TRIBES: HomeApp = { id: 'connect', name: 'Tribes', tags: 'Community • Events • Groups', Icon: Users };
 export const SANCTUM: HomeApp = { id: 'sanctum', name: 'PLCC Sanctum', tags: 'Prayer Rooms • Live Prayer', Icon: Flame };
 export const FIRSTFRUITS: HomeApp = { id: 'tithe', name: 'Firstfruits', tags: 'Tithe • Offerings', Icon: HandHeart, soon: true };

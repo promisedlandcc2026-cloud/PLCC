@@ -1,5 +1,5 @@
 /**
- * Jordan — help requests with tracking and assignments  (see supabase/migrations/chat_requests.sql)
+ * Ka Link — help requests with tracking and assignments  (see supabase/migrations/chat_requests.sql)
  * resource=community&subResource=request*
  *
  *   POST request-create { messageId, category, details }

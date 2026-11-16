@@ -96,7 +96,7 @@ const AwcOneLauncherPage: React.FC = () => {
     };
   }, []);
 
-  // Unread Jordan messages on the Chat tile (same read marks Jordan uses).
+  // Unread Ka Link messages on the Chat tile (same read marks Ka Link uses).
   const [chatUnread, setChatUnread] = useState(0);
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -171,7 +171,7 @@ const AwcOneLauncherPage: React.FC = () => {
   const sideNav: NavItem[] = [
     { label: 'Home', Icon: Home, active: true, onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
     { label: 'Community', Icon: Users, onClick: () => void open('connect') },
-    // Live prayer happens in Jordan's Live Huddles; PLCC Sanctum is the overflow room (its own tile).
+    // Live prayer happens in Ka Link's Live Huddles; PLCC Sanctum is the overflow room (its own tile).
     { label: 'Live prayer', Icon: Globe2, onClick: () => void open('chat', '/live') },
     { label: 'Bible', Icon: BookOpen, onClick: () => window.open(BIBLE_URL, '_blank', 'noopener') },
     ...(can('/giving') ? [{ label: 'Giving', Icon: HandHeart, onClick: () => go('/giving') }] : []),

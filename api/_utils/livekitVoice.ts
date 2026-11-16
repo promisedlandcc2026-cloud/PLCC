@@ -155,7 +155,7 @@ export async function mintLiveKitAccessToken(
 }
 
 /**
- * Is this Jordan room at LiveKit's hard cap (VOICE_ROOM_MAX_PARTICIPANTS)? Counts every
+ * Is this Ka Link room at LiveKit's hard cap (VOICE_ROOM_MAX_PARTICIPANTS)? Counts every
  * connection that holds a seat (the hidden PLCC Sanctum relay too), except the member's own
  * identity so a rejoin after a dropped connection is never turned away.
  */

@@ -1,5 +1,5 @@
 /**
- * Jordan polls — input rules, vote rules, and the shape each member sees,
+ * Ka Link polls — input rules, vote rules, and the shape each member sees,
  * plus the handler's access checks against an in-memory database.
  * Run: npx tsx scripts/chat-polls-smoke.ts
  */

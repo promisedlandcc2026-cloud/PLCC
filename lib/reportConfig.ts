@@ -12,7 +12,7 @@ export const REPORT_ID_PREFIX = 'plcc-report';
 /** Which app has the problem. First entry is the default when the host doesn't say. */
 export const REPORT_APP_OPTIONS: ReportOption[] = [
   { value: 'canaan', label: 'PLCC Canaan' },
-  { value: 'chat', label: 'Jordan' },
+  { value: 'chat', label: 'Ka Link' },
   { value: 'connect', label: 'Tribes' },
   { value: 'sanctum', label: 'PLCC Sanctum (prayer rooms)' },
 ];
@@ -51,7 +51,7 @@ export const REPORT_IMPERSONATED_OPTIONS: ReportOption[] = [
 ];
 
 export const REPORT_WHERE_OPTIONS: ReportOption[] = [
-  { value: 'chat', label: 'Jordan' },
+  { value: 'chat', label: 'Ka Link' },
   { value: 'connect', label: 'Tribes' },
   { value: 'canaan', label: 'PLCC Canaan' },
   { value: 'sanctum', label: 'PLCC Sanctum' },

@@ -1,7 +1,7 @@
 /**
  * PLCC ONE — the app launcher. One sign-in (the Vault's) opens every PLCC app.
  *
- * Connect (and PLCC Ark, which Connect serves at /ark) and Jordan share the Vault's
+ * Connect (and PLCC Ark, which Connect serves at /ark) and Ka Link share the Vault's
  * Supabase tenant, so the launcher asks the Vault API for a single-use sign-in token
  * and the app finishes sign-in at its /auth/sso page. Tithe needs no sign-in to give.
  * Sanctum (corporate prayer rooms) runs on its own stack and keeps its own sign-in.
@@ -36,7 +36,7 @@ export const TITHE_URL = env.VITE_TITHE_URL || 'https://plcc-tithe.vercel.app/';
 const SSO_ENABLED = env.VITE_AWC_ONE_SSO !== 'false';
 
 export const AWC_ONE_APPS: AwcOneApp[] = [
-  { id: 'chat', name: 'Jordan', blurb: 'Messages, Prayer & Calls', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
+  { id: 'chat', name: 'Ka Link', blurb: 'Messages, Prayer & Calls', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
   { id: 'vault', name: 'PLCC Canaan', blurb: 'Church Administration', icon: '/images/awc-one/icon-vault.webp', iconH: 54 },
   { id: 'connect', name: 'Tribes', blurb: 'Community, Events & Groups', icon: '/images/awc-one/icon-connect.webp', iconH: 46 },
   { id: 'sanctum', name: 'PLCC Sanctum', blurb: 'Corporate Prayer Rooms', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
@@ -87,7 +87,7 @@ export async function signedInAppUrl(id: AwcOneAppId, signedIn: boolean, nextPat
 }
 
 /**
- * Chat lives in Jordan: Canaan's Chat opens Jordan signed in (same channels and messages).
+ * Chat lives in Ka Link: Canaan's Chat opens Ka Link signed in (same channels and messages).
  * On by default; set VITE_CHAT_MOVED=false in Vercel (then redeploy) to bring back
  * Canaan's own Chat. The older Canaan chat always stays at /community/chat-classic.
  */

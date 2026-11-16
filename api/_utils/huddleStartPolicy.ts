@@ -1,5 +1,5 @@
 /**
- * Live Huddle start policy (Jordan / Connect / Vault share this service).
+ * Live Huddle start policy (Ka Link / Connect / Vault share this service).
  *
  * Starting = opening a huddle in a room where nobody is on the call yet.
  * Joining  = entering a huddle that is already live.

@@ -2,7 +2,7 @@
  * Live Huddle start policy smoke (no LiveKit / Supabase required).
  * Run: npx tsx scripts/huddle-start-policy-smoke.ts
  *
- * Mirrors the Jordan Live Huddle plan acceptance tests that are decidable
+ * Mirrors the Ka Link Live Huddle plan acceptance tests that are decidable
  * without a live database: who may start, who may only join, outage pass.
  */
 import assert from 'node:assert/strict';

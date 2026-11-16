@@ -130,7 +130,7 @@ export const AwcOneTile: React.FC<{
 export const AwcOneTiles: React.FC<{
   onOpen: (id: AwcOneAppId) => void;
   busyId?: AwcOneAppId | null;
-  /** Unread counts shown on tiles (e.g. Jordan). */
+  /** Unread counts shown on tiles (e.g. Ka Link). */
   badges?: Partial<Record<AwcOneAppId, number>>;
 }> = ({ onOpen, busyId, badges }) => (
   <nav aria-label="PLCC apps" className="w-full">

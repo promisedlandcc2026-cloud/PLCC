@@ -1,5 +1,5 @@
 /**
- * Jordan — event and Serve cards in a chat  (see supabase/migrations/chat_cards.sql)
+ * Ka Link — event and Serve cards in a chat  (see supabase/migrations/chat_cards.sql)
  * resource=community&subResource=card-*
  *
  *   GET  card-options                     — upcoming approved events + open Serve needs (picker)
@@ -13,7 +13,7 @@
  *        the same list as Connect's Home ticket)
  *
  * Serve sign-up itself goes through Tribes's /api/serve (staff-verified eligibility
- * gate + serve_signup_opportunity RPC); Jordan's bridge forwards the member's token there.
+ * gate + serve_signup_opportunity RPC); Ka Link's bridge forwards the member's token there.
  */
 import { normalizeEventStatus } from './eventApprovalLogic.js';
 

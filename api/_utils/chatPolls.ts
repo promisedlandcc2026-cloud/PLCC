@@ -1,5 +1,5 @@
 /**
- * Jordan polls — resource=community&subResource=poll-*  (see supabase/migrations/chat_polls.sql)
+ * Ka Link polls — resource=community&subResource=poll-*  (see supabase/migrations/chat_polls.sql)
  *
  *   POST poll-create { messageId, question, options[], multi?, anonymous? }
  *        The poll rides on a chat message the author has just sent (so every posting

@@ -4743,7 +4743,7 @@ const handleCommunity = async (req: any, res: any) => {
                 return res.status(200).json({ ok: true, archived: await listArchivedChats(supabaseAdmin, authUserId) });
             }
             if (chatType === 'dm-list') {
-                // Jordan: your direct conversations from the server, so they show on every
+                // Ka Link: your direct conversations from the server, so they show on every
                 // device and only for the account they belong to (newest first).
                 const { data: memberRows } = await supabaseAdmin
                     .from('chat_room_members')
@@ -6020,7 +6020,7 @@ const handleCommunity = async (req: any, res: any) => {
                     // when a second participant joins (brief ICE blip → everyone kicked).
                     await ensureVoiceRoom(lk, cid);
 
-                    // Room at its 50-seat cap: say so plainly so Jordan can offer PLCC Sanctum's
+                    // Room at its 50-seat cap: say so plainly so Ka Link can offer PLCC Sanctum's
                     // overflow room instead of a failed connection.
                     const seats = await isVoiceRoomFull(lk, cid, authUserId);
                     if (seats.full) {
@@ -6218,7 +6218,7 @@ const handleCommunity = async (req: any, res: any) => {
                 });
             }
             if (chatType === 'room-info' || chatType === 'room-mute') {
-                // Jordan: live-update topic, Start-button hint and mute switch for one room.
+                // Ka Link: live-update topic, Start-button hint and mute switch for one room.
                 const cid = String(req.body?.channelId || req.body?.channel_id || first(channelId) || '').trim();
                 if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
                 const channel = await fetchChannel(supabaseAdmin, cid);
