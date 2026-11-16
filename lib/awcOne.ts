@@ -84,10 +84,11 @@ export async function signedInAppUrl(id: AwcOneAppId, signedIn: boolean, nextPat
 }
 
 /**
- * Chat moved to Jordan. Off until VITE_CHAT_MOVED=true is set in Vercel (then redeploy);
- * while off, the Vault keeps its own Chat. The old Chat stays at /community/chat-classic.
+ * Chat lives in Jordan: Canaan's Chat opens Jordan signed in (same channels and messages).
+ * On by default; set VITE_CHAT_MOVED=false in Vercel (then redeploy) to bring back
+ * Canaan's own Chat. The older Canaan chat always stays at /community/chat-classic.
  */
-export const CHAT_MOVED = env.VITE_CHAT_MOVED === 'true';
+export const CHAT_MOVED = env.VITE_CHAT_MOVED !== 'false';
 
 export function firstNameOf(name?: string | null): string {
   const n = String(name || '').trim();
