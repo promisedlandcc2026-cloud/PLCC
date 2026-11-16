@@ -9290,6 +9290,10 @@ export default async function handler(req: any, res: any) {
             const { handleVaultHealth } = await import('./vaultNewsHandler.js');
             return handleVaultHealth(req, res);
         }
+        if (healthResource === 'live-prayer') {
+            const { handleLivePrayerStatus } = await import('./livePrayerStatusHandler.js');
+            return handleLivePrayerStatus(req, res);
+        }
         const supabaseAdmin = getSupabaseAdmin();
         if (!supabaseAdmin) {
             console.error('[API Error] Supabase Admin not initialized');
