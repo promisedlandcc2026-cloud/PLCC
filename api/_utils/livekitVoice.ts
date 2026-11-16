@@ -24,6 +24,12 @@ export const VOICE_ROOM_EMPTY_TIMEOUT_SECONDS = 60 * 30; // 30 minutes
 export const VOICE_ROOM_DEPARTURE_TIMEOUT_SECONDS = 30;
 export const VOICE_ROOM_MAX_PARTICIPANTS = 50;
 
+/** PLCC Sanctum's hidden overflow relay joins as `plcc-sanctum-bridge-…`; it is not a person. */
+export function countPeople(participants: unknown): number {
+  if (!Array.isArray(participants)) return 0;
+  return participants.filter((p: any) => !String(p?.identity || '').startsWith('plcc-sanctum-bridge')).length;
+}
+
 export type LiveKitServerConfig = {
   url: string;
   apiKey: string;
@@ -157,7 +163,7 @@ export async function listVoiceRoomParticipantCount(
   const svc = new RoomServiceClient(host, config.apiKey, config.apiSecret);
   try {
     const participants = await svc.listParticipants(roomName);
-    const count = Array.isArray(participants) ? participants.length : 0;
+    const count = countPeople(participants);
     return { roomName, active: count > 0, participantCount: count };
   } catch (err: any) {
     const msg = String(err?.message || err || '').toLowerCase();
@@ -206,7 +212,7 @@ export async function listVoiceHuddleStatusesForChannels(
         const roomName = voiceRoomNameForChannel(id);
         try {
           const participants = await svc.listParticipants(roomName);
-          const count = Array.isArray(participants) ? participants.length : 0;
+          const count = countPeople(participants);
           result[id] = { active: count > 0, participantCount: count };
         } catch (err: any) {
           const msg = String(err?.message || err || '').toLowerCase();
