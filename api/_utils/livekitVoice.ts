@@ -154,6 +154,31 @@ export async function mintLiveKitAccessToken(
   };
 }
 
+/**
+ * Is this Jordan room at LiveKit's hard cap (VOICE_ROOM_MAX_PARTICIPANTS)? Counts every
+ * connection that holds a seat (the hidden PLCC Sanctum relay too), except the member's own
+ * identity so a rejoin after a dropped connection is never turned away.
+ */
+export async function isVoiceRoomFull(
+  config: LiveKitServerConfig,
+  channelId: string,
+  joiningIdentity: string
+): Promise<{ full: boolean; seated: number; capacity: number }> {
+  const capacity = VOICE_ROOM_MAX_PARTICIPANTS;
+  const host = config.url.replace(/^ws/i, 'http');
+  const svc = new RoomServiceClient(host, config.apiKey, config.apiSecret);
+  try {
+    const participants = await svc.listParticipants(voiceRoomNameForChannel(channelId));
+    const seated = Array.isArray(participants)
+      ? participants.filter((p: any) => String(p?.identity || '') !== joiningIdentity).length
+      : 0;
+    return { full: seated >= capacity, seated, capacity };
+  } catch {
+    // Room not created yet or LiveKit busy: let LiveKit decide at connect time.
+    return { full: false, seated: 0, capacity };
+  }
+}
+
 export async function listVoiceRoomParticipantCount(
   config: LiveKitServerConfig,
   channelId: string

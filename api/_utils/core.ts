@@ -153,6 +153,7 @@ import {
     decideVoiceHuddleAccess,
     endVoiceRoom,
     ensureVoiceRoom,
+    isVoiceRoomFull,
     filterVoiceStatusChannelIds,
     getLiveKitServerConfig,
     listVoiceHuddleStatusesForChannels,
@@ -6018,6 +6019,18 @@ const handleCommunity = async (req: any, res: any) => {
                     // Client-auto-created rooms often use emptyTimeout=0 and get deleted
                     // when a second participant joins (brief ICE blip → everyone kicked).
                     await ensureVoiceRoom(lk, cid);
+
+                    // Room at its 50-seat cap: say so plainly so Jordan can offer PLCC Sanctum's
+                    // overflow room instead of a failed connection.
+                    const seats = await isVoiceRoomFull(lk, cid, authUserId);
+                    if (seats.full) {
+                        return res.status(409).json({
+                            ok: false,
+                            code: 'HUDDLE_ROOM_FULL',
+                            error: 'This prayer room is full.',
+                            capacity: seats.capacity,
+                        });
+                    }
 
                     // Session co-host / host from LiveKit room metadata (rejoin keeps canModerate).
                     // First joiner claims host when empty (huddle starter → Play Music + session mod).
