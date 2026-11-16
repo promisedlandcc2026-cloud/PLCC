@@ -53,7 +53,7 @@ const AwcOneLauncherPage: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
-  const open = async (id: AwcOneAppId) => {
+  const open = async (id: AwcOneAppId, nextPath?: string) => {
     if (busyId) return;
     setNote('');
     if (id === 'vault') {
@@ -63,7 +63,7 @@ const AwcOneLauncherPage: React.FC = () => {
     }
     setBusyId(id);
     try {
-      const url = await signedInAppUrl(id, isAuthenticated);
+      const url = await signedInAppUrl(id, isAuthenticated, nextPath);
       window.location.assign(url);
       // If the browser stays on this page (blocked or slow), don't spin forever.
       window.setTimeout(() => setBusyId(null), 8000);
@@ -162,7 +162,8 @@ const AwcOneLauncherPage: React.FC = () => {
   const sideNav: NavItem[] = [
     { label: 'Home', Icon: Home, active: true, onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
     { label: 'Community', Icon: Users, onClick: () => void open('connect') },
-    { label: 'Prayer', Icon: Globe2, onClick: () => void open('sanctum') },
+    // Live prayer happens in Jordan's Live Huddles; PLCC Sanctum is the overflow room (its own tile).
+    { label: 'Live prayer', Icon: Globe2, onClick: () => void open('chat', '/live') },
     { label: 'Bible', Icon: BookOpen, onClick: () => window.open(BIBLE_URL, '_blank', 'noopener') },
     ...(can('/giving') ? [{ label: 'Giving', Icon: HandHeart, onClick: () => go('/giving') }] : []),
     ...(can('/help/member-setup')
