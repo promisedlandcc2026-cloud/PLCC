@@ -135,6 +135,8 @@ export async function mintLiveKitAccessToken(
     identity: plan.identity,
     name: plan.name,
     ttl: plan.ttlSeconds,
+    // Shown in the room (gold "Moderator" badge). Display only — permissions stay in the grant.
+    attributes: { 'plcc.role': plan.grant.roomAdmin || input.canModerate ? 'moderator' : 'member' },
   });
   at.addGrant(plan.grant);
   const token = await at.toJwt();
