@@ -56,7 +56,7 @@ console.log('\nHuddle reliability smoke — status UX + safe JSON');
 const ui = read('components/Community/VoiceHuddle.tsx');
 assert(/25_000|25000/.test(ui), 'voice-huddle-status timeout raised above 8s');
 assert(
-  /Status check is slow \(database busy\)\. You can still Start or Join Huddle\./.test(ui),
+  /Status check is slow \(database busy\)\. You can still Start or Join Ka Link\./.test(ui),
   'status timeout soft warning keeps Start/Join available'
 );
 assert(

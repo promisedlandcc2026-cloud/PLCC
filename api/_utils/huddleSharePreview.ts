@@ -34,17 +34,17 @@ export const HUDDLE_SHARE_PREVIEWS: Record<string, HuddleSharePreview> = {
   'cdd9ed73-6cdc-45a0-a7e7-57beec6eea5e': {
     channelId: 'cdd9ed73-6cdc-45a0-a7e7-57beec6eea5e',
     slug: 'mount-moriah-channel',
-    title: 'Mount Moriah Channel · Live Huddle',
+    title: 'Mount Moriah Channel · Live Ka Link',
     description:
-      'Join the Live Huddle on PLCC Canaan — Discuss · Grow · Connect · Pray · Build Together',
+      'Join the Live Ka Link on PLCC Canaan — Discuss · Grow · Connect · Pray · Build Together',
     ext: 'jpg',
   },
 };
 
 const DEFAULT_PREVIEW: Omit<HuddleSharePreview, 'channelId'> = {
   slug: 'awc-huddle-default',
-  title: 'PLCC Live Huddle',
-  description: 'Join the Live Huddle on Tribes.',
+  title: 'PLCC Live Ka Link',
+  description: 'Join the Live Ka Link on Tribes.',
   ext: 'jpg',
 };
 
@@ -106,12 +106,12 @@ export function resolveHuddleShareCard(opts: {
   const title =
     registered?.title ||
     (label
-      ? `${label.startsWith('#') ? label.slice(1) : label} · Live Huddle`
+      ? `${label.startsWith('#') ? label.slice(1) : label} · Live Ka Link`
       : DEFAULT_PREVIEW.title);
   const description =
     registered?.description ||
     (label
-      ? `Join the Live Huddle in ${label.startsWith('#') ? label : `#${label}`} on Tribes.`
+      ? `Join the Live Ka Link in ${label.startsWith('#') ? label : `#${label}`} on Tribes.`
       : DEFAULT_PREVIEW.description);
 
   const dbImage = String(opts.shareImageUrl || '').trim();
@@ -194,16 +194,16 @@ if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})(
   const bodyHtml = card.connectInviteUrl
     ? `<main>
     <img src="${imageUrl}" alt="" width="120" height="120" style="width:120px;height:120px;border-radius:24px;object-fit:cover" />
-    <p class="kicker">Live Huddle</p>
+    <p class="kicker">Live Ka Link</p>
     <h1>${title.replace(/\s*·\s*Live Huddle$/, '')}</h1>
-    <p class="signin">Sign in to Tribes or PLCC Canaan, then tap the huddle link. It opens right into the prayer call.</p>
-    <p class="q" style="margin-top:20px">Join the huddle on:</p>
+    <p class="signin">Sign in to Tribes or PLCC Canaan, then tap the link. It opens right into the prayer call.</p>
+    <p class="q" style="margin-top:20px">Join the Ka Link on:</p>
     <a class="btn gold" href="${connectUrl}">Tribes<small>Most members</small></a>
     <a class="btn plain" href="${appInviteUrl}">PLCC Canaan<small>Church staff</small></a>
     <p class="note">Either way, you're in the same prayer call.</p>
   </main>`
     : `<main>
-    <p>Opening Live Huddle…</p>
+    <p>Opening Live Ka Link…</p>
     <p><a href="${appInviteUrl}">Continue to PLCC Canaan</a></p>
     <p style="margin-top:16px"><img src="${imageUrl}" alt="" width="280" height="280" style="max-width:80vw;height:auto;border-radius:16px" /></p>
   </main>`;

@@ -33,7 +33,7 @@ describe('Family LiveKit room naming', () => {
   });
 });
 
-describe('Family huddle access + invites', () => {
+describe('Family Ka Link access + invites', () => {
   it('resolves adult household server-side; never trusts client householdId', () => {
     const access = read('api/_utils/familyHuddleAccess.ts');
     assert.ok(access.includes('resolveAdultHouseholdForUser'));
@@ -79,7 +79,7 @@ describe('Family huddle access + invites', () => {
   });
 });
 
-describe('Vault Family Huddle UI', () => {
+describe('Vault Family Ka Link UI', () => {
   it('mints Vault hash invite URLs — not a Connect path', () => {
     const access = read('api/_utils/familyHuddleAccess.ts');
     assert.ok(access.includes("return `/#/family/huddle/join?code="));
@@ -130,7 +130,7 @@ describe('Vault Family Huddle UI', () => {
     assert.ok(existsSync(join(root, 'pages/family/FamilyHuddleJoin.tsx')));
   });
 
-  it('gates Family & Access huddle card on viewerCanHuddle', () => {
+  it('gates Family & Access Ka Link card on viewerCanHuddle', () => {
     const handler = read('api/_utils/familyAdminHandler.ts');
     assert.ok(handler.includes('viewerCanHuddle'));
     assert.ok(handler.includes('resolveAdultHouseholdForUser'));
@@ -149,7 +149,7 @@ describe('Vault Family Huddle UI', () => {
     assert.ok(ui.includes('huddleTokenRefreshDelayMs'));
     assert.ok(ui.includes('shouldAutoRejoinHuddle'));
     assert.ok(ui.includes('endFamilyHuddle'));
-    assert.ok(ui.includes('End Family Huddle for everyone'));
+    assert.ok(ui.includes('End Family Ka Link for everyone'));
     assert.ok(ui.includes('canModerate && !isGuest'));
     assert.ok(ui.includes('guestToken'));
     assert.ok(ui.includes('whatsappInviteHref'));

@@ -56,8 +56,8 @@ const path = buildHuddleInvitePath(CHANNEL)!;
 const url = buildHuddleInviteUrl({ origin: ORIGIN, channelId: CHANNEL })!;
 
 assert(path.includes(CHANNEL), 'A: invite contains channel UUID');
-assert(/[?&]huddle=1(?:&|$)/.test(path), 'B: invite contains huddle=1');
-assert(url.includes(`channel=${CHANNEL}`) && url.includes('huddle=1'), 'B: absolute URL has huddle=1');
+assert(/[?&]huddle=1(?:&|$)/.test(path), 'B: invite contains Ka Link=1');
+assert(url.includes(`channel=${CHANNEL}`) && url.includes('huddle=1'), 'B: absolute URL has Ka Link=1');
 assert(url.startsWith(`${ORIGIN}/#${HUDDLE_INVITE_ROUTE}?`), 'B: HashRouter form');
 
 assert(huddleInviteLooksSafe(url), 'C: invite looks safe');
@@ -78,18 +78,18 @@ assert(
 assert(/setActiveChannel\(deepChannel\)/.test(chatPage), 'D: Chat selects ACL channel from deep-link');
 assert(
   /setIsVoiceHuddleOpen\(true\)/.test(chatPage) && /openedFromInvite|huddleOpenedFromInvite/.test(chatPage),
-  'E: signed-in authorized invite opens Huddle pre-join'
+  'E: signed-in authorized invite opens Ka Link pre-join'
 );
 assert(/openedFromInvite/.test(ui) && /data-huddle-prejoin-copy/.test(ui) && /'invite'/.test(ui), 'E: pre-join invite copy present');
 assert(/A live church conversation is happening now/.test(ui), 'E: invite pre-join body copy');
-assert(/data-huddle-join-cta/.test(ui) && /Join Huddle/.test(ui), 'E: JOIN HUDDLE control present');
+assert(/data-huddle-join-cta/.test(ui) && /Join Ka Link/.test(ui), 'E: JOIN HUDDLE control present');
 
 assert(
   returnToFromRouterLocation({
     pathname: '/community/chat',
     search: `?channel=${CHANNEL}&huddle=1`,
   }) === inviteReturn,
-  'F: signed-out returnTo preserves channel + huddle'
+  'F: signed-out returnTo preserves channel + Ka Link'
 );
 assert(sanitizeReturnTo(inviteReturn) === inviteReturn, 'F: sanitizer allows invite intent query');
 assert(
@@ -107,7 +107,7 @@ assert(
     channelAccessible: false,
     huddleActive: true,
   }) === 'ignore',
-  'H: unauthorized channel cannot open Huddle'
+  'H: unauthorized channel cannot open Ka Link'
 );
 assert(
   /ACL-filtered|inaccessible ids simply do not select/i.test(chatPage),
@@ -127,11 +127,11 @@ assert(
     channelAccessible: true,
     huddleActive: false,
   }) === 'ended',
-  'J: ended Huddle does not auto-start'
+  'J: ended Ka Link does not auto-start'
 );
-assert(/This Huddle has ended/.test(chatPage), 'K: ended Huddle produces ended/inactive behavior');
+assert(/This Ka Link has ended/.test(chatPage), 'K: ended Ka Link produces ended/inactive behavior');
 assert(/data-huddle-invite-ended/.test(chatPage), 'K: ended notice markup present');
-assert(!/setIsVoiceHuddleOpen\(true\).*ended|Start Huddle for invite/i.test(inviteHelper), 'J: helpers do not start rooms');
+assert(!/setIsVoiceHuddleOpen\(true\).*ended|Start Ka Link for invite/i.test(inviteHelper), 'J: helpers do not start rooms');
 
 assert(huddleInviteAutoJoinsLiveKit() === false, 'L: invite does NOT auto-connect LiveKit');
 assert(huddleInviteAutoConnectsLiveKit() === false, 'L: auto-connect helper false');
@@ -145,7 +145,7 @@ assert(
 );
 
 assert(/huddleIntentConsumedRef/.test(chatPage), 'O: one-time consumed intent ref present');
-assert(/stripHuddleIntentParam|HUDDLE_INVITE_INTENT_KEY/.test(chatPage), 'O: huddle intent stripped after consume');
+assert(/stripHuddleIntentParam|HUDDLE_INVITE_INTENT_KEY/.test(chatPage), 'O: Ka Link intent stripped after consume');
 assert(
   stripHuddleIntentFromSearch(`?channel=${CHANNEL}&huddle=1`) === `?channel=${CHANNEL}`,
   'O: closing/not-now does not reopen — intent removed, channel kept'
@@ -164,22 +164,22 @@ assert(
     channelAccessible: true,
     huddleActive: true,
   }) === 'ignore',
-  'Q: normal Community channel URL without huddle=1 behaves unchanged'
+  'Q: normal Community channel URL without Ka Link=1 behaves unchanged'
 );
-assert(/deepHuddleIntent/.test(chatPage), 'Q: Chat gates open on huddle intent flag');
+assert(/deepHuddleIntent/.test(chatPage), 'Q: Chat gates open on Ka Link intent flag');
 
 const share = buildHuddleSharePayload({
   origin: ORIGIN,
   channelId: CHANNEL,
   channelName: 'Prayer',
 })!;
-assert(url.includes('huddle=1') && /Copy Huddle Link/.test(ui), 'R: Copy Link contains new intent');
+assert(url.includes('huddle=1') && /Copy Invite Link/.test(ui), 'R: Copy Link contains new intent');
 assert(
   /\/api\/share-huddle\?channel=/.test(share.url) && huddleInviteLooksSafe(share.url),
   'S: Share uses OG /api/share-huddle landing (WhatsApp card)'
 );
 assert(canUseNavigatorShare({ share: undefined }) === false, 'S: share unsupported degrades');
-assert(/canUseNavigatorShare|Copy Huddle Link/.test(ui), 'S: UI has copy fallback path');
+assert(/canUseNavigatorShare|Copy Ka Link Link/.test(ui), 'S: UI has copy fallback path');
 assert(/buildHuddlePreviewShareUrl/.test(ui), 'S: Copy uses preview share URL for WhatsApp');
 
 assert(huddleGalleryPageSize('desktop') === 32, 'T: gallery desktop=32 small squares');

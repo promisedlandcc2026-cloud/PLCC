@@ -183,8 +183,8 @@ assert(
   'M: cancel message'
 );
 assert(
-  formatScreenShareError({ message: 'publish failed' }).includes('still connected to the huddle'),
-  'M: failure stays in huddle'
+  formatScreenShareError({ message: 'publish failed' }).includes('still connected to the Ka Link'),
+  'M: failure stays in Ka Link'
 );
 assert(isScreenShareSupported({ getDisplayMedia: () => undefined }) === true, 'N: supported when getDisplayMedia exists');
 assert(isScreenShareSupported({}) === false, 'N: unsupported without getDisplayMedia');
@@ -405,11 +405,11 @@ assert(/adaptiveStream:\s*true/.test(ui) && /dynacast:\s*true/.test(ui), 'adapti
 assert(buildScreenShareCaptureOptions('Mozilla/5.0 Chrome/120').resolution?.frameRate === 15, 'chrome gets detail/15fps profile');
 assert(
   buildScreenShareCaptureOptions('Mozilla/5.0 Chrome/120').selfBrowserSurface === 'exclude',
-  'chrome excludes this huddle tab from the share picker'
+  'chrome excludes this Ka Link tab from the share picker'
 );
 assert(
   buildScreenShareCaptureOptions('Mozilla/5.0 Chrome/120').preferCurrentTab === false,
-  'does not prefer capturing the huddle tab'
+  'does not prefer capturing the Ka Link tab'
 );
 assert(isLikelySafari('Mozilla/5.0 Version/17 Safari/605') === true, 'safari detect');
 assert(buildScreenShareCaptureOptions('Mozilla/5.0 Version/17 Safari/605').resolution === undefined, 'safari omits forced resolution');
@@ -418,7 +418,7 @@ assert(
   'safari still asks to exclude this tab when the picker supports it'
 );
 assert(/Raise Hand|Lower Hand|End Huddle for Everyone/.test(ui), 'voice/video controls retained');
-assert(!/userIdMigration|awc_migrate_user_id/.test(ui), 'no identity/RPC migration in huddle UI');
+assert(!/userIdMigration|awc_migrate_user_id/.test(ui), 'no identity/RPC migration in Ka Link UI');
 assert(/VoiceHuddle/.test(read('pages/community/Chat.tsx')), 'Chat still uses VoiceHuddle');
 assert(!/LiveHuddle/.test(read('pages/community/Chat.tsx').replace(/VoiceHuddle/g, '')), 'Chat still not importing AI LiveHuddle');
 

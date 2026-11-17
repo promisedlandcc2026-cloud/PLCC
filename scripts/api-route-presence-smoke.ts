@@ -20,7 +20,7 @@ const required: Array<[string, string]> = [
   ['Daily backup: token route', "subResource === 'voice-daily-token'"],
   ['Daily backup: handler block', "chatType === 'voice-huddle-provider' || chatType === 'voice-daily-token'"],
   ['Daily backup: LIVE counts', 'mergeDailyIntoHuddleStatuses('],
-  ['Huddle mic restore route', "subResource === 'voice-mic-restore'"],
+  ['Ka Link mic restore route', "subResource === 'voice-mic-restore'"],
   ['Seasonal settings defaults', 'seasonal: {'],
   ['Seasonal settings merge', 'DEFAULT_SYSTEM_SETTINGS.seasonal'],
   ['PLCC Bucks route', "case 'kids-bucks'"],

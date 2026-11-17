@@ -30,7 +30,7 @@ const KIND_LABEL: Record<NewsKind, string> = {
   database: 'Database',
   celebration: 'Celebration',
   sympathy: 'Sympathy',
-  live_huddle: 'Live Huddle',
+  live_huddle: 'Live Ka Link',
 };
 
 function roleLabel(role: string | null | undefined): string {
@@ -434,18 +434,18 @@ const VaultNewsCard: React.FC = () => {
               onClick={openSavedHuddle}
               className="min-h-[44px] px-4 py-2.5 rounded-xl bg-burgundy text-gold text-[10px] font-black uppercase tracking-widest hover:brightness-110"
             >
-              Use saved huddle permission
+              Use saved Ka Link permission
             </button>
           ) : (
             <p className="text-xs font-medium text-amber-950 leading-relaxed">
-              No saved huddle permission on this device. Open a huddle once while the database is
+              No saved Ka Link permission on this device. Open a Ka Link once while the database is
               healthy, and this button can open it for the next 12 hours.
             </p>
           )}
           {savedChannels.length > 1 && (
             <p className="mt-2 text-[11px] text-amber-900 font-medium">
-              Several huddles are saved on this device. Chat will open so you can choose one, then
-              Start Huddle.
+              Several Ka Links are saved on this device. Chat will open so you can choose one, then
+              Start Ka Link.
             </p>
           )}
         </div>
@@ -476,7 +476,7 @@ const VaultNewsCard: React.FC = () => {
                 <option value="database">Database</option>
                 <option value="celebration">Celebration</option>
                 <option value="sympathy">Sympathy</option>
-                <option value="live_huddle">Live Huddle</option>
+                <option value="live_huddle">Live Ka Link</option>
               </select>
             </label>
           </div>

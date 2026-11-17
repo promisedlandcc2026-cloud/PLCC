@@ -67,7 +67,7 @@ assert(
     endedForEveryone: false,
     userInitiatedLeave: false,
   }) === true,
-  'unexpected drop while staying in huddle rejoins'
+  'unexpected drop while staying in Ka Link rejoins'
 );
 assert(
   shouldAutoRejoinHuddle({
@@ -108,15 +108,15 @@ const voice = read('api/_utils/livekitVoice.ts');
 const api = read('lib/api.ts');
 const auth = read('lib/authSession.ts');
 assert(/VOICE_TOKEN_TTL_SECONDS = 6 \* 60 \* 60/.test(voice), 'TTL constant is 6 hours');
-assert(/requestVoiceToken/.test(ui), 'UI remints huddle tokens');
-assert(/startHuddleKeepAlive/.test(ui), 'UI schedules huddle token refresh');
-assert(/ensureFreshAuthSession/.test(ui), 'UI refreshes login during huddle');
+assert(/requestVoiceToken/.test(ui), 'UI remints Ka Link tokens');
+assert(/startHuddleKeepAlive/.test(ui), 'UI schedules Ka Link token refresh');
+assert(/ensureFreshAuthSession/.test(ui), 'UI refreshes login during Ka Link');
 assert(/shouldAutoRejoinHuddle/.test(ui), 'UI auto-rejoins unexpected drops');
 assert(/RoomEvent\.Reconnected/.test(ui), 'UI re-subscribes screen share after reconnect');
 assert(/subscribeRemoteScreenShares/.test(ui), 'UI uses late-join screen subscribe helper');
 assert(/refreshSession/.test(auth), '401 recovery calls refreshSession');
 assert(!/ensureFreshAuthSession\(/.test(api), 'getAuthHeaders does not race a proactive refresh');
 assert(/outcome !== 'recovered'/.test(api), 'vaultFetch retries once after recovered 401');
-assert(/refreshSessionOnce/.test(auth), 'huddle keep-alive shares the single-flight refresh');
+assert(/refreshSessionOnce/.test(auth), 'Ka Link keep-alive shares the single-flight refresh');
 
 console.log('\nAll huddle keep-alive smoke tests passed.');

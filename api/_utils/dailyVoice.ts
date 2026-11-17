@@ -8,7 +8,7 @@ export const DAILY_ROOM_PREFIX = 'awc-vault-';
 export const DAILY_TOKEN_TTL_SECONDS = 6 * 60 * 60;
 
 /** Shown to members. The Daily response is logged separately and never includes the API key. */
-export const DAILY_CLIENT_ERROR = 'Backup huddle audio is unavailable right now.';
+export const DAILY_CLIENT_ERROR = 'Backup Ka Link audio is unavailable right now.';
 
 export class DailyApiError extends Error {
   readonly detail: string;

@@ -141,7 +141,7 @@ assert(/buildFeedPostShareAbsoluteUrl/.test(feedPage), 'H: Feed uses share absol
 const huddleInviteSrc = read('api/_utils/huddleInvite.ts');
 assert(
   /return `\$\{origin\}\/#\$\{path\}`/.test(huddleInviteSrc),
-  'G-F: Huddle invite helper remains HashRouter absolute'
+  'G-F: Ka Link invite helper remains HashRouter absolute'
 );
 assert(
   buildFeedPostDeepLink(postId) === `/community/feed?post=${postId}`,

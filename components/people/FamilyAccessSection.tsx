@@ -217,10 +217,10 @@ export default function FamilyAccessSection({ memberId }: Props) {
     try {
       const invite = await createFamilyHuddleInvite();
       const url = familyInviteAbsoluteUrl(invite.path);
-      const text = `Join our Family Huddle on PLCC Canaan (${inviteExpiryLabel(invite.expiresAt)})`;
+      const text = `Join our Family Ka Link on PLCC Canaan (${inviteExpiryLabel(invite.expiresAt)})`;
       try {
         if (navigator.share) {
-          await navigator.share({ title: 'Family Huddle', text, url });
+          await navigator.share({ title: 'Family Ka Link', text, url });
           setShareMsg('Invite shared.');
           return;
         }
@@ -535,10 +535,10 @@ export default function FamilyAccessSection({ memberId }: Props) {
         />
       ) : (
         <section className="rounded-2xl border border-burgundy/10 bg-white p-4 space-y-2">
-          <p className="text-sm font-black text-[#1A1A1A]">Family Huddle</p>
+          <p className="text-sm font-black text-[#1A1A1A]">Family Ka Link</p>
           <p className="text-[12px] text-gray-500 leading-relaxed">
             Start or join only from a household you belong to as a verified adult. Opening
-            this member&apos;s tab would start your own Family Huddle, not theirs.
+            this member&apos;s tab would start your own Family Ka Link, not theirs.
           </p>
           <Link
             to="/family"

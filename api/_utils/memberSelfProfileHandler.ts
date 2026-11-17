@@ -402,7 +402,7 @@ export async function handleMemberSelfProfile(
       const huddleId = String(item?.id || item || '').trim();
       if (!huddleId || ids.includes(huddleId)) continue;
       if (!UUID_RE.test(huddleId)) {
-        return res.status(400).json({ ok: false, error: 'Choose a huddle from your Community list.' });
+        return res.status(400).json({ ok: false, error: 'Choose a Ka Link from your Community list.' });
       }
       ids.push(huddleId);
       if (ids.length >= MAX_FAVORITE_HUDDLES) break;
@@ -412,11 +412,11 @@ export async function handleMemberSelfProfile(
     for (const huddleId of ids) {
       const channel = channels.find((item) => item.id === huddleId);
       if (!channel) {
-        return res.status(403).json({ ok: false, error: 'That huddle is not one you can join.' });
+        return res.status(403).json({ ok: false, error: 'That Ka Link is not one you can join.' });
       }
       saved.push({
         id: channel.id,
-        name: String(channel.name || 'Huddle').trim().slice(0, 80) || 'Huddle',
+        name: String(channel.name || 'Ka Link').trim().slice(0, 80) || 'Ka Link',
       });
     }
     memberPatch.favorite_huddles = saved;

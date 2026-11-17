@@ -67,7 +67,7 @@ export async function handleFamily(req: any, res: any) {
     if (!lk) {
       return res.status(503).json({
         ok: false,
-        error: 'Family Huddle is not configured yet',
+        error: 'Family Ka Link is not configured yet',
         code: 'huddle_unavailable',
       });
     }
@@ -100,7 +100,7 @@ export async function handleFamily(req: any, res: any) {
     if (invite.locked) {
       return res.status(403).json({
         ok: false,
-        error: 'This Family Huddle is locked to new guests.',
+        error: 'This Family Ka Link is locked to new guests.',
         code: 'invite_locked',
       });
     }
@@ -154,7 +154,7 @@ export async function handleFamily(req: any, res: any) {
       });
     } catch (e: any) {
       console.warn('[family-huddle] guest mint', e?.message || e);
-      return res.status(500).json({ ok: false, error: 'Could not join Family Huddle.' });
+      return res.status(500).json({ ok: false, error: 'Could not join Family Ka Link.' });
     }
   }
 
@@ -252,7 +252,7 @@ export async function handleFamily(req: any, res: any) {
       return res.status(503).json({
         ok: false,
         code: 'huddle_unavailable',
-        error: 'Family Huddle is not configured yet',
+        error: 'Family Ka Link is not configured yet',
       });
     }
     try {
@@ -276,7 +276,7 @@ export async function handleFamily(req: any, res: any) {
       });
     } catch (e: any) {
       console.warn('[family-huddle] token', e?.message || e);
-      return res.status(500).json({ ok: false, error: 'Could not start Family Huddle.' });
+      return res.status(500).json({ ok: false, error: 'Could not start Family Ka Link.' });
     }
   }
 
@@ -288,7 +288,7 @@ export async function handleFamily(req: any, res: any) {
       return res.status(503).json({
         ok: false,
         code: 'huddle_unavailable',
-        error: 'Family Huddle is not configured yet',
+        error: 'Family Ka Link is not configured yet',
       });
     }
     try {
@@ -302,7 +302,7 @@ export async function handleFamily(req: any, res: any) {
       return res.status(200).json({ ok: true, ended: result.ended });
     } catch (e: any) {
       console.warn('[family-huddle] end', e?.message || e);
-      return res.status(500).json({ ok: false, error: 'Could not end Family Huddle.' });
+      return res.status(500).json({ ok: false, error: 'Could not end Family Ka Link.' });
     }
   }
 
@@ -362,7 +362,7 @@ export async function handleFamily(req: any, res: any) {
 
   return res.status(404).json({
     ok: false,
-    error: 'Unknown family huddle action.',
+    error: 'Unknown family Ka Link action.',
     code: 'not_found',
   });
 }

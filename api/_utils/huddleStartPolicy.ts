@@ -21,9 +21,9 @@ import { getLiveKitServerConfig, listVoiceRoomParticipantCount } from './livekit
 
 export const HUDDLE_START_FORBIDDEN_CODE = 'huddle_start_forbidden';
 export const HUDDLE_START_FORBIDDEN_MESSAGE =
-  "This huddle hasn't started yet. A leader or room moderator will start it — you can join as soon as it's live.";
+  "This Ka Link hasn't started yet. A leader or room moderator will start it — you can join as soon as it's live.";
 export const HUDDLE_LIVE_UNKNOWN_MESSAGE =
-  "Couldn't check whether this huddle is live. Please try again in a moment.";
+  "Couldn't check whether this Ka Link is live. Please try again in a moment.";
 
 export type HuddleStartReason =
   | 'dm'

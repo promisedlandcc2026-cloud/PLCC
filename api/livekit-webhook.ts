@@ -62,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const lk = getLiveKitServerConfig();
   if (!lk) {
     console.error('[livekit-webhook] LiveKit not configured');
-    return res.status(503).json({ ok: false, error: 'Voice huddles are not configured' });
+    return res.status(503).json({ ok: false, error: 'Voice Ka Links are not configured' });
   }
 
   let rawBody = '';

@@ -59,13 +59,13 @@ export function shouldNotifyForLiveKitEvent(eventName: string): boolean {
 }
 
 export function formatHuddleStartedTitle(): string {
-  return 'Voice Huddle Started';
+  return 'Voice Ka Link Started';
 }
 
 export function formatHuddleStartedBody(channelName: string): string {
   const raw = String(channelName || 'channel').trim() || 'channel';
   const label = raw.startsWith('#') ? raw.slice(1) : raw;
-  return `A Voice Huddle has started in #${label}.`;
+  return `A Voice Ka Link has started in #${label}.`;
 }
 
 export function huddleStartedLink(channelId: string): string {

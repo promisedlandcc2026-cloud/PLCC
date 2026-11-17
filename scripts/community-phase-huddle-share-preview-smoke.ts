@@ -49,7 +49,7 @@ const payload = buildHuddleSharePayload({
   channelId: CHANNEL,
   channelName: 'Mount Moriah',
 })!;
-assert(payload.url === shareUrl, 'Share Huddle payload uses OG landing URL');
+assert(payload.url === shareUrl, 'Share Ka Link payload uses OG landing URL');
 
 const card = resolveHuddleShareCard({ origin: ORIGIN, channelId: CHANNEL })!;
 assert(card.imageUrl.endsWith('/images/share/mount-moriah-channel.jpg'), 'absolute image URL');
@@ -88,7 +88,7 @@ const namedOther = resolveHuddleShareCard({
   channelId: '11111111-1111-1111-1111-111111111111',
   channelName: 'Youth',
 })!;
-assert(/Youth · Live Huddle/.test(namedOther.title), 'unregistered channel uses channel name in title');
+assert(/Youth · Live Ka Link/.test(namedOther.title), 'unregistered channel uses channel name in title');
 assert(
   namedOther.imageUrl.endsWith('/images/awc-connect-logo.png'),
   'unregistered channel falls back to Connect logo when no DB image'

@@ -33,13 +33,13 @@ const base = {
 
 console.log('Huddle start policy');
 
-check("Men's Ministry leader starts Men's Huddle → allowed", () => {
+check("Men's Ministry leader starts Men's Ka Link → allowed", () => {
   const d = decideHuddleStart({ ...base, role: 'MINISTRY_LEADER', isMinistryLeaderInScope: true });
   assert.equal(d.canStart, true);
   assert.equal(d.reason, 'ministry_leader');
 });
 
-check("Men's Ministry leader starts Children's Huddle without authorization → denied", () => {
+check("Men's Ministry leader starts Children's Ka Link without authorization → denied", () => {
   const d = decideHuddleStart({ ...base, role: 'MINISTRY_LEADER', isMinistryLeaderInScope: false });
   assert.equal(d.canStart, false);
   const entry = decideHuddleEntry({ isLive: false, canStart: d.canStart });
@@ -57,7 +57,7 @@ check('Ministry leader title does not grant start in open/private rooms', () => 
   }
 });
 
-check('Regular member starts group Huddle → denied', () => {
+check('Regular member starts group Ka Link → denied', () => {
   for (const visibility of ['open', 'private', 'ministry']) {
     const d = decideHuddleStart({ ...base, visibility });
     assert.equal(d.canStart, false, visibility);
@@ -90,7 +90,7 @@ check('Direct (DM) calls → either person may start', () => {
   assert.equal(decideHuddleStart({ ...base, visibility: 'dm' }).canStart, true);
 });
 
-check('Authorized member joins active Huddle → allowed', () => {
+check('Authorized member joins active Ka Link → allowed', () => {
   const entry = decideHuddleEntry({ isLive: true, canStart: false });
   assert.deepEqual(entry, { ok: true, mode: 'join' });
 });
@@ -171,7 +171,7 @@ check('Tampered pass claiming canStart is rejected', () => {
 
 console.log('Messages');
 check('Canaan shows the "not started yet" wording, not "no access"', () => {
-  const msg = huddleJoinErrorMessage(403, "This huddle hasn't started yet.", HUDDLE_START_FORBIDDEN_CODE);
+  const msg = huddleJoinErrorMessage(403, "This Ka Link hasn't started yet.", HUDDLE_START_FORBIDDEN_CODE);
   assert.match(msg, /hasn't started yet/);
   assert.doesNotMatch(huddleJoinErrorMessage(403, 'x'), /hasn't started yet/);
 });

@@ -91,7 +91,7 @@ function scoreDoc(
   if (/connect|family.?pass|child.?card|view.?card|guardian|my.?family|dependent/i.test(q) && /connect|child|family|card|guardian/i.test(hay)) score += 6;
   if (/team|volunteer|follow.?up/i.test(q) && /team|follow/i.test(hay)) score += 4;
   if (/form|consent/i.test(q) && /form|consent/i.test(hay)) score += 3;
-  if (/chat|huddle|live.?huddle|dm|community/i.test(q) && /community|chat|connect/i.test(hay))
+  if (/chat|huddle|live.?huddle|ka.?link|dm|community/i.test(q) && /community|chat|connect/i.test(hay))
     score += 4;
   return score;
 }

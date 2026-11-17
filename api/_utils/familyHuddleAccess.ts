@@ -70,7 +70,7 @@ export async function resolveAdultHouseholdForUser(
       ok: false,
       status: 403,
       code: 'unlinked',
-      error: 'Link your member profile before starting a Family Huddle.',
+      error: 'Link your member profile before starting a Family Ka Link.',
     };
   }
 
@@ -98,7 +98,7 @@ export async function resolveAdultHouseholdForUser(
       ok: false,
       status: 403,
       code: 'empty',
-      error: 'No household is on file for Family Huddle yet.',
+      error: 'No household is on file for Family Ka Link yet.',
     };
   }
   if (rows.length > 1) {
@@ -106,7 +106,7 @@ export async function resolveAdultHouseholdForUser(
       ok: false,
       status: 403,
       code: 'conflict',
-      error: 'Multiple households are linked. Contact the church office to fix this before using Family Huddle.',
+      error: 'Multiple households are linked. Contact the church office to fix this before using Family Ka Link.',
     };
   }
 
@@ -117,7 +117,7 @@ export async function resolveAdultHouseholdForUser(
       ok: false,
       status: 403,
       code: 'not_adult',
-      error: 'Family Huddle is for household adults only in this version.',
+      error: 'Family Ka Link is for household adults only in this version.',
     };
   }
 

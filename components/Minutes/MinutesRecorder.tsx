@@ -205,7 +205,7 @@ const MinutesRecorder: React.FC<Props> = ({ disabled, onTranscribed, onError, ge
             Record & transcribe
           </p>
           <p className="text-xs text-gray-500 font-medium">
-            Built for ~1 hour huddles. We upload and transcribe every {MINUTES_CHUNK_SECONDS / 60}{' '}
+            Built for ~1 hour Ka Links. We upload and transcribe every {MINUTES_CHUNK_SECONDS / 60}{' '}
             minutes so a long meeting never hits the server upload limit. Max 90 minutes.
           </p>
         </div>

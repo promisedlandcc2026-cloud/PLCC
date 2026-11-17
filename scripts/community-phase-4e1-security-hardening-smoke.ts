@@ -139,7 +139,7 @@ assert(
     localCanModerate: false,
     topic: HUDDLE_CHAT_TOPIC,
   }).route === 'huddle_chat',
-  'D: Huddle Chat unaffected'
+  'D: Ka Link Chat unaffected'
 );
 
 const reactionBytes = new TextEncoder().encode(

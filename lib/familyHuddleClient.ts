@@ -25,13 +25,13 @@ function mapStatus(
     if (bodyCode === 'not_adult') {
       return {
         code: 'not_adult',
-        message: 'Family Huddle is for household adults only in this version.',
+        message: 'Family Ka Link is for household adults only in this version.',
       };
     }
     if (bodyCode === 'unlinked') {
       return {
         code: 'unlinked',
-        message: 'Link your member profile before starting a Family Huddle.',
+        message: 'Link your member profile before starting a Family Ka Link.',
       };
     }
     if (bodyCode === 'conflict') {
@@ -43,13 +43,13 @@ function mapStatus(
     if (bodyCode === 'empty') {
       return {
         code: 'empty',
-        message: 'No household is on file for Family Huddle yet.',
+        message: 'No household is on file for Family Ka Link yet.',
       };
     }
     if (bodyCode === 'invite_locked') {
       return {
         code: 'invite_locked',
-        message: 'This Family Huddle is locked to new guests.',
+        message: 'This Family Ka Link is locked to new guests.',
       };
     }
     if (bodyCode === 'invite_exhausted') {
@@ -60,7 +60,7 @@ function mapStatus(
     }
     return {
       code: 'forbidden',
-      message: 'Family Huddle is not available for your account.',
+      message: 'Family Ka Link is not available for your account.',
     };
   }
   if (status === 404) {
@@ -81,12 +81,12 @@ function mapStatus(
   if (status === 503) {
     return {
       code: 'huddle_unavailable',
-      message: 'Family Huddle is not configured yet.',
+      message: 'Family Ka Link is not configured yet.',
     };
   }
   return {
     code: 'network',
-    message: 'Family Huddle is temporarily unavailable. Please try again.',
+    message: 'Family Ka Link is temporarily unavailable. Please try again.',
   };
 }
 
@@ -131,7 +131,7 @@ async function authedFetch(action: string, init?: RequestInit): Promise<Response
   } catch {
     throw new FamilyHuddleError(
       'network',
-      'Family Huddle is temporarily unavailable. Please try again.'
+      'Family Ka Link is temporarily unavailable. Please try again.'
     );
   }
 }
@@ -143,7 +143,7 @@ function parseJoinToken(
   if (!body.token || !body.url || !body.roomName) {
     throw new FamilyHuddleError(
       'huddle_unavailable',
-      'Family Huddle token was incomplete.',
+      'Family Ka Link token was incomplete.',
       502
     );
   }
@@ -286,7 +286,7 @@ export async function redeemFamilyHuddleInvite(
   } catch {
     throw new FamilyHuddleError(
       'network',
-      'Family Huddle is temporarily unavailable. Please try again.'
+      'Family Ka Link is temporarily unavailable. Please try again.'
     );
   }
   await throwIfNotOk(res);
@@ -317,6 +317,6 @@ export function inviteExpiryLabel(expiresAt: string | null): string {
 }
 
 export function whatsappInviteHref(url: string, expiresAt: string | null): string {
-  const text = `Join our Family Huddle on PLCC Canaan (${inviteExpiryLabel(expiresAt)})\n${url}`;
+  const text = `Join our Family Ka Link on PLCC Canaan (${inviteExpiryLabel(expiresAt)})\n${url}`;
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }

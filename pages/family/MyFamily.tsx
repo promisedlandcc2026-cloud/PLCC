@@ -325,10 +325,10 @@ export default function MyFamilyPage() {
     try {
       const invite = await createFamilyHuddleInvite();
       const url = familyInviteAbsoluteUrl(invite.path);
-      const text = `Join our Family Huddle on PLCC Canaan (${inviteExpiryLabel(invite.expiresAt)})`;
+      const text = `Join our Family Ka Link on PLCC Canaan (${inviteExpiryLabel(invite.expiresAt)})`;
       try {
         if (navigator.share) {
-          await navigator.share({ title: 'Family Huddle', text, url });
+          await navigator.share({ title: 'Family Ka Link', text, url });
           setShareMsg('Invite shared.');
           return;
         }
@@ -364,7 +364,7 @@ export default function MyFamilyPage() {
           <AskAdminTitleLink />
         </div>
         <p className="text-base text-gray-600 leading-relaxed max-w-prose">
-          The people in your household, your private Family Huddle, and your children's Kids View.
+          The people in your household, your private Family Ka Link, and your children's Kids View.
         </p>
       </header>
 
@@ -538,7 +538,7 @@ export default function MyFamilyPage() {
         >
           <div className="flex items-start justify-between gap-3">
             <h2 id="huddle-heading" className="text-[1.75rem] leading-tight font-semibold" style={SERIF}>
-              Family Huddle
+              Family Ka Link
             </h2>
             {huddleLive ? (
               <span className="shrink-0 inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/25 px-3 py-1.5 text-[14px] font-semibold">
@@ -556,7 +556,7 @@ export default function MyFamilyPage() {
           </p>
 
           {!huddleConfigured ? (
-            <p className="mt-5 text-[15px] text-white/70">Family Huddle isn't switched on yet. Check back soon.</p>
+            <p className="mt-5 text-[15px] text-white/70">Family Ka Link isn't switched on yet. Check back soon.</p>
           ) : (
             <div className="mt-5 flex flex-col sm:flex-row gap-3">
               <button
@@ -565,7 +565,7 @@ export default function MyFamilyPage() {
                 className="h-12 px-6 rounded-xl bg-[#C9A35A] text-[#101814] font-bold text-[15px] inline-flex items-center justify-center gap-2 hover:bg-[#d8b33a] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e6c766]/50"
               >
                 {huddleLive ? <Users size={18} aria-hidden /> : <Radio size={18} aria-hidden />}
-                {huddleLive ? 'Join the huddle' : 'Start a huddle'}
+                {huddleLive ? 'Join the Ka Link' : 'Start a Ka Link'}
               </button>
               <button
                 type="button"
@@ -695,7 +695,7 @@ export default function MyFamilyPage() {
               }}
             >
               <p className="text-[15px] text-gray-600 leading-relaxed">
-                Add a spouse or another adult who lives with you. They can join the Family Huddle.
+                Add a spouse or another adult who lives with you. They can join the Family Ka Link.
               </p>
               {adultError ? <Notice tone="error">{adultError}</Notice> : null}
               {adultOk ? <Notice tone="ok">{adultOk}</Notice> : null}

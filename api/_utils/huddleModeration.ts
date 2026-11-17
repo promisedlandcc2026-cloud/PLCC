@@ -23,7 +23,7 @@ export function huddleModeratorCount(roles: HuddleRoomRoles): number {
   return ids.size;
 }
 
-const TOO_MANY_MODS = `This huddle already has ${MAX_HUDDLE_MODERATORS} moderators. That is the most allowed.`;
+const TOO_MANY_MODS = `This Ka Link already has ${MAX_HUDDLE_MODERATORS} moderators. That is the most allowed.`;
 
 export function emptyHuddleRoomRoles(): HuddleRoomRoles {
   return { v: HUDDLE_ROOM_ROLES_VERSION, hostId: null, coHostIds: [] };

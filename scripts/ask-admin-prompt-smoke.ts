@@ -16,14 +16,14 @@ const prompt = buildAskAdminSystemPrompt(
 );
 
 console.log('\nAsk Admin prompt smoke');
-assert(/Live Huddle/i.test(prompt), 'mentions Live Huddle');
-assert(/How do I start \/ join a Live Huddle/i.test(prompt), 'has Live Huddle how-to');
+assert(/Live Ka Link/i.test(prompt), 'mentions Live Ka Link');
+assert(/How do I start \/ join a Live Ka Link/i.test(prompt), 'has Live Ka Link how-to');
 assert(/\/community\/chat/.test(prompt), 'links Chat path');
 assert(/HOW-TO \/ WHERE-IS FIRST/i.test(prompt), 'how-to-first rule present');
 assert(/EXPLAIN SIMPLY/i.test(prompt), 'ELI5 explain-simply rule present');
 assert(/5-year-old|young child/i.test(prompt), 'child-simple voice present');
 assert(
-  /Do not use it for Live Huddle, Chat, Community/i.test(prompt),
+  /Do not use it for Live Ka Link, Chat, Community/i.test(prompt),
   'UNKNOWN must not refuse Chat/Huddle'
 );
 assert(

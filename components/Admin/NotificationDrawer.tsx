@@ -215,7 +215,7 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose
             case 'community_dm':
                 return 'Direct Message';
             case 'community_huddle_started':
-                return 'Voice Huddle';
+                return 'Voice Ka Link';
             case 'event_approval':
                 return 'Event Approval';
             case 'celebration':

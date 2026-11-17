@@ -362,7 +362,7 @@ const PrayerWatchPage: React.FC = () => {
         <div className="mt-5 grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-5 items-start">
           {/* Left: Live Huddle */}
           <section
-            aria-label="Live Huddle"
+            aria-label="Live Ka Link"
             className={`print:hidden ${onCall ? 'sticky top-2 z-20' : ''} lg:sticky lg:top-4`}
           >
             {onCall && access.roomId ? (
@@ -379,7 +379,7 @@ const PrayerWatchPage: React.FC = () => {
               </div>
             ) : (
               <div className="rounded-3xl bg-burgundy text-white p-5 sm:p-6 flex flex-col gap-4 lg:min-h-[320px] shadow-lg">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-gold">Live Huddle</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-gold">Live Ka Link</p>
                 <div>
                   <h2 className="text-2xl font-black leading-tight">{roomName}</h2>
                   <p className="text-sm text-white/80 mt-1">

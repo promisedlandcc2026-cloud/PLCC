@@ -73,7 +73,7 @@ const LiveHuddle: React.FC<LiveHuddleProps> = ({ isOpen, onClose }) => {
                <span className="text-[10px] font-black text-gold uppercase tracking-[0.5em]">Executive Voice Link</span>
                <div className="w-8 h-1 w-8 bg-gold rounded-full opacity-40" />
             </div>
-            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">Live Huddle<span className="text-gold">.</span></h2>
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">Live Ka Link<span className="text-gold">.</span></h2>
             <p className="text-white/40 text-sm md:text-lg font-medium mt-4">Real-time hands-free strategy facilitators for authorized staff.</p>
          </div>
 

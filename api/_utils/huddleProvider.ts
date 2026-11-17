@@ -8,7 +8,7 @@ import { getLiveKitServerConfig, listVoiceRoomParticipantCount } from './livekit
 
 export const HUDDLE_PROVIDER_TTL_MS = 30 * 60 * 1000;
 export const HUDDLE_PROVIDER_SETUP_ERROR =
-  'Run supabase/migrations/huddle_provider.sql in the Supabase SQL editor, then start the huddle again.';
+  'Run supabase/migrations/huddle_provider.sql in the Supabase SQL editor, then start the Ka Link again.';
 
 export type HuddleProviderName = 'livekit' | 'daily';
 
@@ -121,7 +121,7 @@ export async function claimHuddleProvider(
           ok: false,
           status: 409,
           provider: 'daily',
-          error: 'This huddle is already open on the backup audio line.',
+          error: 'This Ka Link is already open on the backup audio line.',
         };
       }
     }
@@ -139,7 +139,7 @@ export async function claimHuddleProvider(
         provider: 'livekit',
         occupied: true,
         error:
-          'This huddle is already on LiveKit, and LiveKit is not accepting anyone else right now.',
+          'This Ka Link is already on LiveKit, and LiveKit is not accepting anyone else right now.',
       };
     }
   }

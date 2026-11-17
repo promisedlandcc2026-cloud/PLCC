@@ -189,7 +189,7 @@ assert(/CREATE TABLE IF NOT EXISTS public\.feed_posts/.test(migration) && /ENABL
 assert(/max-w-2xl|w-full|sm:px/.test(feedPage), 'AA: mobile layout markers');
 assert(/data-feed-empty|data-feed-error|data-feed-loading/.test(feedPage), 'AB: empty/error/loading markers');
 
-assert(!/VoiceHuddle|livekit|huddleReaction|voiceHandRaise/.test(feedPage + helper), 'AC: no Huddle regression in Feed files');
+assert(!/VoiceHuddle|livekit|huddleReaction|voiceHandRaise/.test(feedPage + helper), 'AC: no Ka Link regression in Feed files');
 assert(!/RoomEvent|publishData|HUDDLE_CHAT/.test(feedPage + helper + migration), 'AD: no chat/voice/video/screen-share modifications in Feed');
 
 console.log('\nPhase 4A smoke — route / SQL / UI contracts');
@@ -210,8 +210,8 @@ assert(/aria-current=\{active === 'feed' \? 'page' : undefined\}/.test(read('com
 assert(/CommunityIdentityNav/.test(read('pages/community/Chat.tsx')) && /active=\"chat\"/.test(read('pages/community/Chat.tsx')), '4A.1: Chat page mounts Community nav');
 assert(/variant=\"compact\"/.test(read('pages/community/Chat.tsx')), '4A.1: Chat uses compact Community nav');
 assert(/active === 'chat' \? 'page'/.test(read('components/Community/CommunityIdentityNav.tsx')), '4A.1: Chat active aria-current supported');
-assert(/location\.search/.test(read('components/Community/CommunityIdentityNav.tsx')), '4A.1: Chat link preserves search (huddle invite params)');
-assert(/decideHuddleInviteDeepLink|parseHuddleInviteIntent|HUDDLE_INVITE_INTENT_KEY/.test(read('pages/community/Chat.tsx')), '4A.1: Huddle invite consumption still present');
+assert(/location\.search/.test(read('components/Community/CommunityIdentityNav.tsx')), '4A.1: Chat link preserves search (Ka Link invite params)');
+assert(/decideHuddleInviteDeepLink|parseHuddleInviteIntent|HUDDLE_INVITE_INTENT_KEY/.test(read('pages/community/Chat.tsx')), '4A.1: Ka Link invite consumption still present');
 assert(/path=\"\/community\/feed\"/.test(app) && /path=\"\/community\/chat\"/.test(app), '4A.1: routes preserved');
 assert(/CREATE TABLE IF NOT EXISTS public\.feed_posts/.test(migration), 'migration feed_posts');
 assert(/CREATE TABLE IF NOT EXISTS public\.feed_comments/.test(migration), 'migration feed_comments');

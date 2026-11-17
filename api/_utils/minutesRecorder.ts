@@ -104,7 +104,7 @@ export function huddleMinutesPrefill(opts: {
     .replace(/^#/, '')
     .trim();
   const dept = String(opts.department || '').trim() || 'Leadership';
-  const title = channel ? `${channel} Live Huddle` : 'Live Huddle Minutes';
+  const title = channel ? `${channel} Live Ka Link` : 'Live Ka Link Minutes';
   return { title, department: dept };
 }
 

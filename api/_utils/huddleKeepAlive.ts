@@ -13,10 +13,10 @@ export const HUDDLE_SESSION_KEEPALIVE_MS = 20 * 60 * 1000;
 export const HUDDLE_AUTO_REJOIN_DELAY_MS = 1_200;
 
 export const HUDDLE_SESSION_EXPIRED_MESSAGE =
-  'Your sign-in expired. Sign in again, then rejoin the huddle. Chat and Members use the same session.';
+  'Your sign-in expired. Sign in again, then rejoin the Ka Link. Chat and Members use the same session.';
 
 export const HUDDLE_CHANNEL_FORBIDDEN_MESSAGE =
-  'You do not have access to this channel huddle.';
+  'You do not have access to this channel Ka Link.';
 
 /** Decode JWT exp without verifying — timing only, never for auth. */
 export function readJwtExpMs(token: string): number | null {
@@ -74,7 +74,7 @@ export function huddleJoinErrorMessage(
   }
   if (status === 403) return HUDDLE_CHANNEL_FORBIDDEN_MESSAGE;
   const msg = String(serverError || '').trim();
-  return msg || 'Could not start huddle';
+  return msg || 'Could not start Ka Link';
 }
 
 export function shouldAutoRejoinHuddle(opts: {

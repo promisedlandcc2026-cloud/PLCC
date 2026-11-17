@@ -106,14 +106,14 @@ export async function handleVoiceTokenFallback(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
   const lk = getLiveKitServerConfig();
   if (!lk) {
-    return res.status(503).json({ ok: false, error: 'Voice huddles are not configured yet', configured: false });
+    return res.status(503).json({ ok: false, error: 'Voice Ka Links are not configured yet', configured: false });
   }
   const channelId = String(req.body?.channelId || req.body?.channel_id || '').trim();
   const claims = verifyHuddleFallbackPass(String(req.body?.fallbackPass || ''), lk.apiSecret);
   if (!claims || claims.channelId !== channelId) {
     return res.status(401).json({
       ok: false,
-      error: 'Saved huddle permission expired. Try again after the church database is back.',
+      error: 'Saved Ka Link permission expired. Try again after the church database is back.',
     });
   }
 
@@ -161,6 +161,6 @@ export async function handleVoiceTokenFallback(req: any, res: any) {
     });
   } catch (err: any) {
     console.warn('[voice-token-fallback]', err?.message || err);
-    return res.status(502).json({ ok: false, error: 'Could not open the huddle while the church database is down.' });
+    return res.status(502).json({ ok: false, error: 'Could not open the Ka Link while the church database is down.' });
   }
 }

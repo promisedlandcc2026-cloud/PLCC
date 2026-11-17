@@ -123,7 +123,7 @@ export function formatScreenShareError(err: unknown): string {
   ) {
     return 'Screen sharing is not available in this browser or device.';
   }
-  return "We couldn't start screen sharing. You're still connected to the huddle.";
+  return "We couldn't start screen sharing. You're still connected to the Ka Link.";
 }
 
 /** Participant count is room membership — screen-share state must not change it. */

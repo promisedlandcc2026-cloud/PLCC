@@ -219,10 +219,10 @@ function huddleDisconnectIsFinal(reason?: DisconnectReason): boolean {
 
 function huddleDisconnectMessage(reason?: DisconnectReason): string {
   if (reason === DisconnectReason.DUPLICATE_IDENTITY) {
-    return 'You joined this huddle somewhere else (another tab, app or device). Tap Join to bring it back here.';
+    return 'You joined this Ka Link somewhere else (another tab, app or device). Tap Join to bring it back here.';
   }
-  if (reason === DisconnectReason.PARTICIPANT_REMOVED) return 'You were removed from the huddle.';
-  return 'The huddle has ended.';
+  if (reason === DisconnectReason.PARTICIPANT_REMOVED) return 'You were removed from the Ka Link.';
+  return 'The Ka Link has ended.';
 }
 
 type VoiceHuddleProps = {
@@ -360,7 +360,7 @@ function friendlyError(err: unknown): string {
     return huddleJoinErrorMessage(403);
   }
   if (lower.includes('not configured') || lower.includes('503')) {
-    return 'Huddles are not configured yet. Ask an admin to set LiveKit keys.';
+    return 'Ka Links are not configured yet. Ask an admin to set LiveKit keys.';
   }
   if (lower.includes('network') || lower.includes('websocket') || lower.includes('disconnect')) {
     return 'Network issue. Check your connection and try rejoining.';
@@ -368,7 +368,7 @@ function friendlyError(err: unknown): string {
   if (lower.includes('abort') || lower.includes('timed out') || lower.includes('timeout')) {
     return 'That request timed out. Check your connection and try again.';
   }
-  return msg || 'Could not connect to the huddle.';
+  return msg || 'Could not connect to the Ka Link.';
 }
 
 function initialFromName(name: string): string {
@@ -893,7 +893,7 @@ const ScreenShareStage: React.FC<{
           <MonitorOff size={40} className="text-gold" aria-hidden />
           <p className="text-lg sm:text-xl font-black text-gold">You are sharing your screen</p>
           <p className="text-sm text-white/70 max-w-md">
-            Everyone else can see it. Share a window or slides — not this huddle — so it does not loop.
+            Everyone else can see it. Share a window or slides — not this Ka Link — so it does not loop.
           </p>
         </div>
       ) : (
@@ -1763,7 +1763,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         res: new Response(null, { status: 503 }),
         data: {
           error: savedPass
-            ? 'Could not open the huddle while the church database is down.'
+            ? 'Could not open the Ka Link while the church database is down.'
             : 'The church database is temporarily unavailable.',
         },
       };
@@ -1901,7 +1901,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         setError(
           parseErr instanceof Error
             ? parseErr.message
-            : 'Status check is slow (database busy). You can still Start or Join Huddle.'
+            : 'Status check is slow (database busy). You can still Start or Join Ka Link.'
         );
         setConn((prev) =>
           prev === 'connected' || prev === 'reconnecting' || prev === 'ended' ? prev : 'idle'
@@ -1912,8 +1912,8 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         // Soft warning — do not lock Start/Join behind Unavailable.
         setError(
           res.status === 401 || res.status === 403
-            ? data?.error || 'Could not refresh huddle status. You can still Start or Join Huddle.'
-            : 'Could not refresh who is already in the huddle. You can still Start or Join Huddle.'
+            ? data?.error || 'Could not refresh Ka Link status. You can still Start or Join Ka Link.'
+            : 'Could not refresh who is already in the Ka Link. You can still Start or Join Ka Link.'
         );
         setConn((prev) =>
           prev === 'connected' || prev === 'reconnecting' || prev === 'ended' ? prev : 'idle'
@@ -1939,14 +1939,14 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
       if (isAbortOrTimeoutError(e)) {
         setError(
           saved
-            ? 'The church database is slow. Start Huddle will use the permission saved from your last visit.'
-            : 'The church database is slow. You can still try Start or Join Huddle.'
+            ? 'The church database is slow. Start Ka Link will use the permission saved from your last visit.'
+            : 'The church database is slow. You can still try Start or Join Ka Link.'
         );
       } else {
         setError(
           saved
-            ? 'The church database is temporarily unavailable. Start Huddle will use the permission saved from your last visit.'
-            : 'The church database is temporarily unavailable. You can still try Start or Join Huddle.'
+            ? 'The church database is temporarily unavailable. Start Ka Link will use the permission saved from your last visit.'
+            : 'The church database is temporarily unavailable. You can still try Start or Join Ka Link.'
         );
       }
       setConn((prev) =>
@@ -2069,7 +2069,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         return;
       }
       if (!data.token || !data.url) {
-        setError('Huddle token response was incomplete');
+        setError('Ka Link token response was incomplete');
         setConn('error');
         return;
       }
@@ -2846,7 +2846,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         );
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          setError(data?.error || 'Could not end huddle for everyone on the server');
+          setError(data?.error || 'Could not end Ka Link for everyone on the server');
         } else {
           serverOk = true;
         }
@@ -2872,7 +2872,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
           const q = new URLSearchParams({
             action: 'create',
             huddle: '1',
-            title: (channelName || 'Live Huddle').replace(/^#/, ''),
+            title: (channelName || 'Live Ka Link').replace(/^#/, ''),
             dept: 'Leadership',
           });
           if (hasDraft) q.set('fromDraft', '1');
@@ -2919,7 +2919,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         return;
       }
       if (!data?.participantFound) {
-        setError('Participant is not in the active huddle');
+        setError('Participant is not in the active Ka Link');
         return;
       }
       if (muted && !data?.muted && !data?.micPublishRevoked) {
@@ -2966,7 +2966,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
     const label = action === 'add' ? 'Add Mod' : 'Pass Mod';
     const confirmMsg =
       action === 'add'
-        ? `Add ${name} as a session co-host (Mod) for this huddle?`
+        ? `Add ${name} as a session co-host (Mod) for this Ka Link?`
         : `Pass Host to ${name}? You’ll stay as Mod (co-host).`;
     if (typeof window !== 'undefined' && !window.confirm(confirmMsg)) return;
     setModActionBusy(true);
@@ -3023,7 +3023,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
     // Prefer /api/share-huddle so WhatsApp pastes show the channel card image.
     const url = buildHuddlePreviewShareUrl({ origin, channelId });
     if (!url || !huddleInviteLooksSafe(url)) {
-      setInviteStatus('Could not build a safe Huddle link.');
+      setInviteStatus('Could not build a safe invite link.');
       return;
     }
     setInviteBusy(true);
@@ -3031,15 +3031,15 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
     try {
       if (canUseNavigatorClipboard()) {
         await navigator.clipboard.writeText(url);
-        setInviteStatus('Huddle link copied');
+        setInviteStatus('Invite link copied');
       } else if (typeof window !== 'undefined') {
-        window.prompt('Copy Huddle link', url);
-        setInviteStatus('Huddle link ready to copy');
+        window.prompt('Copy invite link', url);
+        setInviteStatus('Invite link ready to copy');
       } else {
         setInviteStatus('Clipboard unavailable.');
       }
     } catch {
-      setInviteStatus('Could not copy link. You’re still in the huddle.');
+      setInviteStatus('Could not copy link. You’re still in the Ka Link.');
     } finally {
       setInviteBusy(false);
     }
@@ -3057,7 +3057,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
       channelName,
     });
     if (!payload || !huddleInviteLooksSafe(payload.url)) {
-      setInviteStatus('Could not build a safe Huddle link.');
+      setInviteStatus('Could not build a safe invite link.');
       return;
     }
     if (!canUseNavigatorShare()) {
@@ -3068,13 +3068,13 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
     setInviteStatus(null);
     try {
       await navigator.share(payload);
-      setInviteStatus('Huddle link shared');
+      setInviteStatus('Invite link shared');
     } catch (e) {
       const name = String((e as Error)?.name || '');
       if (name === 'AbortError') {
         /* user cancelled */
       } else {
-        setInviteStatus('Could not share. Try Copy Huddle Link.');
+        setInviteStatus('Could not share. Try Copy Invite Link.');
       }
     } finally {
       setInviteBusy(false);
@@ -3178,7 +3178,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         setLastReactionSentAt(Date.now());
         setReactionPickerOpen(false);
       } catch (e) {
-        setReactionError("Couldn't send reaction. You're still in the huddle.");
+        setReactionError("Couldn't send reaction. You're still in the Ka Link.");
         void e;
       } finally {
         setReactionBusy(false);
@@ -3243,7 +3243,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
       setChatNewBelow(false);
     } catch (e) {
       huddleChatDebug('publishData failed', String((e as Error)?.message || e));
-      setChatSendError("Couldn't send message. You're still in the huddle.");
+      setChatSendError("Couldn't send message. You're still in the Ka Link.");
       void e;
     } finally {
       setChatBusy(false);
@@ -3340,7 +3340,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
   const statusLabel = useMemo(() => {
     switch (conn) {
       case 'checking':
-        return 'Checking huddle…';
+        return 'Checking Ka Link…';
       case 'connecting':
         return 'Connecting…';
       case 'connected':
@@ -3348,11 +3348,11 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
       case 'reconnecting':
         return 'Reconnecting…';
       case 'ended':
-        return 'Huddle ended';
+        return 'Ka Link ended';
       case 'error':
         return 'Unavailable';
       default:
-        return huddleActive ? 'Huddle in progress' : 'Ready';
+        return huddleActive ? 'Ka Link in progress' : 'Ready';
     }
   }, [conn, huddleActive]);
 
@@ -3369,13 +3369,13 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
   const inCall = conn === 'connected' || conn === 'reconnecting';
   const onDaily = activeProvider === 'daily';
   const ctaLabel =
-    openedFromInvite && huddleActive ? 'Join Huddle' : huddleActive ? 'Join Huddle' : 'Start Huddle';
+    openedFromInvite && huddleActive ? 'Join Ka Link' : huddleActive ? 'Join Ka Link' : 'Start Ka Link';
   const preJoinChannelLabel = (channelName || 'Channel').replace(/^#/, '');
   const preJoinBody =
     openedFromInvite && huddleActive
       ? 'A live church conversation is happening now. Join with mic first — leave camera off until you need it.'
       : huddleActive || participantCount >= 2
-        ? 'Others are connecting. Join with mic first — leave camera off until you need it (keeps larger huddles stable).'
+        ? 'Others are connecting. Join with mic first — leave camera off until you need it (keeps larger Ka Links stable).'
         : 'Join the prayer call with your voice. Keep this screen open while you pray.';
   const handsCount = raisedQueue.length;
   const dockedSidePanels = attendanceOpen || chatOpen || handsPanelOpen;
@@ -3499,7 +3499,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
         <div className="px-5 pt-5 pb-3 flex items-start justify-between border-b border-gray-50 shrink-0 bg-burgundy text-white">
           <div className="min-w-0 pr-3">
             <p className="text-[9px] font-black text-gold uppercase tracking-[0.25em] mb-1">
-              Live Huddle
+              Live Ka Link
             </p>
             <h3 className="font-black uppercase tracking-tight text-lg leading-snug break-words">
               {preJoinChannelLabel}
@@ -3513,7 +3513,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 )}
                 <span>
                   {statusLabel}
-                  {participantCount > 0 ? ` · ${participantCount} in huddle` : ''}
+                  {participantCount > 0 ? ` · ${participantCount} in Ka Link` : ''}
                 </span>
               </p>
               {inCall && handsCount > 0 && !prayerWatch ? (
@@ -3541,7 +3541,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                     : 'text-gold bg-white/10 hover:bg-white/15'
                 }`}
                 aria-pressed={attendanceOpen}
-                aria-label="Huddle attendance"
+                aria-label="Ka Link attendance"
                 data-huddle-attendance-toggle="true"
               >
                 <ClipboardList size={14} aria-hidden />
@@ -3556,7 +3556,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 onClose();
               }}
               className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/10 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-              aria-label="Close huddle"
+              aria-label="Close Ka Link"
             >
               <X size={18} />
             </button>
@@ -3587,7 +3587,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
             } max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[60] max-sm:max-h-[min(58dvh,26rem)] max-sm:rounded-t-2xl max-sm:border max-sm:border-b-0 max-sm:shadow-[0_-12px_40px_rgba(13, 26, 20,0.25)] sm:static sm:relative sm:w-[min(18rem,30%)] sm:min-h-0 sm:max-h-none sm:rounded-none sm:shadow-none sm:border-t-0 sm:border-r sm:order-1`}
             data-huddle-attendance-dock="true"
             data-huddle-attendance-live="true"
-            aria-label="Huddle attendance"
+            aria-label="Ka Link attendance"
           >
             <div className="flex-1 min-h-0 overflow-y-auto p-3">
               <HuddleAttendancePanel
@@ -3651,7 +3651,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
 
           {conn === 'ended' ? (
             <p className="text-[13px] text-gray-500 font-medium text-center py-6">
-              This huddle was ended by a moderator.
+              This Ka Link was ended by a moderator.
             </p>
           ) : null}
 
@@ -3744,7 +3744,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                             ? huddlePresentationFocusRailClass()
                             : huddlePresentationRailClass()
                         }
-                        aria-label="Huddle participants"
+                        aria-label="Ka Link participants"
                         data-huddle-rail="participants"
                       >
                         {railRoster.map((p) => (
@@ -3782,7 +3782,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                             setGalleryPage(1);
                           }}
                           placeholder="Find someone"
-                          aria-label="Find someone in the huddle"
+                          aria-label="Find someone in the Ka Link"
                           className="w-full h-9 pl-8 pr-3 rounded-lg border border-gray-200 bg-white text-sm text-[#0d1a14] outline-none focus:border-gold focus:ring-2 focus:ring-gold/30"
                         />
                       </label>
@@ -3810,7 +3810,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                     </div>
                   ) : null}
                   {gallerySearch.trim() && galleryRoster.length === 0 ? (
-                    <p className="text-sm text-gray-500 py-2">No one in the huddle matches “{gallerySearch.trim()}”.</p>
+                    <p className="text-sm text-gray-500 py-2">No one in the Ka Link matches “{gallerySearch.trim()}”.</p>
                   ) : null}
                   {galleryRoster.length > 0 ? (
                     <div
@@ -3873,7 +3873,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                   <span className="inline-flex items-center gap-1">
-                    <Users size={12} aria-hidden /> {roster.length} in huddle
+                    <Users size={12} aria-hidden /> {roster.length} in Ka Link
                   </span>
                   <span>Camera & screen optional · same room</span>
                 </div>
@@ -3883,11 +3883,11 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                     onClick={() => void copyHuddleLink()}
                     disabled={inviteBusy}
                     className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gold/25 bg-gold-cream/40 text-burgundy text-[9px] font-black uppercase tracking-widest hover:bg-gold-cream disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-                    aria-label="Copy Huddle Link"
+                    aria-label="Copy Invite Link"
                     data-huddle-invite-copy="true"
                   >
                     <Link2 size={14} aria-hidden />
-                    Copy Huddle Link
+                    Copy Invite Link
                   </button>
                   {shareSupported ? (
                     <button
@@ -3895,11 +3895,11 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                       onClick={() => void shareHuddleLink()}
                       disabled={inviteBusy}
                       className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gold/25 bg-white text-burgundy text-[9px] font-black uppercase tracking-widest hover:bg-gold-cream disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-                      aria-label="Share Huddle"
+                      aria-label="Share Ka Link"
                       data-huddle-invite-share="true"
                     >
                       <Share2 size={14} aria-hidden />
-                      Share Huddle
+                      Share Ka Link
                     </button>
                   ) : null}
                 </div>
@@ -3935,7 +3935,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
           data-huddle-controls-footer="true"
         >
           {inCall ? (
-            <div className="flex flex-wrap gap-1.5 sm:gap-2" role="toolbar" aria-label="Huddle controls">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2" role="toolbar" aria-label="Ka Link controls">
               {!prayerWatch ? (
                 <>
               <button
@@ -4057,7 +4057,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   aria-pressed={musicPlaying}
                   title={
                     musicActive && !musicPlaying
-                      ? 'Music is already playing in this huddle'
+                      ? 'Music is already playing in this Ka Link'
                       : undefined
                   }
                   data-huddle-music-control="true"
@@ -4100,7 +4100,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   className={`${controlBtnClass} w-full ${
                     reactionPickerOpen ? controlActiveClass : controlIdleClass
                   }`}
-                  aria-label="Open huddle reactions"
+                  aria-label="Open Ka Link reactions"
                   aria-expanded={reactionPickerOpen}
                   aria-haspopup="menu"
                   data-huddle-reaction-control="true"
@@ -4111,7 +4111,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 {reactionPickerOpen ? (
                   <div
                     role="menu"
-                    aria-label="Huddle reactions"
+                    aria-label="Ka Link reactions"
                     className={`absolute bottom-[calc(100%+0.5rem)] left-0 right-0 sm:left-auto sm:right-0 sm:w-52 z-[50] rounded-2xl border shadow-xl p-2 ${
                       focusActive
                         ? 'bg-[#0c110f] border-white/15'
@@ -4158,7 +4158,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   className={`${controlBtnClass} ${
                     attendanceOpen ? controlActiveClass : controlIdleClass
                   }`}
-                  aria-label={attendanceOpen ? 'Close huddle attendance' : 'Open huddle attendance'}
+                  aria-label={attendanceOpen ? 'Close Ka Link attendance' : 'Open Ka Link attendance'}
                   aria-pressed={attendanceOpen}
                   data-huddle-attendance-toggle="true"
                 >
@@ -4172,7 +4172,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 className={`${controlBtnClass} relative ${
                   chatOpen ? controlActiveClass : controlIdleClass
                 }`}
-                aria-label={chatOpen ? 'Close huddle chat' : 'Open huddle chat'}
+                aria-label={chatOpen ? 'Close Ka Link chat' : 'Open Ka Link chat'}
                 aria-pressed={chatOpen}
                 data-huddle-chat-control="true"
               >
@@ -4209,7 +4209,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 type="button"
                 onClick={leaveHuddle}
                 className={`${controlBtnClass} ${controlActiveClass}`}
-                aria-label="Leave huddle"
+                aria-label="Leave Ka Link"
               >
                 <PhoneOff size={16} aria-hidden />
                 Leave
@@ -4235,14 +4235,14 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                 disabled={conn === 'checking' || conn === 'connecting' || conn === 'ended'}
                 className="w-full h-12 rounded-xl bg-gold text-burgundy font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
                 data-huddle-join-cta="true"
-                aria-label={conn === 'ended' ? 'Huddle ended' : ctaLabel}
+                aria-label={conn === 'ended' ? 'Ka Link ended' : ctaLabel}
               >
                 {conn === 'connecting' || conn === 'checking' ? (
                   <Loader2 size={16} className="animate-spin" aria-hidden />
                 ) : (
                   <Mic size={16} aria-hidden />
                 )}
-                {conn === 'ended' ? 'Huddle Ended' : ctaLabel}
+                {conn === 'ended' ? 'Ka Link Ended' : ctaLabel}
               </button>
               )}
               {canModerate && huddleActive && conn !== 'ended' ? (
@@ -4252,7 +4252,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   onClick={() => void endForEveryone()}
                   className="w-full h-10 rounded-xl text-[10px] font-bold uppercase tracking-wide text-red-700 bg-red-50 border border-red-100 hover:bg-red-100 disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
                   data-huddle-prejoin-end="true"
-                  aria-label="End huddle for everyone"
+                  aria-label="End Ka Link for everyone"
                 >
                   {ending ? 'Ending…' : 'End for everyone'}
                 </button>
@@ -4274,8 +4274,8 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   focusActive ? 'text-white/70' : 'text-gray-600'
                 }`}
               >
-                Record during the huddle (not after). Click Start recording below. When you end the
-                huddle, we can open Minutes so you sign and email the PDF.
+                Record during the Ka Link (not after). Click Start recording below. When you end the
+                Ka Link, we can open Minutes so you sign and email the PDF.
               </p>
               {minutesRecorderError ? (
                 <p className="text-[11px] font-semibold text-red-500" role="alert">
@@ -4290,7 +4290,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                     transcript,
                     summary,
                     audioUrl,
-                    title: (channelName || 'Live Huddle').replace(/^#/, ''),
+                    title: (channelName || 'Live Ka Link').replace(/^#/, ''),
                   });
                 }}
               />
@@ -4314,7 +4314,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
               }`}
               data-huddle-enable-audio="true"
             >
-              Tap to enable huddle sound — browsers often block audio until you allow it.
+              Tap to enable Ka Link sound — browsers often block audio until you allow it.
             </button>
           ) : null}
 
@@ -4359,7 +4359,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   }}
                   className="h-9 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wide text-gray-400 hover:text-burgundy hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   data-huddle-dismiss="close"
-                  aria-label="Close huddle"
+                  aria-label="Close Ka Link"
                 >
                   Close
                 </button>
@@ -4500,7 +4500,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   : 'border-gray-200 bg-white'
               } max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[60] max-sm:max-h-[min(58dvh,26rem)] max-sm:rounded-t-2xl max-sm:border max-sm:border-b-0 max-sm:shadow-[0_-12px_40px_rgba(13, 26, 20,0.25)] sm:static sm:relative sm:w-[min(20rem,34%)] sm:min-h-0 sm:max-h-none sm:rounded-none sm:shadow-none sm:border-t-0 sm:border-l sm:order-3`}
               data-huddle-chat-panel="true"
-              aria-label="Huddle chat"
+              aria-label="Ka Link chat"
             >
               <div
                 className={`px-3 py-2.5 border-b flex items-center justify-between gap-2 shrink-0 ${
@@ -4515,7 +4515,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                       focusActive ? 'text-gold' : 'text-burgundy'
                     }`}
                   >
-                    Huddle Chat
+                    Ka Link Chat
                   </p>
                   <p
                     className={`text-[11px] font-medium truncate ${
@@ -4533,7 +4533,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                       ? 'text-white/60 hover:text-white hover:bg-white/10'
                       : 'text-gray-400 hover:text-burgundy hover:bg-gray-50'
                   }`}
-                  aria-label="Close huddle chat"
+                  aria-label="Close Ka Link chat"
                 >
                   <X size={16} />
                 </button>
@@ -4556,7 +4556,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                         focusActive ? 'text-white/40' : 'text-gray-400'
                       }`}
                     >
-                      No messages yet. Say hello to the huddle.
+                      No messages yet. Say hello to the Ka Link.
                     </p>
                   ) : (
                     chatMessages.map((m) => (
@@ -4648,7 +4648,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   </p>
                 ) : null}
                 <label htmlFor="awc-huddle-chat-input" className="sr-only">
-                  Huddle chat message
+                  Ka Link chat message
                 </label>
                 <textarea
                   id="awc-huddle-chat-input"
@@ -4665,7 +4665,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                   }}
                   rows={2}
                   maxLength={HUDDLE_CHAT_MAX_LENGTH}
-                  placeholder="Message the huddle…"
+                  placeholder="Message the Ka Link…"
                   className={`w-full resize-none rounded-xl border px-3 py-2 text-[13px] font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
                     focusActive
                       ? 'border-white/15 bg-black/30 text-white placeholder:text-white/30'
@@ -4685,7 +4685,7 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
                     type="submit"
                     disabled={chatBusy || !chatDraft.trim()}
                     className="h-10 px-4 rounded-xl bg-gold text-burgundy font-black text-[10px] uppercase tracking-widest disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
-                    aria-label="Send huddle chat message"
+                    aria-label="Send Ka Link chat message"
                     data-huddle-chat-send="true"
                   >
                     {chatBusy ? 'Sending…' : 'Send'}

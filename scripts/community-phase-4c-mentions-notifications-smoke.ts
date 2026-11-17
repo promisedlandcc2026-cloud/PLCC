@@ -280,8 +280,8 @@ assert(
 assert(feedReactionNotificationsDeferred() === true, 'X: reaction notifications deferred');
 
 // Y huddle
-assert(/community_huddle_started/.test(migration), 'Y: huddle type retained in CHECK');
-assert(/community_huddle_started/.test(notify), 'Y: huddle notify type preserved');
+assert(/community_huddle_started/.test(migration), 'Y: Ka Link type retained in CHECK');
+assert(/community_huddle_started/.test(notify), 'Y: Ka Link notify type preserved');
 
 // Z CHECK widen
 assert(/community_feed_comment/.test(migration), 'Z: CHECK includes feed comment');
@@ -317,7 +317,7 @@ assert(/feedType === 'comments'|submitComment/.test(core + feedPage), 'AO: comme
 assert(/decideFeedReactionToggle|reactions/.test(core + feedPage), 'AP: reactions');
 assert(/Remove post|moderation/.test(feedPage), 'AQ: moderation UI');
 assert(/CommunityIdentityNav/.test(feedPage), 'AR: Feed|Chat nav');
-assert(/decideHuddleInviteDeepLink|huddle=1/.test(read('pages/community/Chat.tsx')), 'AS: Huddle invite');
+assert(/decideHuddleInviteDeepLink|huddle=1/.test(read('pages/community/Chat.tsx')), 'AS: Ka Link invite');
 assert(!/VoiceHuddle|RoomEvent|livekit-client/.test(helper + prepare + migration), 'AT: no LiveKit in 4C helpers');
 
 assert(/data-feed-mention-picker/.test(read('components/Community/FeedMentionComposer.tsx')), 'mention picker UI');

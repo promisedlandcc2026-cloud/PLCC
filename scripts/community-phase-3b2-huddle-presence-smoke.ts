@@ -41,9 +41,9 @@ assert(active[idA].active === true && active[idA].participantCount === 3, 'B: ac
 assert(active[idB].active === false, 'B: missing room stays inactive');
 assert(formatChannelHuddleBadge(3) === 'LIVE · 3', 'B: channel badge LIVE · N');
 assert(formatHeaderHuddleLabel({ participantCount: 3, inHuddle: false }) === 'Ask to Join · 3', 'B: header join label');
-assert(formatHeaderHuddleLabel({ participantCount: 3, inHuddle: true }) === 'In Huddle · 3', 'B: header in-huddle label');
-assert(formatHuddleParticipantAria(1) === '1 participant in voice huddle', 'singular aria');
-assert(formatHuddleParticipantAria(2) === '2 participants in voice huddle', 'plural aria');
+assert(formatHeaderHuddleLabel({ participantCount: 3, inHuddle: true }) === 'In Ka Link · 3', 'B: header in-huddle label');
+assert(formatHuddleParticipantAria(1) === '1 participant in voice Ka Link', 'singular aria');
+assert(formatHuddleParticipantAria(2) === '2 participants in voice Ka Link', 'plural aria');
 
 const afterJoin = mapRoomsToHuddleStatuses(
   [idA],
@@ -135,7 +135,7 @@ assert(/community_huddle_started/.test(notify), 'notify type includes community_
 assert(/community_huddle_started/.test(phase3b2TypeSql), 'type migration allows community_huddle_started');
 assert(/community_mention/.test(phase2bSql), 'existing community notify types remain in 2B SQL');
 assert(/WebhookReceiver/.test(webhook), 'signed LiveKit webhook wired');
-assert(/community_huddle_started/.test(drawer) && /Mic/.test(drawer), 'drawer Voice Huddle + Mic');
+assert(/community_huddle_started/.test(drawer) && /Mic/.test(drawer), 'drawer Voice Ka Link + Mic');
 assert(/searchParams\.get\('channel'\)/.test(chat), 'Chat deep-link ?channel=');
 assert(/notifyHuddleStartedUsers|listCommunityNotifyEligibleUserIds/.test(
   readFileSync(join(root, 'api/_utils/livekitHuddleNotify.ts'), 'utf8')

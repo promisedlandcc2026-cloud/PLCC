@@ -64,10 +64,10 @@ function huddleDisconnectIsFinal(reason?: DisconnectReason): boolean {
 
 function huddleDisconnectMessage(reason?: DisconnectReason): string {
   if (reason === DisconnectReason.DUPLICATE_IDENTITY) {
-    return 'You joined this huddle somewhere else (another tab, app or device). Tap Join to bring it back here.';
+    return 'You joined this Ka Link somewhere else (another tab, app or device). Tap Join to bring it back here.';
   }
-  if (reason === DisconnectReason.PARTICIPANT_REMOVED) return 'You were removed from the huddle.';
-  return 'The huddle has ended.';
+  if (reason === DisconnectReason.PARTICIPANT_REMOVED) return 'You were removed from the Ka Link.';
+  return 'The Ka Link has ended.';
 }
 
 type ConnState = 'prejoin' | 'connecting' | 'connected' | 'error';
@@ -181,7 +181,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
   const [handRaised, setHandRaised] = useState(false);
   const [needSoundTap, setNeedSoundTap] = useState(false);
   const [tiles, setTiles] = useState<Tile[]>([]);
-  const [title, setTitle] = useState(householdName || 'Family Huddle');
+  const [title, setTitle] = useState(householdName || 'Family Ka Link');
   const [canModerate, setCanModerate] = useState(!isGuest);
   const [ending, setEnding] = useState(false);
   const [invite, setInvite] = useState<FamilyHuddleInvite | null>(null);
@@ -351,7 +351,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
       setError(null);
       try {
         if (!mountedRef.current) return;
-        setTitle(tokenPayload.householdName || householdName || 'Family Huddle');
+        setTitle(tokenPayload.householdName || householdName || 'Family Ka Link');
         setCanModerate(Boolean(tokenPayload.canModerate) && !tokenPayload.isGuest);
 
         const room = new Room({ adaptiveStream: true, dynacast: true });
@@ -488,7 +488,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
         const message =
           err instanceof FamilyHuddleError
             ? err.message
-            : 'Could not join Family Huddle. Please try again.';
+            : 'Could not join Family Ka Link. Please try again.';
         setError(message);
         setConn('error');
       } finally {
@@ -521,7 +521,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
       const message =
         err instanceof FamilyHuddleError
           ? err.message
-          : 'Could not join Family Huddle. Please try again.';
+          : 'Could not join Family Ka Link. Please try again.';
       setError(message);
       setConn('error');
     }
@@ -550,7 +550,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
   const endForEveryone = useCallback(async () => {
     if (!canModerate || ending || isGuest) return;
     const ok = window.confirm(
-      'End this Family Huddle for everyone? All participants will be disconnected.'
+      'End this Family Ka Link for everyone? All participants will be disconnected.'
     );
     if (!ok) return;
     userLeftRef.current = true;
@@ -569,7 +569,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
       const message =
         err instanceof FamilyHuddleError
           ? err.message
-          : 'Could not end Family Huddle. Please try again.';
+          : 'Could not end Family Ka Link. Please try again.';
       setError(message);
     } finally {
       setEnding(false);
@@ -611,10 +611,10 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
     const created = invite || (await ensureInvite());
     if (!created) return;
     const url = familyInviteAbsoluteUrl(created.path);
-    const text = `Join our Family Huddle on PLCC Canaan (${inviteExpiryLabel(created.expiresAt)})`;
+    const text = `Join our Family Ka Link on PLCC Canaan (${inviteExpiryLabel(created.expiresAt)})`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Family Huddle', text, url });
+        await navigator.share({ title: 'Family Ka Link', text, url });
         return;
       }
     } catch {
@@ -720,7 +720,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
       className="fixed inset-0 z-[400] flex flex-col bg-[#0f0a0c] text-white"
       role="dialog"
       aria-modal="true"
-      aria-label="Family Huddle"
+      aria-label="Family Ka Link"
     >
       <header className="flex items-center justify-between gap-2 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2 border-b border-white/10">
         <div className="min-w-0">
@@ -733,7 +733,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
           type="button"
           onClick={() => void leave()}
           className="min-h-[44px] min-w-[44px] rounded-full bg-white/10 flex items-center justify-center shrink-0"
-          aria-label="Close Family Huddle"
+          aria-label="Close Family Ka Link"
         >
           <X size={20} aria-hidden />
         </button>
@@ -755,7 +755,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
           <div className="max-w-md mx-auto space-y-4 pt-6">
             <p className="text-sm text-white/70 text-center leading-relaxed">
               {mode === 'start'
-                ? 'Start a private Family Huddle for household adults. Share a link for guests — dependents stay off video in this version.'
+                ? 'Start a private Family Ka Link for household adults. Share a link for guests — dependents stay off video in this version.'
                 : 'Join your family’s live room. Mute and camera controls are available.'}
             </p>
             {error ? (
@@ -788,7 +788,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
               onClick={() => void join()}
               className="w-full min-h-[48px] rounded-2xl bg-burgundy text-white font-bold text-base"
             >
-              {mode === 'start' ? 'Start Family Huddle' : 'Join Family Huddle'}
+              {mode === 'start' ? 'Start Family Ka Link' : 'Join Family Ka Link'}
             </button>
             <button
               type="button"
@@ -804,7 +804,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
           <div className="flex flex-col items-center justify-center gap-3 py-24 text-white/70">
             <Loader2 className="animate-spin" size={28} aria-hidden />
             <p className="text-sm font-medium">
-              {mode === 'start' ? 'Starting Family Huddle…' : 'Joining Family Huddle…'}
+              {mode === 'start' ? 'Starting Family Ka Link…' : 'Joining Family Ka Link…'}
             </p>
           </div>
         ) : null}
@@ -954,7 +954,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
               type="button"
               onClick={() => void leave()}
               className="min-h-[44px] min-w-[44px] rounded-2xl bg-red-600 flex items-center justify-center"
-              aria-label="Leave Family Huddle"
+              aria-label="Leave Family Ka Link"
             >
               <PhoneOff size={22} />
             </button>
@@ -966,7 +966,7 @@ export const FamilyVoiceHuddle: React.FC<Props> = ({
               disabled={ending}
               className="w-full min-h-[40px] text-xs font-bold text-red-300/90 disabled:opacity-50"
             >
-              {ending ? 'Ending…' : 'End Family Huddle for everyone'}
+              {ending ? 'Ending…' : 'End Family Ka Link for everyone'}
             </button>
           ) : null}
         </footer>

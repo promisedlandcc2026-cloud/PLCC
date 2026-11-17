@@ -4979,7 +4979,7 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!lk) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Voice huddles are not configured yet',
+                        error: 'Voice Ka Links are not configured yet',
                         configured: false,
                     });
                 }
@@ -5024,7 +5024,7 @@ const handleCommunity = async (req: any, res: any) => {
                     console.warn('[voice-huddle-status]', e);
                     return res.status(502).json({
                         ok: false,
-                        error: 'Unable to check voice huddle status',
+                        error: 'Unable to check voice Ka Link status',
                     });
                 }
             }
@@ -5034,7 +5034,7 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!canViewHuddleAttendance(authRole)) {
                     return res.status(403).json({
                         ok: false,
-                        error: 'Only Pastor, Admin, Super Admin, or Ministry Leader can view huddle attendance',
+                        error: 'Only Pastor, Admin, Super Admin, or Ministry Leader can view Ka Link attendance',
                     });
                 }
                 const channel = await fetchChannel(supabaseAdmin, cid);
@@ -5056,7 +5056,7 @@ const handleCommunity = async (req: any, res: any) => {
                     console.warn('[voice-huddle-attendance]', e);
                     return res.status(502).json({
                         ok: false,
-                        error: 'Unable to load huddle attendance',
+                        error: 'Unable to load Ka Link attendance',
                     });
                 }
             }
@@ -5131,7 +5131,7 @@ const handleCommunity = async (req: any, res: any) => {
                         ok: true,
                         configured: true,
                         byChannel: {},
-                        warning: 'Voice huddle status temporarily unavailable',
+                        warning: 'Voice Ka Link status temporarily unavailable',
                     });
                 }
             }
@@ -5972,7 +5972,7 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!lk) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Voice huddles are not configured yet',
+                        error: 'Voice Ka Links are not configured yet',
                         configured: false,
                     });
                 }
@@ -6107,8 +6107,8 @@ const handleCommunity = async (req: any, res: any) => {
                     return res.status(500).json({
                         ok: false,
                         error: reason
-                            ? `Could not issue voice huddle token (${reason})`
-                            : 'Could not issue voice huddle token',
+                            ? `Could not issue voice Ka Link token (${reason})`
+                            : 'Could not issue voice Ka Link token',
                     });
                 }
             }
@@ -6308,7 +6308,7 @@ const handleCommunity = async (req: any, res: any) => {
                         return res.status(200).json({ ok: true, ...resolved, channelId: cid });
                     } catch (e: any) {
                         console.warn('[voice-huddle-provider]', e);
-                        return res.status(500).json({ ok: false, error: 'Could not read the huddle line.' });
+                        return res.status(500).json({ ok: false, error: 'Could not read the Ka Link line.' });
                     }
                 }
 
@@ -6316,12 +6316,12 @@ const handleCommunity = async (req: any, res: any) => {
                     .trim()
                     .toLowerCase();
                 if (requested !== 'livekit' && requested !== 'daily') {
-                    return res.status(400).json({ ok: false, error: 'Choose a huddle line.' });
+                    return res.status(400).json({ ok: false, error: 'Choose a Ka Link line.' });
                 }
                 if (chatType === 'voice-daily-token' && !getDailyApiKey()) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Backup huddle audio is not configured yet.',
+                        error: 'Backup Ka Link audio is not configured yet.',
                         configured: false,
                     });
                 }
@@ -6367,7 +6367,7 @@ const handleCommunity = async (req: any, res: any) => {
                     if (!apiKey) {
                         return res.status(503).json({
                             ok: false,
-                            error: 'Backup huddle audio is not configured yet.',
+                            error: 'Backup Ka Link audio is not configured yet.',
                             configured: false,
                         });
                     }
@@ -6395,13 +6395,13 @@ const handleCommunity = async (req: any, res: any) => {
                         console.warn('[voice-daily-token]', e.detail || e.message);
                         return res.status(502).json({
                             ok: false,
-                            error: 'Backup huddle audio is unavailable right now.',
+                            error: 'Backup Ka Link audio is unavailable right now.',
                         });
                     }
                     console.warn('[voice-daily-token]', e?.message || 'Could not open backup huddle audio.');
                     return res.status(500).json({
                         ok: false,
-                        error: 'Could not open backup huddle audio.',
+                        error: 'Could not open backup Ka Link audio.',
                     });
                 }
             }
@@ -6442,7 +6442,7 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!lk) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Voice huddles are not configured yet',
+                        error: 'Voice Ka Links are not configured yet',
                     });
                 }
                 const session = await resolveVoiceCanModerate(
@@ -6461,7 +6461,7 @@ const handleCommunity = async (req: any, res: any) => {
                     });
                     return res.status(403).json({
                         ok: false,
-                        error: 'Only moderators can end the voice huddle for everyone',
+                        error: 'Only moderators can end the voice Ka Link for everyone',
                     });
                 }
                 try {
@@ -6476,7 +6476,7 @@ const handleCommunity = async (req: any, res: any) => {
                     return res.status(200).json({ ok: true, ...result });
                 } catch (e: any) {
                     console.warn('[voice-huddle-end]', e);
-                    return res.status(500).json({ ok: false, error: 'Could not end voice huddle' });
+                    return res.status(500).json({ ok: false, error: 'Could not end voice Ka Link' });
                 }
             }
             if (chatType === 'voice-hand-lower') {
@@ -6522,7 +6522,7 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!lk) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Voice huddles are not configured yet',
+                        error: 'Voice Ka Links are not configured yet',
                     });
                 }
                 const session = await resolveVoiceCanModerate(
@@ -6603,7 +6603,7 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!lk) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Voice huddles are not configured yet',
+                        error: 'Voice Ka Links are not configured yet',
                     });
                 }
                 try {
@@ -6628,7 +6628,7 @@ const handleCommunity = async (req: any, res: any) => {
                     console.warn('[voice-huddle-mod]', e);
                     return res.status(500).json({
                         ok: false,
-                        error: 'Could not update huddle moderator',
+                        error: 'Could not update Ka Link moderator',
                     });
                 }
             }
@@ -6676,7 +6676,7 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!lk) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Voice huddles are not configured yet',
+                        error: 'Voice Ka Links are not configured yet',
                     });
                 }
                 const session = await resolveVoiceCanModerate(
@@ -6702,7 +6702,7 @@ const handleCommunity = async (req: any, res: any) => {
                     if (!result.participantFound) {
                         return res.status(404).json({
                             ok: false,
-                            error: 'Participant is not in the active huddle',
+                            error: 'Participant is not in the active Ka Link',
                             ...result,
                         });
                     }
@@ -6738,7 +6738,7 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!lk) {
                     return res.status(503).json({
                         ok: false,
-                        error: 'Voice huddles are not configured yet',
+                        error: 'Voice Ka Links are not configured yet',
                     });
                 }
                 try {
@@ -6746,7 +6746,7 @@ const handleCommunity = async (req: any, res: any) => {
                     if (!result.participantFound) {
                         return res.status(404).json({
                             ok: false,
-                            error: 'You are not in the active huddle',
+                            error: 'You are not in the active Ka Link',
                             ...result,
                         });
                     }

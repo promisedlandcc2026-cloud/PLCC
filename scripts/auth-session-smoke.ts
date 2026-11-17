@@ -140,7 +140,7 @@ async function main() {
   assert(
     sanitizeReturnTo('/community/chat?channel=bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb&huddle=1') ===
       '/community/chat?channel=bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb&huddle=1',
-    'K: channel + huddle intent allowed'
+    'K: channel + Ka Link intent allowed'
   );
   assert(
     returnToFromRouterLocation({ pathname: '/community/chat', search: '' }) === '/community/chat',
@@ -158,7 +158,7 @@ async function main() {
       pathname: '/community/chat',
       search: '?channel=bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb&huddle=1',
     }) === '/community/chat?channel=bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb&huddle=1',
-    'K: pathname + channel + huddle survives'
+    'K: pathname + channel + Ka Link survives'
   );
   assert(
     returnToFromRouterLocation({ pathname: 'https://evil.example', search: '?x=1' }) === null,

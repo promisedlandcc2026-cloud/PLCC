@@ -980,7 +980,7 @@ const ChatPage: React.FC = () => {
       if (!opts?.keepMenuOpen) setShareMenuOpen(false);
       setTimeout(() => setWhatsappLinkCopied(false), 2000);
     } catch {
-      window.prompt('Copy WhatsApp Huddle link', url);
+      window.prompt('Copy WhatsApp invite link', url);
     }
   };
 
@@ -1476,7 +1476,7 @@ const ChatPage: React.FC = () => {
                     : 'bg-white text-[#0d1a14] border-black/[0.08] hover:border-burgundy/25 hover:bg-burgundy/[0.03]'
                 }`}
                 aria-pressed={attendancePanelOpen}
-                aria-label="Huddle attendance"
+                aria-label="Ka Link attendance"
                 title="Attendance"
                 data-huddle-attendance-chat-toggle="true"
               >
@@ -1519,7 +1519,7 @@ const ChatPage: React.FC = () => {
                     aria-label={
                       isLive
                         ? `${label}. ${formatHuddleParticipantAria(liveCount)}`
-                        : 'Live Huddle'
+                        : 'Live Ka Link'
                     }
                     data-huddle-ask-to-join={askToJoin ? 'true' : undefined}
                   >
@@ -1539,7 +1539,7 @@ const ChatPage: React.FC = () => {
                         ? inHuddle
                           ? `In · ${liveCount}`
                           : `Ask · ${liveCount}`
-                        : 'Huddle'}
+                        : 'Ka Link'}
                     </span>
                   </button>
                 );
@@ -1569,13 +1569,13 @@ const ChatPage: React.FC = () => {
             data-huddle-invite-ended="true"
           >
             <p className="text-[12px] font-semibold text-burgundy leading-snug">
-              This Huddle has ended.
+              This Ka Link has ended.
             </p>
             <button
               type="button"
               onClick={() => setHuddleInviteEndedNotice(false)}
               className="shrink-0 p-1 rounded-lg text-gray-300 hover:text-burgundy focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-              aria-label="Dismiss ended huddle notice"
+              aria-label="Dismiss ended Ka Link notice"
             >
               <X size={14} aria-hidden />
             </button>
@@ -1598,7 +1598,7 @@ const ChatPage: React.FC = () => {
               />
               <div className="min-w-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white">
-                  Live Huddle
+                  Live Ka Link
                 </p>
                 <p className="text-[12px] font-semibold text-emerald-50 leading-snug truncate">
                   {activeHuddleMeta.liveCount} in voice · tap to join with mic
@@ -1612,7 +1612,7 @@ const ChatPage: React.FC = () => {
                   onClick={() => setAttendancePanelOpen(true)}
                   className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-900/30 text-white font-black text-[10px] uppercase tracking-widest border border-white/25 hover:bg-emerald-900/45 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   data-huddle-attendance-live-entry="true"
-                  aria-label="See who is in the huddle"
+                  aria-label="See who is in the Ka Link"
                 >
                   <ClipboardList size={13} aria-hidden />
                   Who’s here
@@ -1626,7 +1626,7 @@ const ChatPage: React.FC = () => {
                 }}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-emerald-700 font-black text-[10px] uppercase tracking-widest shadow-[0_0_16px_rgba(255,255,255,0.55)] hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 data-huddle-ask-to-join="true"
-                aria-label={`Ask to join Live Huddle. ${formatHuddleParticipantAria(activeHuddleMeta.liveCount)}`}
+                aria-label={`Ask to join Live Ka Link. ${formatHuddleParticipantAria(activeHuddleMeta.liveCount)}`}
               >
                 <Mic size={13} aria-hidden />
                 Ask to Join
@@ -2157,7 +2157,7 @@ const ChatPage: React.FC = () => {
                       <Mic size={14} className="text-gold shrink-0" aria-hidden />
                     )}
                     <h4 className="text-[10px] font-black uppercase tracking-[0.16em] text-[#0d1a14]">
-                      Live Huddle
+                      Live Ka Link
                     </h4>
                   </div>
                   <p className="text-[12px] text-gray-600 mb-3 leading-snug">
@@ -2166,8 +2166,8 @@ const ChatPage: React.FC = () => {
                         ? `You're in · ${activeHuddleMeta.liveCount} voice${
                             activeHuddleMeta.liveCount === 1 ? '' : 's'
                           }`
-                        : `${activeHuddleMeta.liveCount} in huddle right now`
-                      : 'Start a voice huddle without leaving this channel.'}
+                        : `${activeHuddleMeta.liveCount} in Ka Link right now`
+                      : 'Start a voice Ka Link without leaving this channel.'}
                   </p>
                   <button
                     type="button"
@@ -2190,10 +2190,10 @@ const ChatPage: React.FC = () => {
                   >
                     <Mic size={13} aria-hidden />
                     {activeHuddleMeta.inHuddle
-                      ? 'Open huddle'
+                      ? 'Open Ka Link'
                       : activeHuddleMeta.isLive
                         ? 'Ask to Join'
-                        : 'Start huddle'}
+                        : 'Start Ka Link'}
                   </button>
                 </section>
               ) : null}

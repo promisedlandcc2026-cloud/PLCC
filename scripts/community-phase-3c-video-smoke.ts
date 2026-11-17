@@ -66,7 +66,7 @@ console.log('\nPhase 3C video smoke — voice feature regression (J–M)');
 assert(/toggleOwnHand|Raise Hand/.test(ui), 'J: Raise Hand retained');
 assert(/moderatorLowerHand|Lower Hand/.test(ui), 'K: moderator Lower Hand retained');
 assert(/toggleMute|setMicrophoneEnabled/.test(ui), 'L: Mute retained');
-assert(/End Huddle for Everyone|voice-huddle-end/.test(ui), 'M: End for Everyone retained');
+assert(/End Ka Link for Everyone|voice-huddle-end/.test(ui), 'M: End for Everyone retained');
 assert(/TrackSubscribed|TrackUnsubscribed|LocalTrackPublished/.test(ui), 'video track events wired');
 assert(/adaptiveStream:\s*true/.test(ui) && /dynacast:\s*true/.test(ui), 'adaptiveStream + dynacast');
 
@@ -125,10 +125,10 @@ assert(
 
 console.log('\nPhase 3C video smoke — hygiene / copy');
 
-assert(/Live Huddle/.test(ui), 'UI labeled Live Huddle');
-assert(/Join Huddle|Start Huddle/.test(ui), 'CTA uses Huddle not separate Voice/Video rooms');
+assert(/Live Ka Link/.test(ui), 'UI labeled Live Ka Link');
+assert(/Join Ka Link|Start Ka Link/.test(ui), 'CTA uses Ka Link not separate Voice/Video rooms');
 assert(!/LiveHuddle/.test(read('pages/community/Chat.tsx').replace(/VoiceHuddle/g, '')), 'Chat still not importing AI LiveHuddle');
 assert(/VoiceHuddle/.test(read('pages/community/Chat.tsx')), 'Chat still uses same VoiceHuddle component');
-assert(!/userIdMigration|awc_migrate_user_id/.test(ui), 'no identity/RPC migration in huddle UI');
+assert(!/userIdMigration|awc_migrate_user_id/.test(ui), 'no identity/RPC migration in Ka Link UI');
 
 console.log('\nAll Phase 3C video smoke tests passed.');

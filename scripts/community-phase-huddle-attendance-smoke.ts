@@ -59,7 +59,7 @@ assert(/room_finished/.test(helper), 'helper handles room_finished');
 assert(/voice-huddle-attendance/.test(core), 'API subresource voice-huddle-attendance');
 assert(/canViewHuddleAttendance\(authRole\)/.test(core), 'API gates by attendance roles');
 assert(
-  /Only Pastor, Admin, Super Admin, or Ministry Leader can view huddle attendance/.test(core),
+  /Only Pastor, Admin, Super Admin, or Ministry Leader can view Ka Link attendance/.test(core),
   'API 403 copy for non-leaders'
 );
 assert(/getHuddleAttendanceForChannel/.test(core), 'API loads live + session + history');
@@ -69,10 +69,10 @@ console.log('\nHuddle attendance smoke — UI strings');
 const panel = read('components/Community/HuddleAttendancePanel.tsx');
 const voice = read('components/Community/VoiceHuddle.tsx');
 const chat = read('pages/community/Chat.tsx');
-assert(/In huddle now/.test(panel), 'live roster section');
+assert(/In Ka Link now/.test(panel), 'live roster section');
 assert(/Joined this session/.test(panel), 'cumulative session section');
-assert(/Recent huddle attendance/.test(panel), 'history section');
-assert(/Huddle attendance/.test(panel), 'panel title');
+assert(/Recent Ka Link attendance/.test(panel), 'history section');
+assert(/Ka Link attendance/.test(panel), 'panel title');
 assert(/voice-huddle-attendance/.test(panel), 'panel fetches attendance API');
 assert(/data-huddle-attendance-toggle/.test(voice), 'VoiceHuddle attendance toggle');
 assert(/HuddleAttendancePanel/.test(voice), 'VoiceHuddle embeds attendance panel');
@@ -86,7 +86,7 @@ assert(!/data-huddle-attendance-live="true">\s*<HuddleAttendancePanel/.test(voic
 assert(/data-huddle-attendance-chat-toggle/.test(chat), 'Chat header attendance toggle');
 assert(/Who.?s here/.test(chat), 'Chat live banner Who’s here entry');
 assert(/data-huddle-attendance-history-panel/.test(chat), 'Chat history/live panel mount');
-assert(/preferHistory/.test(chat), 'Chat prefers history when huddle not live');
+assert(/preferHistory/.test(chat), 'Chat prefers history when Ka Link not live');
 assert(/canViewHuddleAttendanceUi/.test(chat) && /canViewHuddleAttendanceUi/.test(voice), 'UI role helper');
 
 console.log('\nHuddle attendance smoke — all checks passed');

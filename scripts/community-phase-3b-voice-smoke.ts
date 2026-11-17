@@ -166,7 +166,7 @@ const modPlan = decideVoiceHuddleAccess({
   isChannelCreator: false,
   isBroadAdmin: false,
 });
-assert(modPlan.ok === true && modPlan.canModerate === true, 'ministry moderator can end huddle');
+assert(modPlan.ok === true && modPlan.canModerate === true, 'ministry moderator can end Ka Link');
 
 console.log('\nPhase 3B voice smoke — secret not client-exposed');
 
@@ -199,9 +199,9 @@ assert(
 );
 assert(!/<LiveHuddle[\s/>]/.test(chatPage), 'Community Chat does not render LiveHuddle');
 assert(!/PLCC AI Strategist|Initializing Secure Voice Link|primary focus/.test(chatPage), 'Community Chat has no AI Strategist copy');
-assert(/Start Huddle|Join Huddle|Start Voice Huddle|Join Voice Huddle/.test(voiceUi), 'VoiceHuddle exposes Start/Join CTAs');
-assert(/Live Huddle|Voice Huddle/.test(voiceUi), 'VoiceHuddle shows huddle branding');
-assert(/End Huddle for Everyone|End for everyone/.test(voiceUi), 'VoiceHuddle exposes moderator end control');
+assert(/Start Ka Link|Join Ka Link/.test(voiceUi), 'VoiceHuddle exposes Start/Join CTAs');
+assert(/Live Ka Link|Voice Ka Link/.test(voiceUi), 'VoiceHuddle shows Ka Link branding');
+assert(/End Ka Link for Everyone|End for everyone/.test(voiceUi), 'VoiceHuddle exposes moderator end control');
 assert(!/PLCC AI Strategist|Initializing Secure Voice Link|primary focus|END SESSION/.test(voiceUi), 'VoiceHuddle has no legacy AI session UI');
 assert(/Raise Hand|Lower Hand/.test(voiceUi), 'VoiceHuddle exposes raise/lower hand controls');
 assert(/voice-hand-lower/.test(voiceUi), 'moderator lower uses server voice-hand-lower endpoint');
@@ -213,8 +213,8 @@ assert(/fetchWithTimeout/.test(chatPage), 'Chat channel/message fetches use time
 assert(/45_000|45000/.test(chatPage), 'channels fetch allows cold-start budget');
 assert(/retrying once|isAbortOrTimeoutError/.test(chatPage), 'channels auto-retries abort/timeout');
 assert(/channelsError|Retry/.test(chatPage), 'Chat shows retry when channels fail to load');
-assert(/setInterval\(tick,\s*10000\)/.test(chatPage), 'LIVE huddle status polls every 10s');
-assert(/fetchHuddleStatuses/.test(chatPage), 'Chat refreshes huddle statuses after channels load');
+assert(/setInterval\(tick,\s*10000\)/.test(chatPage), 'LIVE Ka Link status polls every 10s');
+assert(/fetchHuddleStatuses/.test(chatPage), 'Chat refreshes Ka Link statuses after channels load');
 
 console.log('\nPhase 3B voice smoke — raise hand queue + ACL');
 
@@ -284,18 +284,18 @@ assert(/disconnectRoomRef/.test(voiceUi), 'disconnect via stable ref (no mid-cal
 assert(/fetchWithTimeout|AbortController/.test(voiceUi), 'end/join use request timeout');
 assert(/withClientTimeout/.test(voiceUi), 'room disconnect bounded so Leave cannot hang');
 assert(/void checkStatus\(\)/.test(voiceUi), 'leave does not await status (DB hang fix)');
-assert(/data-huddle-chat-panel|huddle-chat/.test(voiceUi), 'VoiceHuddle has huddle chat panel');
+assert(/data-huddle-chat-panel|huddle-chat/.test(voiceUi), 'VoiceHuddle has Ka Link chat panel');
 assert(/max-sm:absolute|scrollIntoView/.test(voiceUi), 'mobile chat opens as visible sheet');
-assert(/createPortal/.test(voiceUi) && /data-huddle-portal/.test(voiceUi), 'huddle portals to body (iOS bottom-nav fix)');
-assert(/awc-huddle-open/.test(voiceUi), 'body class while huddle open');
+assert(/createPortal/.test(voiceUi) && /data-huddle-portal/.test(voiceUi), 'Ka Link portals to body (iOS bottom-nav fix)');
+assert(/awc-huddle-open/.test(voiceUi), 'body class while Ka Link open');
 assert(/endRoomOnLeave|alone/.test(voiceUi), 'solo moderator Leave ends LiveKit room');
 assert(/localTeardown/.test(voiceUi), 'end-for-everyone tears down UI in parallel with server');
-assert(/data-huddle-prejoin-end/.test(voiceUi), 'prejoin End clears stuck huddle without joining');
+assert(/data-huddle-prejoin-end/.test(voiceUi), 'prejoin End clears stuck Ka Link without joining');
 assert(/channelCanModerate/.test(coreSrc) && /voice-huddle-status/.test(coreSrc), 'status returns canModerate for prejoin End');
 assert(/presence\.active === false/.test(chatPage), 'Chat clears LIVE badge after End');
 assert(/setEnding\(false\)/.test(voiceUi) && /Ending…|Ending\.\.\./.test(voiceUi), 'Ending UI clears ending flag');
 assert(/startAudio/.test(voiceUi), 'unlocks audio after join (Safari/WebKit)');
-assert(/data-huddle-enable-audio|audioBlocked|Enable huddle sound|enable huddle sound/.test(voiceUi), 'tap-to-enable sound affordance');
+assert(/data-huddle-enable-audio|audioBlocked|Enable Ka Link sound|enable Ka Link sound/.test(voiceUi), 'tap-to-enable sound affordance');
 assert(/Timed out ending the LiveKit room|timeoutMs/.test(voiceSrc), 'server endVoiceRoom has timeout');
 assert(
   planVoiceAccessToken({
@@ -327,7 +327,7 @@ assert(
 assert(verifyHuddleFallbackPass(String(fallbackPass), 'other-secret', 1_000) === null, 'fallback pass rejects a bad signature');
 assert(verifyHuddleFallbackPass(String(fallbackPass), 'test-secret', 1_000 + 13 * 60 * 60) === null, 'fallback pass expires');
 assert(/voice-token-fallback/.test(voiceUi), 'client can open LiveKit from a saved pass');
-assert(/voice-token-fallback/.test(coreSrc), 'server accepts a saved huddle pass without Supabase');
+assert(/voice-token-fallback/.test(coreSrc), 'server accepts a saved Ka Link pass without Supabase');
 assert(/connectLiveKitOnce/.test(voiceUi), 'client tries LiveKit once');
 assert(/voice-daily-token/.test(readFileSync(join(root, 'lib/huddle/index.ts'), 'utf8')), 'client can request Daily backup audio');
 assert(/livekit_quota_exceeded/.test(readFileSync(join(root, 'lib/huddle/index.ts'), 'utf8')), 'client remembers a LiveKit quota block');

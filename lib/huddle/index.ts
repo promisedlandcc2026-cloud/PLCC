@@ -89,7 +89,7 @@ export async function claimChannelHuddleProvider(
   if (!res.ok) {
     return {
       ok: false,
-      error: data?.error || 'Could not save the huddle line.',
+      error: data?.error || 'Could not save the Ka Link line.',
       occupied: Boolean(data?.occupied),
       provider: data?.provider === 'daily' || data?.provider === 'livekit' ? data.provider : undefined,
     };
@@ -109,7 +109,7 @@ export async function fetchDailyHuddle(
   );
   if (!res.ok || !data?.token || !data?.url) {
     return {
-      error: data?.error || 'Could not open backup huddle audio.',
+      error: data?.error || 'Could not open backup Ka Link audio.',
       occupied: Boolean(data?.occupied),
     };
   }

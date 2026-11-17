@@ -171,7 +171,7 @@ const HuddleAttendancePanel: React.FC<Props> = ({
           <ClipboardList size={16} className="text-gold shrink-0" aria-hidden />
           <div className="min-w-0">
             <p className="text-[10px] font-black uppercase tracking-widest text-gold">
-              Huddle attendance
+              Ka Link attendance
             </p>
             <p className="text-xs font-semibold text-white/80 truncate">
               Pastor / staff roster
@@ -208,7 +208,7 @@ const HuddleAttendancePanel: React.FC<Props> = ({
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <h4 className="text-[11px] font-black uppercase tracking-widest text-burgundy/70 flex items-center gap-1.5">
                       <Users size={12} aria-hidden />
-                      In huddle now
+                      In Ka Link now
                       <span className="text-burgundy">({live.length})</span>
                     </h4>
                     {live.length > 0 ? (
@@ -222,7 +222,7 @@ const HuddleAttendancePanel: React.FC<Props> = ({
                     ) : null}
                   </div>
                   {live.length === 0 ? (
-                    <p className="text-xs text-gray-500 font-medium">No one is in the huddle right now.</p>
+                    <p className="text-xs text-gray-500 font-medium">No one is in the Ka Link right now.</p>
                   ) : (
                     <ul className="space-y-1.5">
                       {live.map((p) => (
@@ -258,7 +258,7 @@ const HuddleAttendancePanel: React.FC<Props> = ({
                   </div>
                   {sessionPeople.length === 0 ? (
                     <p className="text-xs text-gray-500 font-medium">
-                      Attendance will appear as people join (saved for after the huddle).
+                      Attendance will appear as people join (saved for after the Ka Link).
                     </p>
                   ) : (
                     <ul className="space-y-1.5">
@@ -287,11 +287,11 @@ const HuddleAttendancePanel: React.FC<Props> = ({
 
             <section data-huddle-attendance-history="true">
               <h4 className="text-[11px] font-black uppercase tracking-widest text-burgundy/70 mb-2">
-                Recent huddle attendance
+                Recent Ka Link attendance
               </h4>
               {history.length === 0 ? (
                 <p className="text-xs text-gray-500 font-medium">
-                  No finished huddles recorded yet for this channel.
+                  No finished Ka Links recorded yet for this channel.
                 </p>
               ) : (
                 <ul className="space-y-2">

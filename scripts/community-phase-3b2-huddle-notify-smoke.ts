@@ -113,9 +113,9 @@ assert(shouldNotifyForLiveKitEvent('room_started') === true, 'room_started notif
 assert(shouldNotifyForLiveKitEvent('participant_joined') === false, 'joins do not notify');
 assert(resolveHuddleNotifyChannelId(voiceRoomNameForChannel(channelId)) === channelId, 'room resolves');
 assert(resolveHuddleNotifyChannelId('bad-room') === null, 'malformed room rejected');
-assert(formatHuddleStartedTitle() === 'Voice Huddle Started', 'title copy');
+assert(formatHuddleStartedTitle() === 'Voice Ka Link Started', 'title copy');
 assert(
-  formatHuddleStartedBody('General') === 'A Voice Huddle has started in #General.',
+  formatHuddleStartedBody('General') === 'A Voice Ka Link has started in #General.',
   'body copy'
 );
 assert(huddleStartedLink(channelId) === `/community/chat?channel=${channelId}`, 'deep-link');
@@ -135,7 +135,7 @@ const envEx = read('env.livekit.example');
 
 assert(/WebhookReceiver/.test(webhook) && /receiver\.receive\(/.test(webhook), 'N: signed receive');
 assert(/status\(401\)/.test(webhook), 'N: unsigned → 401');
-assert(/notifyHuddleStartedUsers/.test(notifyHelper), 'conflict-safe huddle insert used');
+assert(/notifyHuddleStartedUsers/.test(notifyHelper), 'conflict-safe Ka Link insert used');
 assert(!/notifyAllUsers/.test(notifyHelper), 'open path does not use notifyAllUsers');
 assert(/listCommunityNotifyEligibleUserIds/.test(notifyHelper), 'open uses Community eligibility list');
 assert(/filterCommunityNotifyEligibleUserIds/.test(notifyHelper), 'restricted filters eligibility');

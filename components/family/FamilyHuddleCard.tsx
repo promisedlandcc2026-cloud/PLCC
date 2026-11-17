@@ -32,7 +32,7 @@ export function FamilyHuddleCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <h2 id="family-huddle-heading" className="text-sm font-black text-[#1A1A1A]">
-            Family Huddle
+            Family Ka Link
           </h2>
           <p className="text-[12px] text-gray-500 leading-relaxed">
             Private live video for household adults. Guests can join with a share link.
@@ -51,7 +51,7 @@ export function FamilyHuddleCard({
       </div>
 
       {!huddleConfigured ? (
-        <p className="text-sm text-gray-500">Family Huddle is not configured yet. Check back soon.</p>
+        <p className="text-sm text-gray-500">Family Ka Link is not configured yet. Check back soon.</p>
       ) : (
         <div className="space-y-2">
           {huddleLive ? (
@@ -61,7 +61,7 @@ export function FamilyHuddleCard({
               className="inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-burgundy text-white text-sm font-bold"
             >
               <Users size={16} aria-hidden />
-              Join Family Huddle
+              Join Family Ka Link
             </button>
           ) : (
             <button
@@ -70,7 +70,7 @@ export function FamilyHuddleCard({
               className="inline-flex w-full min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-burgundy text-white text-sm font-bold"
             >
               <Radio size={16} aria-hidden />
-              Start Family Huddle
+              Start Family Ka Link
             </button>
           )}
           <button

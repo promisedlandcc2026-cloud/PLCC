@@ -1371,7 +1371,7 @@ export const MemberProfileView: React.FC = () => {
         <ul className="flex gap-2 overflow-x-auto no-scrollbar">
           {[
             ['cp-about', 'About'],
-            ['cp-huddles', 'Huddles'],
+            ['cp-huddles', 'Ka Links'],
             ['cp-journey', 'Journey'],
             ['cp-badges', 'Badges'],
             ['cp-updates', 'Updates'],
@@ -1465,7 +1465,7 @@ export const MemberProfileView: React.FC = () => {
           <div id="cp-huddles" className="scroll-mt-20 bg-white rounded-2xl p-5 sm:p-6 border border-stone-200/90 shadow-xs space-y-4">
             <h2 className="text-base font-semibold text-stone-900 flex items-center gap-2">
               <Radio className="w-4 h-4 text-[#1d372c]" />
-              Huddles
+              Ka Links
             </h2>
             {savedHuddles.length ? (
               <ul className="space-y-2">
@@ -1493,7 +1493,7 @@ export const MemberProfileView: React.FC = () => {
                             <span
                               className={`w-1.5 h-1.5 rounded-full ${live ? 'bg-[#C9A35A] shadow-[0_0_8px_#C9A35A]' : 'bg-stone-300'}`}
                             />
-                            Join Live Huddle
+                            Join Live Ka Link
                           </button>
                         ) : live ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-[#1d372c] bg-[#EEF3EF] border border-[#1d372c]/15">
@@ -1515,7 +1515,7 @@ export const MemberProfileView: React.FC = () => {
                               });
                               void persistLinkedIdentity({ favoriteHuddles: next })
                                 .then(() => setHuddleNote('Saved.'))
-                                .catch(() => setHuddleNote('Could not save those huddles.'))
+                                .catch(() => setHuddleNote('Could not save those Ka Links.'))
                                 .finally(() => setHuddleSaving(false));
                             }}
                             className="text-[11px] text-stone-400 hover:text-[#1d372c] disabled:opacity-40"
@@ -1530,7 +1530,7 @@ export const MemberProfileView: React.FC = () => {
               </ul>
             ) : (
               <div className="text-sm text-stone-500 bg-stone-50/60 p-4 rounded-xl border border-stone-100">
-                No huddles yet.
+                No Ka Links yet.
               </div>
             )}
             {ownProfile ? (
@@ -1541,11 +1541,11 @@ export const MemberProfileView: React.FC = () => {
                   const choice = huddleChoices.find((channel) => channel.id === huddleDraft);
                   if (!choice) return;
                   if (savedHuddles.some((huddle) => huddle.id === choice.id)) {
-                    setHuddleNote('That huddle is already on your profile.');
+                    setHuddleNote('That Ka Link is already on your profile.');
                     return;
                   }
                   if (savedHuddles.length >= 8) {
-                    setHuddleNote('You can keep up to 8 huddles.');
+                    setHuddleNote('You can keep up to 8 Ka Links.');
                     return;
                   }
                   const next = [...savedHuddles, choice];
@@ -1560,12 +1560,12 @@ export const MemberProfileView: React.FC = () => {
                       setHuddleDraft('');
                       setHuddleNote('Saved.');
                     })
-                    .catch(() => setHuddleNote('Could not save those huddles.'))
+                    .catch(() => setHuddleNote('Could not save those Ka Links.'))
                     .finally(() => setHuddleSaving(false));
                 }}
               >
                 <label className="block text-xs font-medium text-stone-600" htmlFor="favorite-huddle">
-                  Add a Community huddle
+                  Add a Community Ka Link
                 </label>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <select
@@ -1574,7 +1574,7 @@ export const MemberProfileView: React.FC = () => {
                     onChange={(event) => setHuddleDraft(event.target.value)}
                     className="flex-1 p-3 text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#1d372c] bg-stone-50/50"
                   >
-                    <option value="">Choose a huddle</option>
+                    <option value="">Choose a Ka Link</option>
                     {huddleChoices
                       .filter((channel) => !savedHuddles.some((huddle) => huddle.id === channel.id))
                       .map((channel) => (
@@ -1588,7 +1588,7 @@ export const MemberProfileView: React.FC = () => {
                     disabled={huddleSaving || !huddleDraft}
                     className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#1d372c] hover:bg-[#12231c] rounded-lg disabled:opacity-40"
                   >
-                    {huddleSaving ? 'Saving...' : 'Add huddle'}
+                    {huddleSaving ? 'Saving...' : 'Add Ka Link'}
                   </button>
                 </div>
                 <p className="text-[11px] text-stone-400">{huddleNote}</p>

@@ -294,15 +294,15 @@ export function formatHeaderHuddleLabel(opts: {
   inHuddle: boolean;
 }): string {
   const n = Math.max(0, Number(opts.participantCount) || 0);
-  if (n <= 0) return 'Live Huddle';
-  if (opts.inHuddle) return `In Huddle · ${n}`;
+  if (n <= 0) return 'Live Ka Link';
+  if (opts.inHuddle) return `In Ka Link · ${n}`;
   return `Ask to Join · ${n}`;
 }
 
 export function formatHuddleParticipantAria(count: number): string {
   const n = Math.max(0, Number(count) || 0);
-  if (n === 1) return '1 participant in voice huddle';
-  return `${n} participants in voice huddle`;
+  if (n === 1) return '1 participant in voice Ka Link';
+  return `${n} participants in voice Ka Link`;
 }
 
 /** Filter channel ids eligible for voice status (non-DM, access already known). */
@@ -609,7 +609,7 @@ export function decideVoiceHuddleAccess(opts: {
   }
   const vis = String(opts.visibility || '').toLowerCase();
   if (vis === 'dm' && !opts.allowDm) {
-    return { ok: false, status: 400, error: 'Voice huddles are not available for DMs yet' };
+    return { ok: false, status: 400, error: 'Voice Ka Links are not available for DMs yet' };
   }
   const canModerate =
     opts.isChannelModerator || opts.isChannelCreator || opts.isBroadAdmin;
@@ -889,7 +889,7 @@ export async function applyVoiceHuddleModAction(
       return { ok: false, status: 403, error: 'Host already claimed' };
     }
   } else if (!actorMayAct) {
-    return { ok: false, status: 403, error: 'Forbidden: only huddle moderators can manage MOD' };
+    return { ok: false, status: 403, error: 'Forbidden: only Ka Link moderators can manage MOD' };
   }
 
   if (opts.action === 'add' || opts.action === 'pass') {
@@ -902,7 +902,7 @@ export async function applyVoiceHuddleModAction(
     } catch (err: any) {
       const msg = String(err?.message || err || '').toLowerCase();
       if (msg.includes('not found') || msg.includes('does not exist') || err?.status === 404) {
-        return { ok: false, status: 404, error: 'Target participant is not in the huddle' };
+        return { ok: false, status: 404, error: 'Target participant is not in the Ka Link' };
       }
       throw err;
     }

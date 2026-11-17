@@ -43,7 +43,7 @@ const REASON_LABEL: Record<string, string> = {
 };
 
 const PROBLEM_LABEL: Record<string, string> = {
-  huddle: 'Live Huddle (audio / video)',
+  huddle: 'Live Ka Link (audio / video)',
   messages: 'Chat or messages',
   notifications: 'Not getting phone alerts',
   login: 'Signing in or account',

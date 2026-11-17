@@ -257,7 +257,7 @@ const PrayerWallPage: React.FC = () => {
             </span>
             <span className="flex-1 min-w-0">
               <span className="block text-sm font-black text-[#0d1a14]">Intercessors Prayer Watch</span>
-              <span className="block text-xs text-gray-500">Live Huddle and every prayer request, side by side</span>
+              <span className="block text-xs text-gray-500">Live Ka Link and every prayer request, side by side</span>
             </span>
           </Link>
         )}

@@ -121,7 +121,7 @@ assert(/decideFeedReactionToggle/.test(core), 'Q: reactions remain');
 assert(/feedType === 'comments'/.test(core), 'R: comments remain');
 assert(/hasMore|FEED_PAGE_SIZE|Load more|data-feed-load-more/.test(core + feedPage), 'S: pagination remains');
 assert(/CommunityIdentityNav/.test(feedPage + chat), 'T: Feed|Chat navigation remains');
-assert(/decideHuddleInviteDeepLink|parseHuddleInviteIntent/.test(chat), 'U: Huddle invite path intact');
+assert(/decideHuddleInviteDeepLink|parseHuddleInviteIntent/.test(chat), 'U: Ka Link invite path intact');
 assert(!/VoiceHuddle|livekit|RoomEvent/.test(helper + prepare + migration), 'U: no LiveKit in 4B helpers/migration');
 
 assert(feedImagesDeferred() === false, 'images enabled');

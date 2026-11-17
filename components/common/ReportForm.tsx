@@ -63,7 +63,7 @@ const YES_NO_UNSURE = opts('Yes', 'No', 'Not sure');
 const PROBLEM_FLOWS: Flow[] = [
   {
     value: 'huddle',
-    label: 'Live Huddle (prayer calls, audio or video)',
+    label: 'Live Ka Link (prayer calls, audio or video)',
     questions: [
       {
         id: 'issue',
@@ -71,7 +71,7 @@ const PROBLEM_FLOWS: Flow[] = [
         type: 'select',
         required: true,
         options: opts(
-          "I can't join the huddle",
+          "I can't join the Ka Link",
           "I can't hear other people",
           "Other people can't hear me",
           'Video or camera not working',
@@ -87,7 +87,7 @@ const PROBLEM_FLOWS: Flow[] = [
         label: 'When it asked to use your microphone, did you tap Allow?',
         type: 'select',
         options: YES_NO_UNSURE,
-        showIf: (a) => a.issue === "Other people can't hear me" || a.issue === "I can't join the huddle",
+        showIf: (a) => a.issue === "Other people can't hear me" || a.issue === "I can't join the Ka Link",
       },
       { id: 'headphones', label: 'Are you using headphones or Bluetooth?', type: 'select', options: opts('Yes', 'No') },
       {
@@ -131,7 +131,7 @@ const PROBLEM_FLOWS: Flow[] = [
         label: 'Which alerts are missing?',
         type: 'select',
         required: true,
-        options: opts('Messages', 'Huddles starting', 'Prayer requests', 'Church news and announcements', 'All of them'),
+        options: opts('Messages', 'Ka Links starting', 'Prayer requests', 'Church news and announcements', 'All of them'),
       },
       DEVICE,
       {

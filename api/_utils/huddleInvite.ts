@@ -68,8 +68,8 @@ export function buildHuddleSharePayload(opts: {
   const raw = String(opts.channelName || 'channel').trim() || 'channel';
   const label = raw.startsWith('#') ? raw.slice(1) : raw;
   return {
-    title: 'PLCC Live Huddle',
-    text: `Join the Live Huddle in #${label}. Sign in to Tribes or PLCC Canaan, then tap the huddle link. It opens right into the prayer call:`,
+    title: 'PLCC Live Ka Link',
+    text: `Join the Live Ka Link in #${label}. Sign in to Tribes or PLCC Canaan, then tap the link. It opens right into the prayer call:`,
     url,
   };
 }

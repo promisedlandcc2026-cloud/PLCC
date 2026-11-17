@@ -38,7 +38,7 @@ function readNewsFields(req: any): { title: string; body: string; kind: string }
   if (!title || title.length > 120) return { error: 'Add a title of 120 characters or less.' };
   if (!body || body.length > 1000) return { error: 'Add a note of 1,000 characters or less.' };
   if (!NEWS_KINDS.has(kind)) {
-    return { error: 'Choose Church, Database, Celebration, Sympathy, or Live Huddle.' };
+    return { error: 'Choose Church, Database, Celebration, Sympathy, or Live Ka Link.' };
   }
   return { title, body, kind };
 }
@@ -63,7 +63,7 @@ function newsWriteError(res: any, error: { code?: string; message?: string }, ki
   if (kind === 'live_huddle' && /check constraint|23514/i.test(`${error.code || ''} ${error.message || ''}`)) {
     return res.status(503).json({
       ok: false,
-      error: 'Run supabase/migrations/vault_news_live_huddle.sql in the Supabase SQL editor, then post Live Huddle again.',
+      error: 'Run supabase/migrations/vault_news_live_huddle.sql in the Supabase SQL editor, then post Live Ka Link again.',
     });
   }
   if (missingNewsTable(error)) {

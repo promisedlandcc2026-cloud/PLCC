@@ -40,7 +40,7 @@ assert(
   formatMinutesTranscriptAsNotes('Hello church').includes('Hello church'),
   'notes wrap transcript'
 );
-assert(huddleMinutesPrefill({ channelName: '#Worship' }).title === 'Worship Live Huddle', 'huddle title');
+assert(huddleMinutesPrefill({ channelName: '#Worship' }).title === 'Worship Live Ka Link', 'huddle title');
 assert(MINUTES_AUDIO_BUCKET === 'minutes-audio', 'bucket name');
 assert(MINUTES_MAX_RECORD_SECONDS >= 3600, 'hour-long recording cap');
 assert(minutesChunkCount(3600) === 12, '1 hour is 12 five-minute chunks');
@@ -62,7 +62,7 @@ assert(/Typed legal name/.test(view), 'view typed name');
 assert(/subResource=pdf/.test(view), 'download PDF');
 assert(/huddle: '1'/.test(huddle) && /communication\/minutes/.test(huddle), 'post-huddle minutes prompt');
 assert(/data-huddle-minutes-control/.test(huddle), 'during-huddle Minutes control');
-assert(/Record during the huddle/.test(huddle), 'during-huddle recorder copy');
+assert(/Record during the Ka Link/.test(huddle), 'during-huddle recorder copy');
 assert(/Open Meeting Minutes to review/.test(huddle) || /Open Meeting Minutes to type/.test(huddle), 'end huddle opens minutes not start recorder');
 assert(/onClose\(\)/.test(huddle) && /Always dismiss after End/.test(huddle), 'end huddle closes modal after minutes prompt');
 assert(/prev === 'ended'/.test(huddle) && /Never clobber 'ended'/.test(huddle), 'status poll preserves ended (no Ready flash)');
