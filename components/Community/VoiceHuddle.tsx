@@ -2472,6 +2472,8 @@ const VoiceHuddle: React.FC<VoiceHuddleProps> = ({
           sources.length === 0 ||
           sources.some(
             (source) =>
+              // LiveKit sends sources as numbers (TrackSource.MICROPHONE = 2).
+              (source as unknown) === 2 ||
               source === Track.Source.Microphone ||
               String(source).toUpperCase().includes('MICROPHONE')
           );
