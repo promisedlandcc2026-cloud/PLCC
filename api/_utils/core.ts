@@ -494,6 +494,29 @@ const handleAuth = async (req: any, res: any) => {
  * Same-origin OTP proxy so Safari / DuckDuckGo (tracker blocking) do not need
  * to call *.supabase.co directly from the browser for send/verify.
  */
+/**
+ * A member whose email was never confirmed gets Supabase's "confirm signup" email
+ * instead of their sign-in code, and can't get in (Nov 2026: Sandie, Oine, Karungi).
+ * For an account that already has a church profile, confirm the email right before
+ * sending the code: the code still only reaches that inbox, so nothing is opened up.
+ */
+async function confirmMemberEmailBeforeCode(email: string): Promise<void> {
+    try {
+        const supabaseAdmin = getSupabaseAdmin();
+        if (!supabaseAdmin) return;
+        const { data: profile } = await supabaseAdmin.from('users').select('id').ilike('email', email).maybeSingle();
+        const id = (profile as any)?.id;
+        if (!id) return;
+        const { data } = await supabaseAdmin.auth.admin.getUserById(String(id));
+        const user = data?.user;
+        if (!user || user.email_confirmed_at || String(user.email || '').toLowerCase() !== email) return;
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, { email_confirm: true });
+        if (error) console.warn('[auth-otp send] could not confirm member email:', error.message);
+    } catch (err: any) {
+        console.warn('[auth-otp send] member email check failed:', err?.message || err);
+    }
+}
+
 const handleAuthOtp = async (req: any, res: any) => {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -523,6 +546,7 @@ const handleAuthOtp = async (req: any, res: any) => {
 
     try {
         if (action === 'send') {
+            await confirmMemberEmailBeforeCode(email);
             const upstream = await fetch(`${supabaseUrl}/auth/v1/otp`, {
                 method: 'POST',
                 headers: goTrueHeaders,
