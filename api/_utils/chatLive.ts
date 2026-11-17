@@ -217,3 +217,114 @@ export async function alertChatMessage(
     console.warn('[chat-live] alert failed:', err?.message || err);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Email fallback for direct messages
+// ---------------------------------------------------------------------------
+
+const KA_LINK_ORIGIN = String(process.env.KA_LINK_PUBLIC_ORIGIN || process.env.CHAT_PUBLIC_ORIGIN || 'https://plcc-chat.vercel.app').replace(/\/+$/, '');
+
+function escapeHtml(s: string): string {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/** A real inbox (phone sign-ins get a placeholder like …@phone.awcvault.invalid). */
+export function emailableAddress(raw: unknown): string | null {
+  const s = String(raw ?? '').trim();
+  if (!/^[^\s@<>]+@[^\s@<>]+\.[A-Za-z]{2,}$/.test(s)) return null;
+  if (/\.(invalid|test|example|local)$/i.test(s)) return null;
+  return s;
+}
+
+/** Pure: the email for "X sent you a message". The message itself is never included (it's private). */
+export function dmEmailFor(opts: { authorName: string; channelId: string; origin?: string }): { subject: string; html: string; text: string; url: string } {
+  const author = String(opts.authorName || 'Someone').trim() || 'Someone';
+  const url = `${(opts.origin || KA_LINK_ORIGIN).replace(/\/+$/, '')}/community/chat/${encodeURIComponent(opts.channelId)}`;
+  const name = escapeHtml(author);
+  const subject = `${author} sent you a message`;
+  const text = `${author} sent you a message on PLCC Ka Link.\n\nOpen it: ${url}\n\nTip: turn on phone alerts in PLCC Ka Link (your profile → Phone alerts) to get these on your phone instead of by email.`;
+  const html = `<!doctype html><html><body style="margin:0;background:#f6f1e7;font-family:Arial,Helvetica,sans-serif;color:#1c1a16">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fffdf8;border-radius:16px;padding:32px">
+<tr><td style="font-size:12px;letter-spacing:2px;color:#9a7a3a;font-weight:bold">PLCC KA LINK</td></tr>
+<tr><td style="padding-top:12px;font-size:22px;font-weight:bold">${name} sent you a message</td></tr>
+<tr><td style="padding-top:8px;font-size:15px;line-height:1.5;color:#4a463e">Open PLCC Ka Link to read it and reply.</td></tr>
+<tr><td style="padding-top:24px"><a href="${escapeHtml(url)}" style="background:#0d3b26;color:#f4eee2;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block">Open the message</a></td></tr>
+<tr><td style="padding-top:28px;font-size:12px;line-height:1.5;color:#7a756b">Tip: turn on phone alerts in PLCC Ka Link (your profile → Phone alerts) to get these on your phone instead of by email. On iPhone, add PLCC Ka Link to your Home Screen first.</td></tr>
+</table><p style="font-size:11px;color:#9a958b;margin-top:16px">Promised Land Christian Center · Kira-Kitukutwe</p></td></tr></table></body></html>`;
+  return { subject, html, text, url };
+}
+
+/**
+ * Direct message → email the other person, but only when it would otherwise go unnoticed:
+ *  - they have no phone alerts on (no 'chat' push subscription),
+ *  - they haven't muted the chat,
+ *  - and this is the first message they haven't read yet (one email per burst, not per message).
+ * Never throws.
+ */
+export async function emailDmIfNoAlerts(
+  supabase: SupabaseClient,
+  opts: {
+    channel: { id: string; participants?: unknown; visibility?: string | null; type?: string | null };
+    authorId: string;
+    authorName: string;
+    messageId: string;
+    send?: (msg: { to: string; subject: string; html: string; text: string }) => Promise<boolean>;
+  }
+): Promise<{ emailed: number }> {
+  let emailed = 0;
+  try {
+    if (normalizeVisibility(opts.channel as any) !== 'dm') return { emailed };
+    const muted = await mutedUserIds(supabase, opts.channel.id);
+    const recipients = participantIds(opts.channel.participants).filter((id) => id && id !== String(opts.authorId) && !muted.has(id));
+    if (!recipients.length) return { emailed };
+    const send = opts.send ?? defaultDmEmailSender;
+    for (const userId of recipients) {
+      const { count: subs } = await supabase
+        .from('push_subscriptions')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .contains('topics', ['chat']);
+      if ((subs ?? 0) > 0) continue; // phone alert already on its way
+
+      const { data: read } = await supabase
+        .from('chat_read_status')
+        .select('last_read_at')
+        .eq('user_id', userId)
+        .eq('channel_id', opts.channel.id)
+        .maybeSingle();
+      let earlier = supabase
+        .from('chat_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('channel_id', opts.channel.id)
+        .neq('user_id', userId)
+        .neq('id', opts.messageId)
+        .is('deleted_at', null);
+      if ((read as any)?.last_read_at) earlier = earlier.gt('created_at', (read as any).last_read_at);
+      const { count: unreadBefore, error: unreadErr } = await earlier;
+      if (unreadErr || (unreadBefore ?? 0) > 0) continue; // already told about this conversation
+
+      const { data: user } = await supabase.from('users').select('email').eq('id', userId).maybeSingle();
+      const to = emailableAddress((user as any)?.email);
+      if (!to) continue;
+      const mail = dmEmailFor({ authorName: opts.authorName, channelId: opts.channel.id });
+      if (await send({ to, subject: mail.subject, html: mail.html, text: mail.text })) emailed += 1;
+    }
+  } catch (err: any) {
+    console.warn('[chat-live] dm email failed:', err?.message || err);
+  }
+  return { emailed };
+}
+
+async function defaultDmEmailSender(msg: { to: string; subject: string; html: string; text: string }): Promise<boolean> {
+  const { getResend } = await import('./deps.js');
+  const { vaultFrom } = await import('./emailFrom.js');
+  const resend = await getResend();
+  if (!resend) return false;
+  const { error } = await resend.emails.send({ from: vaultFrom('PLCC Ka Link'), to: [msg.to], subject: msg.subject, html: msg.html, text: msg.text });
+  if (error) {
+    console.warn('[chat-live] dm email not sent:', error.message || error);
+    return false;
+  }
+  return true;
+}

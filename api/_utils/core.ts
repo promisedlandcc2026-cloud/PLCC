@@ -184,7 +184,7 @@ import {
     setChatArchived,
     setMessagePinned,
 } from './chatRooms.js';
-import { alertChatMessage, broadcastChatEvent, chatRealtimeTopic, decideChatEdit, isRoomMuted, mentionsEveryone, setRoomMuted } from './chatLive.js';
+import { alertChatMessage, broadcastChatEvent, emailDmIfNoAlerts, chatRealtimeTopic, decideChatEdit, isRoomMuted, mentionsEveryone, setRoomMuted } from './chatLive.js';
 import {
     CHAT_MEDIA_ALLOWED_MIME,
     CHAT_MEDIA_BUCKET,
@@ -5636,6 +5636,13 @@ const handleCommunity = async (req: any, res: any) => {
                             authorName: humanDisplayName,
                             content,
                             everyone: everyoneAlert,
+                        }),
+                        // Direct messages: email people who have no phone alerts on (once per unread burst).
+                        emailDmIfNoAlerts(supabaseAdmin, {
+                            channel: gate.channel,
+                            authorId: authUserId,
+                            authorName: humanDisplayName,
+                            messageId: String(data.id),
                         }),
                     ])
                 );
