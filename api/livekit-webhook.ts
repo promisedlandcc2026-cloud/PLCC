@@ -17,6 +17,7 @@ import {
   handleHuddleAttendanceWebhookEvent,
   isHuddleAttendanceWebhookEvent,
 } from './_utils/huddleAttendance.js';
+import { handleRecordingWebhookEvent } from './_utils/kaLinkRecording.js';
 
 /** Preserve raw body for signature verification (Vercel Node). */
 export const config = {
@@ -91,6 +92,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const roomName = String(room?.name || '');
   const roomSid = String(room?.sid || '');
   const participant = (event as any)?.participant || null;
+
+  // Ka Link recordings (#14): egress_started / egress_updated / egress_ended.
+  if (eventName.startsWith('egress_')) {
+    const sb = getSupabaseAdmin();
+    const updated = sb ? await handleRecordingWebhookEvent(sb, eventName, (event as any)?.egressInfo) : false;
+    return res.status(200).json({ ok: true, event: eventName, recording: updated });
+  }
 
   const wantsNotify = shouldNotifyForLiveKitEvent(eventName);
   const wantsAttendance = isHuddleAttendanceWebhookEvent(eventName);

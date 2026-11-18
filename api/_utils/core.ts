@@ -181,6 +181,15 @@ import {
 } from './huddleAttendance.js';
 import { isHuddleSessionModerator, parseHuddleModAction } from './huddleModeration.js';
 import {
+    RECORDINGS_NOT_SET_UP,
+    fetchRecordingOutcome,
+    getRecordingStorageConfig,
+    isRecordingsTableMissing,
+    recordingFilePath,
+    startKaLinkRecording,
+    stopKaLinkRecording,
+} from './kaLinkRecording.js';
+import {
     canManageKaLinkTeam,
     listKaLinkTeam,
     parseKaLinkTeamRole,
@@ -6807,6 +6816,206 @@ const handleCommunity = async (req: any, res: any) => {
                     });
                 }
             }
+            if (chatType === 'voice-recording') {
+                // #14 Ka Link recordings: moderators start/stop; room members list and play.
+                const cid = String(req.body?.channelId || '').trim();
+                const recAction = String(req.body?.action || '').trim().toLowerCase();
+                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
+                if (!['start', 'stop', 'list', 'play', 'delete'].includes(recAction)) {
+                    return res.status(400).json({ ok: false, error: 'Unknown recording action' });
+                }
+                const channel = await fetchChannel(supabaseAdmin, cid);
+                const gate = await assertChannelAccess(channel);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+                const lk = getLiveKitServerConfig();
+                const storage = getRecordingStorageConfig();
+                const recDb = supabaseAdmin.from('ka_link_recordings');
+                const tableError = (error: any) =>
+                    res.status(isRecordingsTableMissing(error) ? 503 : 500).json({
+                        ok: false,
+                        setupNeeded: isRecordingsTableMissing(error),
+                        error: isRecordingsTableMissing(error)
+                            ? 'Run supabase/migrations/ka_link_recordings.sql in the Supabase SQL editor first.'
+                            : 'Could not load recordings.',
+                    });
+
+                if (recAction === 'list') {
+                    const { data, error } = await supabaseAdmin
+                        .from('ka_link_recordings')
+                        .select('id, channel_name, status, started_at, ended_at, duration_seconds, size_bytes, started_by, egress_id')
+                        .eq('channel_id', cid)
+                        .neq('status', 'failed')
+                        .order('started_at', { ascending: false })
+                        .limit(50);
+                    if (error) return tableError(error);
+                    const rows = (data || []) as any[];
+                    // A webhook may have been missed: ask LiveKit about anything still "in progress" for > 2 min.
+                    if (lk) {
+                        for (const r of rows) {
+                            if ((r.status === 'recording' || r.status === 'processing') && Date.now() - new Date(r.started_at).getTime() > 120_000) {
+                                const outcome = await fetchRecordingOutcome(lk, r.egress_id);
+                                if (outcome && outcome.status !== r.status) {
+                                    r.status = outcome.status;
+                                    if (outcome.durationSeconds) r.duration_seconds = outcome.durationSeconds;
+                                    await supabaseAdmin
+                                        .from('ka_link_recordings')
+                                        .update({
+                                            status: outcome.status,
+                                            duration_seconds: outcome.durationSeconds,
+                                            size_bytes: outcome.sizeBytes,
+                                            ...(outcome.status === 'ready' || outcome.status === 'failed' ? { ended_at: new Date().toISOString() } : {}),
+                                        })
+                                        .eq('id', r.id);
+                                }
+                            }
+                        }
+                    }
+                    const starterIds = Array.from(new Set(rows.map((r) => r.started_by).filter(Boolean)));
+                    const names = new Map<string, string>();
+                    if (starterIds.length) {
+                        const { data: users } = await supabaseAdmin.from('users').select('id, name').in('id', starterIds);
+                        for (const u of (users || []) as any[]) names.set(String(u.id), String(u.name || ''));
+                    }
+                    return res.status(200).json({
+                        ok: true,
+                        configured: Boolean(storage),
+                        recordings: rows
+                            .filter((r) => r.status !== 'failed')
+                            .map((r) => ({
+                                id: r.id,
+                                channelName: r.channel_name,
+                                status: r.status,
+                                startedAt: r.started_at,
+                                endedAt: r.ended_at,
+                                durationSeconds: r.duration_seconds,
+                                sizeBytes: r.size_bytes,
+                                startedByName: names.get(String(r.started_by)) || null,
+                            })),
+                    });
+                }
+
+                if (recAction === 'play') {
+                    const recordingId = String(req.body?.recordingId || '').trim();
+                    const { data: rec, error } = await supabaseAdmin
+                        .from('ka_link_recordings')
+                        .select('id, storage_path, status')
+                        .eq('id', recordingId)
+                        .eq('channel_id', cid)
+                        .maybeSingle();
+                    if (error) return tableError(error);
+                    if (!rec || (rec as any).status !== 'ready') {
+                        return res.status(404).json({ ok: false, error: 'That recording is not ready yet.' });
+                    }
+                    const bucket = storage?.bucket || 'ka-link-recordings';
+                    const { data: signed, error: signError } = await supabaseAdmin.storage
+                        .from(bucket)
+                        .createSignedUrl(String((rec as any).storage_path), 60 * 60);
+                    if (signError || !signed?.signedUrl) {
+                        return res.status(404).json({ ok: false, error: 'The recording file could not be found.' });
+                    }
+                    return res.status(200).json({ ok: true, url: signed.signedUrl });
+                }
+
+                // start / stop / delete: Ka Link moderators only.
+                const { data: recMembership } = await supabaseAdmin
+                    .from('chat_room_members')
+                    .select('role')
+                    .eq('channel_id', cid)
+                    .eq('user_id', authUserId)
+                    .maybeSingle();
+                const recVoice = decideVoiceHuddleAccess({
+                    canAccessChannel: true,
+                    visibility: normalizeVisibility(gate.channel),
+                    isChannelModerator: String(recMembership?.role || '').toLowerCase() === 'moderator',
+                    isChannelCreator: String(gate.channel.created_by || '') === String(authUserId),
+                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    allowDm: false,
+                });
+                if (recVoice.ok === false) return res.status(recVoice.status).json({ ok: false, error: recVoice.error });
+                if (!lk) return res.status(503).json({ ok: false, error: 'Voice Ka Links are not configured yet' });
+                const recSession = await resolveVoiceCanModerate(lk, cid, authUserId, recVoice.canModerate);
+                if (!recSession.canModerate) {
+                    return res.status(403).json({ ok: false, error: 'Only Ka Link moderators can manage recordings.' });
+                }
+
+                if (recAction === 'delete') {
+                    const recordingId = String(req.body?.recordingId || '').trim();
+                    const { data: rec, error } = await supabaseAdmin
+                        .from('ka_link_recordings')
+                        .select('id, storage_path, status, egress_id')
+                        .eq('id', recordingId)
+                        .eq('channel_id', cid)
+                        .maybeSingle();
+                    if (error) return tableError(error);
+                    if (!rec) return res.status(404).json({ ok: false, error: 'Recording not found.' });
+                    if ((rec as any).status === 'recording') await stopKaLinkRecording(lk, String((rec as any).egress_id));
+                    await supabaseAdmin.storage
+                        .from(storage?.bucket || 'ka-link-recordings')
+                        .remove([String((rec as any).storage_path)])
+                        .catch(() => null);
+                    await supabaseAdmin.from('ka_link_recordings').delete().eq('id', recordingId);
+                    const logAudit = await getAudit();
+                    await logAudit({ userId: authUserId, action: 'Ka Link recording deleted', resourceType: 'ka_link_recording', resourceId: recordingId, details: { channelId: cid }, req });
+                    return res.status(200).json({ ok: true });
+                }
+
+                // The one recording in progress for this room, if any.
+                const { data: active, error: activeError } = await supabaseAdmin
+                    .from('ka_link_recordings')
+                    .select('id, egress_id')
+                    .eq('channel_id', cid)
+                    .eq('status', 'recording')
+                    .order('started_at', { ascending: false })
+                    .limit(1);
+                if (activeError) return tableError(activeError);
+                const current = (active || [])[0] as any;
+
+                if (recAction === 'stop') {
+                    if (current) {
+                        await stopKaLinkRecording(lk, String(current.egress_id));
+                        await supabaseAdmin.from('ka_link_recordings').update({ status: 'processing' }).eq('id', current.id);
+                    }
+                    return res.status(200).json({ ok: true, recording: false });
+                }
+
+                // start
+                if (!storage) return res.status(503).json({ ok: false, setupNeeded: true, error: RECORDINGS_NOT_SET_UP });
+                if (current) {
+                    const outcome = await fetchRecordingOutcome(lk, String(current.egress_id));
+                    if (!outcome || outcome.status === 'recording') return res.status(200).json({ ok: true, recording: true });
+                    await supabaseAdmin.from('ka_link_recordings').update({ status: outcome.status }).eq('id', current.id);
+                }
+                const startedAt = new Date();
+                const path = recordingFilePath(cid, startedAt, Math.random().toString(36).slice(2, 8));
+                try {
+                    const { egressId } = await startKaLinkRecording(lk, storage, cid, path);
+                    const { error: insertError } = await supabaseAdmin.from('ka_link_recordings').insert({
+                        channel_id: cid,
+                        channel_name: String(gate.channel.name || 'Ka Link').slice(0, 120),
+                        egress_id: egressId,
+                        status: 'recording',
+                        storage_path: path,
+                        started_by: authUserId,
+                        started_at: startedAt.toISOString(),
+                    });
+                    if (insertError) {
+                        await stopKaLinkRecording(lk, egressId);
+                        return tableError(insertError);
+                    }
+                    const logAudit = await getAudit();
+                    await logAudit({ userId: authUserId, action: 'Ka Link recording started', resourceType: 'chat_channel', resourceId: cid, details: { egressId }, req });
+                    return res.status(200).json({ ok: true, recording: true });
+                } catch (e: any) {
+                    console.warn('[voice-recording start]', e?.message || e);
+                    const reason = String(e?.message || '').replace(/\s+/g, ' ').slice(0, 140);
+                    return res.status(502).json({
+                        ok: false,
+                        error: /no.*participant|not found|does not exist/i.test(reason)
+                            ? 'Start the Ka Link before recording.'
+                            : `Could not start recording${reason ? ` (${reason})` : ''}.`,
+                    });
+                }
+            }
             if (chatType === 'ka-link-team') {
                 // Phase 3: Pastor / Admin / Super Admin manage the Ka Link team in Canaan.
                 if (!canManageKaLinkTeam(authRole)) {
@@ -9664,7 +9873,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }
