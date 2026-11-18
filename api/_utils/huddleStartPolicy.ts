@@ -113,7 +113,8 @@ export type HuddleAuditAction =
   | 'Live Huddle started'
   | 'Live Huddle start denied'
   | 'Live Huddle ended for everyone'
-  | 'Live Huddle end denied';
+  | 'Live Huddle end denied'
+  | `Ka Link moderator: ${'mic-lock' | 'mic-unlock' | 'remove' | 'block'}`;
 
 /**
  * Audit a huddle lifecycle event. Never records call content. Never throws —

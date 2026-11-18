@@ -163,7 +163,18 @@ import {
     muteParticipantMicrophoneTracks,
     resolveVoiceCanModerate,
     restoreOwnMicrophonePublish,
+    readHuddleStage,
+    writeHuddleStage,
+    setParticipantMicrophoneAllowed,
+    applyHuddleMicLock,
+    lowerAllHuddleHands,
+    removeHuddleParticipant,
 } from './livekitVoice.js';
+import {
+    applyHuddleStageAction,
+    huddleMicAllowed,
+    huddleUserBlocked,
+} from './huddleStage.js';
 import {
     canViewHuddleAttendance,
     getHuddleAttendanceForChannel,
@@ -6063,6 +6074,16 @@ const handleCommunity = async (req: any, res: any) => {
                         });
                     }
 
+                    // Phase 2: removed-and-blocked members stay out for the rest of this Ka Link.
+                    const stageNow = await readHuddleStage(lk, cid).catch(() => null);
+                    if (stageNow && huddleUserBlocked(stageNow.stage, authUserId)) {
+                        return res.status(403).json({
+                            ok: false,
+                            code: 'HUDDLE_BLOCKED',
+                            error: 'A moderator removed you from this Ka Link.',
+                        });
+                    }
+
                     // Session co-host / host from LiveKit room metadata (rejoin keeps canModerate).
                     // First joiner claims host when empty (huddle starter → Play Music + session mod).
                     let session = await resolveVoiceCanModerate(
@@ -6090,12 +6111,18 @@ const handleCommunity = async (req: any, res: any) => {
                     // moderate via our APIs (mute/end) without displacing the active host.
                     const roomAdmin = isHuddleSessionModerator(session.roles, authUserId);
 
+                    // Mics locked (#8): members join without mic permission; Bible readers (#11)
+                    // and moderators keep theirs.
+                    const allowMicrophone = stageNow
+                        ? huddleMicAllowed({ stage: stageNow.stage, userId: authUserId, isModerator: canModerate })
+                        : true;
                     const minted = await mintLiveKitAccessToken(lk, {
                         userId: authUserId,
                         displayName,
                         channelId: cid,
                         canModerate,
                         roomAdmin,
+                        allowMicrophone,
                     });
                     if (entry.mode === 'start') {
                         await logHuddleAudit({
@@ -6746,6 +6773,129 @@ const handleCommunity = async (req: any, res: any) => {
                     });
                 }
             }
+            if (chatType === 'voice-huddle-stage') {
+                // Phase 2 moderator tools: mic lock, lower all hands, allow-to-speak,
+                // Bible readers, remove / block. Session-only (LiveKit room metadata).
+                const cid = String(req.body?.channelId || req.body?.channel_id || first(channelId) || '').trim();
+                const stageAction = String(req.body?.action || '').trim().toLowerCase();
+                const targetIdentity = String(req.body?.targetIdentity || '').trim();
+                const STAGE_ACTIONS = new Set([
+                    'mic-lock', 'mic-unlock', 'lower-all-hands', 'allow-mic', 'revoke-mic',
+                    'reader-add', 'reader-remove', 'remove', 'block',
+                ]);
+                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
+                if (!STAGE_ACTIONS.has(stageAction)) {
+                    return res.status(400).json({ ok: false, error: 'Unknown moderator action' });
+                }
+                const needsTarget = !['mic-lock', 'mic-unlock', 'lower-all-hands'].includes(stageAction);
+                if (needsTarget && !targetIdentity) {
+                    return res.status(400).json({ ok: false, error: 'targetIdentity is required' });
+                }
+                const channel = await fetchChannel(supabaseAdmin, cid);
+                const gate = await assertChannelAccess(channel);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+                const { data: membership } = await supabaseAdmin
+                    .from('chat_room_members')
+                    .select('role')
+                    .eq('channel_id', cid)
+                    .eq('user_id', authUserId)
+                    .maybeSingle();
+                const voiceDecision = decideVoiceHuddleAccess({
+                    canAccessChannel: true,
+                    visibility: normalizeVisibility(gate.channel),
+                    isChannelModerator: String(membership?.role || '').toLowerCase() === 'moderator',
+                    isChannelCreator: String(gate.channel.created_by || '') === String(authUserId),
+                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    allowDm: normalizeVisibility(gate.channel) === 'dm',
+                });
+                if (voiceDecision.ok === false) {
+                    return res.status(voiceDecision.status).json({ ok: false, error: voiceDecision.error });
+                }
+                const lk = getLiveKitServerConfig();
+                if (!lk) return res.status(503).json({ ok: false, error: 'Voice Ka Links are not configured yet' });
+                const session = await resolveVoiceCanModerate(lk, cid, authUserId, voiceDecision.canModerate);
+                if (!session.canModerate) {
+                    return res.status(403).json({ ok: false, error: 'Only Ka Link moderators can do that' });
+                }
+                try {
+                    const current = await readHuddleStage(lk, cid);
+                    if (!current.roomExists) {
+                        return res.status(404).json({ ok: false, error: 'This Ka Link is not live right now' });
+                    }
+                    // Channel moderators + creator keep their mic when mics are locked.
+                    const { data: channelMods } = await supabaseAdmin
+                        .from('chat_room_members')
+                        .select('user_id')
+                        .eq('channel_id', cid)
+                        .eq('role', 'moderator');
+                    const moderatorIds = new Set<string>(
+                        (channelMods || []).map((m: any) => String(m.user_id || '')).filter(Boolean)
+                    );
+                    if (gate.channel.created_by) moderatorIds.add(String(gate.channel.created_by));
+                    if (current.roles.hostId) moderatorIds.add(current.roles.hostId);
+                    for (const id of current.roles.coHostIds) moderatorIds.add(id);
+                    moderatorIds.add(String(authUserId));
+                    const targetIsModerator = Boolean(targetIdentity) && moderatorIds.has(targetIdentity);
+                    if (targetIsModerator && ['revoke-mic', 'remove', 'block'].includes(stageAction)) {
+                        return res.status(400).json({ ok: false, error: 'You can’t do that to a Ka Link moderator.' });
+                    }
+
+                    let stage = current.stage;
+                    const saveStage = async (action: 'mic-lock' | 'mic-unlock' | 'reader-add' | 'reader-remove' | 'block') => {
+                        const applied = applyHuddleStageAction(stage, action, targetIdentity);
+                        if (applied.ok === false) return applied.error;
+                        stage = await writeHuddleStage(lk, cid, applied.stage, current.metadata);
+                        return null;
+                    };
+                    let detail: Record<string, unknown> = {};
+
+                    if (stageAction === 'mic-lock' || stageAction === 'mic-unlock') {
+                        const err = await saveStage(stageAction);
+                        if (err) return res.status(400).json({ ok: false, error: err });
+                        const exempt = new Set<string>([...moderatorIds, ...stage.readerIds]);
+                        detail = await applyHuddleMicLock(lk, cid, stageAction === 'mic-lock', exempt);
+                    } else if (stageAction === 'lower-all-hands') {
+                        detail = await lowerAllHuddleHands(lk, cid);
+                    } else if (stageAction === 'allow-mic' || stageAction === 'revoke-mic') {
+                        const r = await setParticipantMicrophoneAllowed(lk, cid, targetIdentity, stageAction === 'allow-mic');
+                        if (!r.participantFound) {
+                            return res.status(404).json({ ok: false, error: 'That person is not in the Ka Link' });
+                        }
+                    } else if (stageAction === 'reader-add' || stageAction === 'reader-remove') {
+                        const err = await saveStage(stageAction);
+                        if (err) return res.status(400).json({ ok: false, error: err });
+                        if (stage.micLock && !targetIsModerator) {
+                            await setParticipantMicrophoneAllowed(lk, cid, targetIdentity, stageAction === 'reader-add');
+                        }
+                    } else if (stageAction === 'remove' || stageAction === 'block') {
+                        if (stageAction === 'block') {
+                            const err = await saveStage('block');
+                            if (err) return res.status(400).json({ ok: false, error: err });
+                        }
+                        detail = await removeHuddleParticipant(lk, cid, targetIdentity);
+                    }
+
+                    if (['mic-lock', 'mic-unlock', 'remove', 'block'].includes(stageAction)) {
+                        await logHuddleAudit({
+                            action: `Ka Link moderator: ${stageAction as 'mic-lock' | 'mic-unlock' | 'remove' | 'block'}`,
+                            userId: authUserId,
+                            channelId: cid,
+                            details: { targetIdentity: targetIdentity || null, ...detail },
+                            req,
+                        });
+                    }
+                    return res.status(200).json({
+                        ok: true,
+                        action: stageAction,
+                        micLock: stage.micLock,
+                        readerIds: stage.readerIds,
+                        ...detail,
+                    });
+                } catch (e: any) {
+                    console.warn('[voice-huddle-stage]', e);
+                    return res.status(500).json({ ok: false, error: 'Could not complete that moderator action' });
+                }
+            }
             if (chatType === 'voice-mic-restore') {
                 const cid = String(
                     req.body?.channelId || req.body?.channel_id || first(channelId) || ''
@@ -6771,6 +6921,28 @@ const handleCommunity = async (req: any, res: any) => {
                         ok: false,
                         error: 'Voice Ka Links are not configured yet',
                     });
+                }
+                // Mics locked: only moderators and Bible readers may give themselves the mic back.
+                const stageForRestore = await readHuddleStage(lk, cid).catch(() => null);
+                if (stageForRestore?.stage.micLock) {
+                    const { data: restoreMembership } = await supabaseAdmin
+                        .from('chat_room_members')
+                        .select('role')
+                        .eq('channel_id', cid)
+                        .eq('user_id', authUserId)
+                        .maybeSingle();
+                    const restoreIsMod =
+                        String(restoreMembership?.role || '').toLowerCase() === 'moderator' ||
+                        String(gate.channel.created_by || '') === String(authUserId) ||
+                        isBroadChatAdmin(authRole) ||
+                        isHuddleSessionModerator(stageForRestore.roles, authUserId);
+                    if (!huddleMicAllowed({ stage: stageForRestore.stage, userId: authUserId, isModerator: restoreIsMod })) {
+                        return res.status(403).json({
+                            ok: false,
+                            code: 'HUDDLE_MIC_LOCKED',
+                            error: 'Mics are locked. Raise your hand and a moderator will let you speak.',
+                        });
+                    }
                 }
                 try {
                     const result = await restoreOwnMicrophonePublish(lk, cid, authUserId);
@@ -9411,7 +9583,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }

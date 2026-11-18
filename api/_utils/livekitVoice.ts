@@ -4,6 +4,7 @@
  */
 import { AccessToken, RoomServiceClient, TrackSource } from 'livekit-server-sdk';
 import { buildLowerHandMetadata } from './voiceHandRaise.js';
+import { buildHuddleStageMetadata, parseHuddleStage, type HuddleStage } from './huddleStage.js';
 import {
   applyHuddleModAction,
   buildHuddleRoomRolesMetadata,
@@ -79,6 +80,11 @@ export type VoiceTokenClaimsInput = {
    * Defaults to canModerate when omitted (legacy).
    */
   roomAdmin?: boolean;
+  /**
+   * False when the moderators locked mics (#8): the member joins without
+   * microphone permission and raises a hand to be allowed. Default true.
+   */
+  allowMicrophone?: boolean;
   ttlSeconds?: number;
 };
 
@@ -114,6 +120,8 @@ export function planVoiceAccessToken(input: VoiceTokenClaimsInput): VoiceTokenPl
   const roomAdmin = input.roomAdmin !== undefined ? Boolean(input.roomAdmin) : Boolean(input.canModerate);
   // Screen sharing is for moderators and up: channel moderators/creator, church leaders, huddle host/co-hosts.
   const canScreenShare = Boolean(input.canModerate) || roomAdmin;
+  const allowMicrophone = input.allowMicrophone !== false || canScreenShare;
+  const restrictSources = !canScreenShare || !allowMicrophone;
   return {
     identity: userId,
     name: String(input.displayName || '').trim() || 'Member',
@@ -123,7 +131,7 @@ export function planVoiceAccessToken(input: VoiceTokenClaimsInput): VoiceTokenPl
       roomJoin: true,
       room: roomName,
       canPublish: true,
-      ...(canScreenShare ? {} : { canPublishSources: huddlePublishSources(true, false) }),
+      ...(restrictSources ? { canPublishSources: huddlePublishSources(allowMicrophone, canScreenShare) } : {}),
       canSubscribe: true,
       canPublishData: true,
       canUpdateOwnMetadata: true,
@@ -955,3 +963,152 @@ export async function applyVoiceHuddleModAction(
 }
 
 export type { HuddleRoomRoles, HuddleModAction };
+
+
+/* ------------------------------------------------------------------ */
+/* Phase 2 moderator tools (Nov 2026): mic lock, lower all hands,      */
+/* allow-to-speak, Bible readers, remove / block.                      */
+/* ------------------------------------------------------------------ */
+
+function isNotFoundError(err: any): boolean {
+  const msg = String(err?.message || err || '').toLowerCase();
+  return msg.includes('not found') || msg.includes('does not exist') || err?.status === 404;
+}
+
+/** Stage rules (mic lock, readers, blocked) for the live room. Empty when no room. */
+export async function readHuddleStage(
+  config: LiveKitServerConfig,
+  channelId: string
+): Promise<{ stage: HuddleStage; roles: HuddleRoomRoles; metadata: string; roomExists: boolean }> {
+  const current = await readHuddleRoomRoles(config, channelId);
+  return {
+    stage: parseHuddleStage(current.metadata),
+    roles: current.roles,
+    metadata: current.metadata,
+    roomExists: current.roomExists,
+  };
+}
+
+export async function writeHuddleStage(
+  config: LiveKitServerConfig,
+  channelId: string,
+  stage: HuddleStage,
+  existingMetadata: string
+): Promise<HuddleStage> {
+  const roomName = voiceRoomNameForChannel(channelId);
+  const metadata = buildHuddleStageMetadata(existingMetadata, stage);
+  await roomServiceClient(config).updateRoomMetadata(roomName, metadata);
+  return parseHuddleStage(metadata);
+}
+
+/**
+ * Give or take a member's microphone permission.
+ * Taking it also silences any open mic. Giving it back does NOT open their mic —
+ * they unmute themselves when ready.
+ */
+export async function setParticipantMicrophoneAllowed(
+  config: LiveKitServerConfig,
+  channelId: string,
+  targetIdentity: string,
+  allow: boolean
+): Promise<{ participantFound: boolean }> {
+  const identity = String(targetIdentity || '').trim();
+  if (!identity) throw new Error('targetIdentity is required');
+  const roomName = voiceRoomNameForChannel(channelId);
+  const svc = roomServiceClient(config);
+  let participant: Awaited<ReturnType<RoomServiceClient['getParticipant']>> | null = null;
+  try {
+    participant = await svc.getParticipant(roomName, identity);
+  } catch (err: any) {
+    if (!isNotFoundError(err)) throw err;
+    return { participantFound: false };
+  }
+  if (!allow) {
+    for (const sid of selectMicrophoneTrackSids(participant?.tracks)) {
+      try {
+        await svc.mutePublishedTrack(roomName, identity, sid, true);
+      } catch {
+        /* track may be gone */
+      }
+    }
+  }
+  await setMicrophonePublishAllowed(svc, roomName, identity, participant, allow);
+  return { participantFound: true };
+}
+
+/**
+ * Lock or unlock everyone's mic at once. People in `exemptIds` (host, co-hosts,
+ * channel moderators, Bible readers) keep their mic.
+ */
+export async function applyHuddleMicLock(
+  config: LiveKitServerConfig,
+  channelId: string,
+  locked: boolean,
+  exemptIds: Set<string>
+): Promise<{ changed: number }> {
+  const roomName = voiceRoomNameForChannel(channelId);
+  const svc = roomServiceClient(config);
+  const participants = await svc.listParticipants(roomName).catch(() => []);
+  let changed = 0;
+  for (const p of participants || []) {
+    const identity = String(p?.identity || '');
+    if (!identity || identity.startsWith('plcc-sanctum-bridge') || exemptIds.has(identity)) continue;
+    try {
+      if (locked) {
+        for (const sid of selectMicrophoneTrackSids(p?.tracks)) {
+          await svc.mutePublishedTrack(roomName, identity, sid, true).catch(() => undefined);
+        }
+      }
+      await setMicrophonePublishAllowed(svc, roomName, identity, p, !locked);
+      changed += 1;
+    } catch (err: any) {
+      console.warn('[huddle mic lock]', identity, err?.message || err);
+    }
+  }
+  return { changed };
+}
+
+/** Lower every raised hand in the room (#7). */
+export async function lowerAllHuddleHands(
+  config: LiveKitServerConfig,
+  channelId: string
+): Promise<{ lowered: number }> {
+  const roomName = voiceRoomNameForChannel(channelId);
+  const svc = roomServiceClient(config);
+  const participants = await svc.listParticipants(roomName).catch(() => []);
+  let lowered = 0;
+  for (const p of participants || []) {
+    const meta = String(p?.metadata || '');
+    let raised = false;
+    try {
+      raised = Boolean(JSON.parse(meta || '{}')?.handRaised);
+    } catch {
+      raised = false;
+    }
+    if (!raised) continue;
+    try {
+      await svc.updateParticipant(roomName, String(p.identity), { metadata: buildLowerHandMetadata(meta) });
+      lowered += 1;
+    } catch (err: any) {
+      if (!isNotFoundError(err)) console.warn('[huddle lower all]', err?.message || err);
+    }
+  }
+  return { lowered };
+}
+
+/** Take someone out of the live Ka Link (#16). */
+export async function removeHuddleParticipant(
+  config: LiveKitServerConfig,
+  channelId: string,
+  targetIdentity: string
+): Promise<{ removed: boolean }> {
+  const identity = String(targetIdentity || '').trim();
+  if (!identity) throw new Error('targetIdentity is required');
+  try {
+    await roomServiceClient(config).removeParticipant(voiceRoomNameForChannel(channelId), identity);
+    return { removed: true };
+  } catch (err: any) {
+    if (isNotFoundError(err)) return { removed: false };
+    throw err;
+  }
+}

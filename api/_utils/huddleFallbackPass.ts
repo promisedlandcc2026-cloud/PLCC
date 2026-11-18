@@ -11,8 +11,10 @@ import {
   getLiveKitServerConfig,
   mintLiveKitAccessToken,
   resolveVoiceCanModerate,
+  readHuddleStage,
 } from './livekitVoice.js';
 import { decideHuddleEntry, readHuddleIsLive } from './huddleStartPolicy.js';
+import { huddleMicAllowed, huddleUserBlocked } from './huddleStage.js';
 
 export const HUDDLE_FALLBACK_TTL_SECONDS = 12 * 60 * 60;
 
@@ -125,6 +127,11 @@ export async function handleVoiceTokenFallback(req: any, res: any) {
 
   try {
     await ensureVoiceRoom(lk, channelId);
+    // Same Phase 2 rules as the normal path: blocked stay out, mic lock applies.
+    const stageNow = await readHuddleStage(lk, channelId).catch(() => null);
+    if (stageNow && huddleUserBlocked(stageNow.stage, claims.userId)) {
+      return res.status(403).json({ ok: false, code: 'HUDDLE_BLOCKED', error: 'A moderator removed you from this Ka Link.' });
+    }
     let session = await resolveVoiceCanModerate(lk, channelId, claims.userId, claims.channelCanModerate);
     if (!session.roles.hostId) {
       const claimed = await applyVoiceHuddleModAction(lk, {
@@ -144,6 +151,9 @@ export async function handleVoiceTokenFallback(req: any, res: any) {
       channelId,
       canModerate,
       roomAdmin: isHuddleSessionModerator(session.roles, claims.userId),
+      allowMicrophone: stageNow
+        ? huddleMicAllowed({ stage: stageNow.stage, userId: claims.userId, isModerator: canModerate })
+        : true,
     });
     return res.status(200).json({
       ok: true,
