@@ -102,6 +102,7 @@ import VaultRepairPage from './pages/admin/VaultRepair';
 import KaLinkTeamPage from './pages/admin/KaLinkTeam';
 import SignInProblemsPage from './pages/admin/SignInProblems';
 import KaLinkMusicPage from './pages/admin/KaLinkMusic';
+import { PrivacyPage, TermsPage } from './pages/legal/LegalPage';
 import OrganizationSettingsPage from './pages/admin/OrganizationSettings';
 import ReportsLibraryPage from './pages/admin/Reports';
 import AuditLogPage from './pages/admin/AuditLog';
@@ -624,6 +625,8 @@ const App: React.FC = () => {
         <Routes>
           {/* Authentication & Public */}
           <Route path="/login" element={<LoginPortal />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/family/huddle/join" element={<FamilyHuddleJoinPage />} />
           <Route path="/help/member-setup" element={<MemberSetupGuide />} />
           <Route path="/help/how-to-videos" element={<ProtectedRoute><AppShell><HowToVideosPage /></AppShell></ProtectedRoute>} />

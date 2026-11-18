@@ -59,8 +59,8 @@ const SMS_SIGNIN_ENABLED = import.meta.env.VITE_SMS_SIGNIN_ENABLED === 'true';
 /** Must match the opt-in shown at sanctum-live-nine.vercel.app/sms (carrier review). */
 const SMS_CONSENT_TEXT =
   'I agree to receive one-time sign-in codes by text message from Promised Land Christian Center (PLCC Canaan) at the mobile number above. Message frequency varies (one text per sign-in request). Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of membership.';
-const SMS_TERMS_URL = 'https://sanctum-live-nine.vercel.app/terms';
-const SMS_PRIVACY_URL = 'https://sanctum-live-nine.vercel.app/privacy';
+const SMS_TERMS_URL = '#/terms';
+const SMS_PRIVACY_URL = '#/privacy';
 type AuthMode = 'login' | 'signup';
 type PortalView = 'choose' | 'member';
 
@@ -1081,7 +1081,10 @@ const LoginPortal: React.FC = () => {
                       className="w-4 h-4 mt-0.5 rounded border-white/10 bg-white/5 text-gold focus:ring-gold"
                     />
                     <span className="text-[10px] font-bold text-white/40 leading-relaxed group-hover:text-white/60 transition-colors">
-                      I agree to the <span className="text-gold underline">Terms of Service</span> and <span className="text-gold underline">Privacy Policy</span>.
+                      I agree to the{' '}
+                      <a href="#/terms" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gold underline underline-offset-2 hover:text-white">Terms of Service</a>
+                      {' '}and{' '}
+                      <a href="#/privacy" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-gold underline underline-offset-2 hover:text-white">Privacy Policy</a>.
                     </span>
                   </label>
                 </div>
