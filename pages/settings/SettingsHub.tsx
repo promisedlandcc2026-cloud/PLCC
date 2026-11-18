@@ -46,7 +46,7 @@ const ALL_ITEMS: Record<string, SettingsNavItem> = {
     events: { id: 'events', label: 'Events & Check-In', icon: Calendar, description: 'Check-in rules and label printer' },
     integrations: { id: 'integrations', label: 'Integrations', icon: Share2, description: 'Stripe, Planning Center and app connections' },
     system: { id: 'system', label: 'Preferences', icon: Settings, description: 'Church-wide look, seasonal theme and feature switches' },
-    'staff-roles': { id: 'staff-roles', label: 'Staff & Roles', icon: ShieldCheck, description: "Change a person's role without resetting their password" },
+    'staff-roles': { id: 'staff-roles', label: 'Staff & Roles', icon: ShieldCheck, description: "Change a person's role, or reset their password" },
     'security-log': { id: 'security-log', label: 'Security Log', icon: Shield, description: 'Security officer reports and shift activity' },
     audit: { id: 'audit', label: 'Audit Log', icon: ClipboardList, description: 'Who changed what across PLCC Canaan' },
 };

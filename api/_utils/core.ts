@@ -712,6 +712,27 @@ const handleUsers = async (req: any, res: any) => {
     const isAdmin = effectiveRole && ['SUPER_ADMIN', 'PASTOR', 'ADMIN_STAFF', 'ADMIN', 'SECRETARY', 'ASST_SECRETARY', 'FIRST_LADY', 'FINANCE'].includes(effectiveRole);
     const isSuperAdmin = effectiveRole === 'SUPER_ADMIN';
 
+    // Staff & Roles → Reset password (Super Admin only). Sets a new temporary password the admin
+    // passes on to the person (e.g. a member locked out of phone sign-in). Never logged.
+    if (req.method === 'POST' && String(req.query?.subResource || '') === 'reset-password') {
+        if (!user || !isSuperAdmin) return res.status(403).json({ error: 'Only Super Admins can reset passwords.' });
+        const targetId = String(req.body?.id || '').trim();
+        if (!/^[0-9a-f-]{36}$/i.test(targetId)) return res.status(400).json({ error: 'Choose a person first.' });
+        if (targetId === user.id) return res.status(400).json({ error: 'Change your own password from your profile instead.' });
+        const { data: target } = await supabaseAdmin.from('users').select('id, name, email, phone').eq('id', targetId).maybeSingle();
+        if (!target) return res.status(404).json({ error: 'That person was not found.' });
+        const { generateTemporaryPassword } = await import('./tempPassword.js');
+        const temporaryPassword = generateTemporaryPassword();
+        const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(targetId, { password: temporaryPassword });
+        if (pwError) {
+            console.error('[users] reset-password failed:', pwError.message);
+            return res.status(502).json({ error: 'Could not reset the password. Try again.' });
+        }
+        const logAudit = await getAudit();
+        await logAudit({ action: 'Password Reset', details: { target: target.name || target.id }, resourceType: 'user', resourceId: targetId, severity: 'critical', req });
+        return res.status(200).json({ ok: true, temporaryPassword });
+    }
+
     if (req.method === 'GET') {
         // Check if this is a self-profile request (used during login)
         const selfOnly = req.query?.self === 'true';

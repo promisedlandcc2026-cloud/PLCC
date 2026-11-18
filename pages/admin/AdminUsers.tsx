@@ -8,6 +8,8 @@ import {
   ArrowLeft,
   Loader2,
   Wrench,
+  KeyRound,
+  Copy,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../../App';
@@ -104,6 +106,10 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
   const [newUserTitle, setNewUserTitle] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState('MEMBER');
+  const [resetTarget, setResetTarget] = useState<any | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const [resetResult, setResetResult] = useState<{ name: string; contact: string; phoneSignIn: boolean; password: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!isSuperAdmin) {
@@ -151,6 +157,42 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
       setSavingId(null);
     }
   };
+
+  const handleResetPassword = async () => {
+    const u = resetTarget;
+    if (!u || !isSuperAdmin) return;
+    setResetting(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch('/api/vault?resource=users&subResource=reset-password', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: u.id }),
+      });
+      const data = await parseApiJson<{ ok?: boolean; error?: string; temporaryPassword?: string }>(res);
+      if (!res.ok || !data.temporaryPassword) throw new Error(data.error || 'Could not reset the password');
+      setResetResult({
+        name: u.name || 'this person',
+        contact: formatAccountContact(u.email, u.phone) || u.email,
+        phoneSignIn: isPhonePlaceholderEmail(u.email),
+        password: data.temporaryPassword,
+      });
+      setCopied(false);
+      setResetTarget(null);
+    } catch (err: any) {
+      setError(err?.message || 'Could not reset the password');
+      setResetTarget(null);
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const resetMessage = (r: { name: string; contact: string; phoneSignIn: boolean; password: string }) =>
+    `Hi ${r.name.split(' ')[0]}, your PLCC sign-in has been reset. ` +
+    (r.phoneSignIn ? `Choose Phone, enter ${r.contact}` : `Sign in with ${r.contact}`) +
+    ` and use this temporary password: ${r.password}. Please keep it private.`;
 
   const handleInviteUser = async () => {
     if (!newUserEmail || !newUserFirstName || !newUserPassword) {
@@ -522,6 +564,17 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
                   {savingId === u.id ? (
                     <Loader2 size={16} className="animate-spin text-burgundy" />
                   ) : null}
+                  {u.id !== userId ? (
+                    <button
+                      type="button"
+                      onClick={() => setResetTarget(u)}
+                      className="min-h-[40px] px-3 rounded-xl border border-gray-200 bg-white text-xs font-bold text-[#0d1a14] hover:border-burgundy inline-flex items-center gap-1.5"
+                      aria-label={`Reset password for ${u.name || formatAccountContact(u.email, u.phone) || u.email}`}
+                      data-testid="staff-reset-password"
+                    >
+                      <KeyRound size={14} aria-hidden /> Reset password
+                    </button>
+                  ) : null}
                   <select
                     value={u.role || 'MEMBER'}
                     disabled={savingId === u.id}
@@ -548,6 +601,57 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
           </div>
         )}
       </div>
+      {resetTarget ? (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Reset password">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+            <h2 className="text-xl font-bold text-[#0d1a14]">Reset password?</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              {resetTarget.name || 'This person'} ({formatAccountContact(resetTarget.email, resetTarget.phone) || resetTarget.email}) gets a new
+              temporary password. Their old password stops working. You will see the new one once, to send to them.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setResetTarget(null)} disabled={resetting} className="min-h-[44px] px-4 rounded-xl font-bold text-gray-600">
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleResetPassword()}
+                disabled={resetting}
+                className="min-h-[44px] px-4 rounded-xl bg-[#0d1a14] text-[#f1d58a] font-bold inline-flex items-center gap-2 disabled:opacity-60"
+              >
+                {resetting ? <Loader2 size={16} className="animate-spin" /> : <KeyRound size={16} />} Reset password
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {resetResult ? (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="New temporary password">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+            <h2 className="text-xl font-bold text-[#0d1a14]">New temporary password</h2>
+            <p className="mt-1 text-sm text-gray-600">For {resetResult.name}. It is shown only now.</p>
+            <p className="mt-4 text-center text-3xl font-black tracking-wider text-[#0d1a14] select-all" data-testid="staff-temp-password">
+              {resetResult.password}
+            </p>
+            <p className="mt-4 text-xs font-bold uppercase tracking-wide text-gray-400">Message to send them</p>
+            <p className="mt-1 rounded-xl bg-[#FAFAF8] p-3 text-sm text-[#0d1a14]">{resetMessage(resetResult)}</p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  void navigator.clipboard?.writeText(resetMessage(resetResult)).then(() => setCopied(true)).catch(() => {});
+                }}
+                className="min-h-[44px] px-4 rounded-xl border border-gray-200 font-bold text-[#0d1a14] inline-flex items-center gap-2"
+              >
+                <Copy size={16} /> {copied ? 'Copied' : 'Copy message'}
+              </button>
+              <button type="button" onClick={() => setResetResult(null)} className="min-h-[44px] px-4 rounded-xl bg-[#0d1a14] text-[#f1d58a] font-bold">
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
