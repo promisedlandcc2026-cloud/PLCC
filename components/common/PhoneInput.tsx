@@ -18,6 +18,9 @@ const PREFERRED: CountryCode[] = ['UG', 'KE', 'TZ', 'RW', 'SS', 'CD', 'BI', 'US'
 
 type Country = { code: CountryCode; name: string; dial: string; flag: string };
 
+/** Dark text on white for the open country list, whatever screen it sits on. */
+const OPTION_STYLE: React.CSSProperties = { color: '#111827', backgroundColor: '#ffffff' };
+
 function flagOf(code: string): string {
   return code
     .toUpperCase()
@@ -161,18 +164,21 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
             setCountry(next);
             emit(local, next);
           }}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          // The list opens in the browser's own (light) menu: never inherit a dark
+          // card's white text, or the country names are white on white.
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer bg-white text-gray-900"
+          style={{ colorScheme: 'light' }}
         >
-          <optgroup label="Common">
+          <optgroup label="Common" style={OPTION_STYLE}>
             {preferred.map((c) => (
-              <option key={c.code} value={c.code}>
+              <option key={c.code} value={c.code} style={OPTION_STYLE}>
                 {c.flag} {c.name} ({c.dial})
               </option>
             ))}
           </optgroup>
-          <optgroup label="All countries">
+          <optgroup label="All countries" style={OPTION_STYLE}>
             {others.map((c) => (
-              <option key={c.code} value={c.code}>
+              <option key={c.code} value={c.code} style={OPTION_STYLE}>
                 {c.flag} {c.name} ({c.dial})
               </option>
             ))}
