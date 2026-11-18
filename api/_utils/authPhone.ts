@@ -3,6 +3,8 @@ import { ensureMemberForUser } from './ensureMemberForUser.js';
 import { getBcrypt } from './deps.js';
 
 import { formatPhoneForDisplay, isUgandanE164, toE164Intl } from './ugPhone.js';
+// Loaded only when needed: the browser bundle imports this file for phone formatting.
+import type { SignInFailureReason } from './signInFailures.js';
 /** Reserved IETF TLD — never receives mail. Internal Auth email for phone-only accounts. */
 export const PHONE_EMAIL_DOMAIN = 'phone.awcvault.invalid';
 const GENERIC_LOGIN_ERROR = 'That phone number or password is incorrect.';
@@ -198,26 +200,44 @@ export const handleAuthPhone = async (req: any, res: any) => {
   const body = req.body || {};
   const action = String(body.action || '').toLowerCase();
   const password = String(body.password || '');
+  // Phase 4 (#17): log why a sign-in failed (never the password).
+  const logFailure = async (reason: SignInFailureReason, identifier: string, detail?: string, userId?: string | null) =>
+    (await import('./signInFailures.js')).recordSignInFailure({
+      app: typeof body.client_app === 'string' ? body.client_app : 'canaan',
+      method: 'phone',
+      identifier,
+      reason,
+      detail: detail ? `${action}: ${detail}` : action,
+      userAgent: typeof body.client_ua === 'string' ? body.client_ua : String(req.headers?.['user-agent'] || ''),
+      userId: userId || null,
+      source: 'server',
+    });
   let e164 = '';
   try {
     e164 = toE164Phone(body.phone || '');
   } catch (err: any) {
+    await logFailure('invalid_phone', String(body.phone || ''));
     return res.status(400).json({ error: err.message || 'Enter a valid mobile number.' });
   }
 
   if (password.length < 6) {
+    await logFailure('short_password', e164);
     return res.status(400).json({ error: 'Password must be at least 6 characters.' });
   }
 
   const limitKey = clientKey(req, e164);
   if (rateLimited(limitKey)) {
+    await logFailure('rate_limited', e164);
     return res.status(429).json({ error: 'Too many tries. Wait a few minutes, then try again.' });
   }
 
   try {
     if (action === 'signin') {
       const emails = await findEmailsForPhone(e164);
-      if (!emails.length) return res.status(401).json({ error: GENERIC_LOGIN_ERROR });
+      if (!emails.length) {
+        await logFailure('no_account', e164);
+        return res.status(401).json({ error: GENERIC_LOGIN_ERROR });
+      }
       let lastErr: any = null;
       for (const email of emails) {
         try {
@@ -228,6 +248,15 @@ export const handleAuthPhone = async (req: any, res: any) => {
           // Wrong password for this candidate — try the next account on this number.
           if (err?.message !== GENERIC_LOGIN_ERROR) break;
         }
+      }
+      // findEmailsForPhone always adds the phone-only internal address, so check
+      // whether a real account carries this number before calling it a wrong password.
+      const { data: owner } = await supabaseAdmin.from('users').select('id').in('phone', phoneLookupValues(e164)).limit(1);
+      const ownerId = (owner && owner[0]?.id) || null;
+      if (lastErr?.message === GENERIC_LOGIN_ERROR) {
+        await logFailure(ownerId ? 'wrong_password' : 'no_account', e164, undefined, ownerId);
+      } else {
+        await logFailure('server_error', e164, String(lastErr?.message || ''), ownerId);
       }
       throw lastErr || new Error(GENERIC_LOGIN_ERROR);
     }
@@ -248,6 +277,7 @@ export const handleAuthPhone = async (req: any, res: any) => {
         .select('id, phone')
         .in('phone', phoneLookupValues(e164));
       if ((existingPhone || []).some((u: any) => samePhone(u.phone, e164))) {
+        await logFailure('account_exists', e164);
         return res.status(409).json({ error: 'An account already uses that phone number. Sign in instead.' });
       }
 
@@ -265,8 +295,10 @@ export const handleAuthPhone = async (req: any, res: any) => {
       if (createError || !created?.user) {
         const msg = createError?.message || 'Could not create your account.';
         if (/already|registered|exists/i.test(msg)) {
+          await logFailure('account_exists', e164, msg);
           return res.status(409).json({ error: 'An account already uses that email or phone. Sign in instead.' });
         }
+        await logFailure('signup_failed', e164, msg);
         return res.status(400).json({ error: msg });
       }
 

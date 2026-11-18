@@ -125,7 +125,7 @@ export function accountantRouteDecision(
   const resource = String(ctx.resource || '').toLowerCase();
   const method = String(ctx.method || 'GET').toUpperCase();
   if (resource === 'fundraisers') return 'ok';
-  if (resource === 'auth' || resource === 'auth-otp' || resource === 'auth-phone' || resource === 'auth-phone-code') return 'ok';
+  if (resource === 'auth' || resource === 'auth-otp' || resource === 'auth-phone' || resource === 'auth-phone-code' || resource === 'sign-in-failures') return 'ok';
   if (resource === 'notifications') return 'ok';
   if (resource === 'users') {
     if (method === 'GET' && ctx.selfQuery && !ctx.subResource) return 'ok';

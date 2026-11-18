@@ -14,7 +14,8 @@ import {
   BookOpen,
   Database,
   Shield,
-  Radio
+  Radio,
+  KeyRound
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,6 +38,14 @@ const MorePage: React.FC = () => {
       icon: <ShieldCheck size={28} />,
       color: 'bg-gold text-burgundy',
       shadow: 'shadow-gold/20'
+    },
+    {
+      label: 'Sign-in Problems',
+      description: 'Who can’t get in, and why',
+      path: '/admin/sign-in-problems',
+      icon: <KeyRound size={28} />,
+      color: 'bg-amber-500 text-white',
+      shadow: 'shadow-amber-500/20'
     },
     {
       label: 'Ka Link Team',

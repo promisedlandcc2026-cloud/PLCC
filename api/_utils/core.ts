@@ -9909,6 +9909,11 @@ const handleSettings = async (req: any, res: any) => {
                 const { handleAuthPhoneCode } = await import('./authPhoneCode.js');
                 return handleAuthPhoneCode(req, res);
             }
+            case 'sign-in-failures': {
+                // Phase 4 (#17): apps report sign-in problems; leaders read them.
+                const { handleSignInFailures } = await import('./signInFailures.js');
+                return handleSignInFailures(req, res);
+            }
             case 'users': return await handleUsers(req, res);
             case 'events': return await handleEvents(req, res);
             case 'organization': return await handleOrganization(req, res);
