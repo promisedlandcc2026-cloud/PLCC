@@ -15,7 +15,8 @@ import {
   Database,
   Shield,
   Radio,
-  KeyRound
+  KeyRound,
+  Music
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,6 +39,14 @@ const MorePage: React.FC = () => {
       icon: <ShieldCheck size={28} />,
       color: 'bg-gold text-burgundy',
       shadow: 'shadow-gold/20'
+    },
+    {
+      label: 'Ka Link Music',
+      description: 'Songs for waiting times & interludes',
+      path: '/admin/ka-link-music',
+      icon: <Music size={28} />,
+      color: 'bg-burgundy text-gold',
+      shadow: 'shadow-burgundy/20'
     },
     {
       label: 'Sign-in Problems',

@@ -190,7 +190,16 @@ import {
     stopKaLinkRecording,
 } from './kaLinkRecording.js';
 import {
+    KA_LINK_SONGS_BUCKET,
+    MAX_LIBRARY_SONGS,
+    cleanSongText,
+    isSongsTableMissing,
+    songStoragePath,
+    validateSongUpload,
+} from './kaLinkSongs.js';
+import {
     canManageKaLinkTeam,
+    fetchKaLinkTeamRole,
     listKaLinkTeam,
     parseKaLinkTeamRole,
     resolveKaLinkStart,
@@ -6816,6 +6825,143 @@ const handleCommunity = async (req: any, res: any) => {
                     });
                 }
             }
+            if (chatType === 'ka-link-songs') {
+                // #12 song library. Managers: Pastor / Admin / Super Admin + Ka Link team Admins.
+                const songAction = String(req.body?.action || 'list').trim().toLowerCase();
+                const isSongManager =
+                    canManageKaLinkTeam(authRole) || (await fetchKaLinkTeamRole(supabaseAdmin, authUserId)) === 'admin';
+                const songsError = (error: any) =>
+                    res.status(isSongsTableMissing(error) ? 503 : 500).json({
+                        ok: false,
+                        setupNeeded: isSongsTableMissing(error),
+                        error: isSongsTableMissing(error)
+                            ? 'Run supabase/migrations/ka_link_songs.sql in the Supabase SQL editor first.'
+                            : 'Could not load the song library.',
+                    });
+
+                if (songAction === 'list') {
+                    // Play links go to managers, or to a Ka Link moderator of the given room.
+                    let mayPlay = isSongManager;
+                    const cid = String(req.body?.channelId || '').trim();
+                    if (!mayPlay && cid) {
+                        const channel = await fetchChannel(supabaseAdmin, cid);
+                        const gate = await assertChannelAccess(channel);
+                        if (gate.ok) {
+                            const { data: m } = await supabaseAdmin
+                                .from('chat_room_members')
+                                .select('role')
+                                .eq('channel_id', cid)
+                                .eq('user_id', authUserId)
+                                .maybeSingle();
+                            const decision = decideVoiceHuddleAccess({
+                                canAccessChannel: true,
+                                visibility: normalizeVisibility(gate.channel),
+                                isChannelModerator: String(m?.role || '').toLowerCase() === 'moderator',
+                                isChannelCreator: String(gate.channel.created_by || '') === String(authUserId),
+                                isBroadAdmin: isBroadChatAdmin(authRole),
+                                allowDm: false,
+                            });
+                            const lkSongs = getLiveKitServerConfig();
+                            if (decision.ok && lkSongs) {
+                                mayPlay = (await resolveVoiceCanModerate(lkSongs, cid, authUserId, decision.canModerate)).canModerate;
+                            }
+                        }
+                    }
+                    const { data, error } = await supabaseAdmin
+                        .from('ka_link_songs')
+                        .select('id, title, artist, storage_path, duration_seconds, size_bytes, status, created_at')
+                        .eq('status', 'ready')
+                        .order('title', { ascending: true })
+                        .limit(MAX_LIBRARY_SONGS);
+                    if (error) return songsError(error);
+                    const rows = (data || []) as any[];
+                    let urls = new Map<string, string>();
+                    if (mayPlay && rows.length) {
+                        const { data: signed } = await supabaseAdmin.storage
+                            .from(KA_LINK_SONGS_BUCKET)
+                            .createSignedUrls(rows.map((r) => r.storage_path), 3 * 60 * 60);
+                        for (const s of (signed || []) as any[]) if (s?.path && s?.signedUrl) urls.set(s.path, s.signedUrl);
+                    }
+                    return res.status(200).json({
+                        ok: true,
+                        canManage: isSongManager,
+                        songs: rows.map((r) => ({
+                            id: r.id,
+                            title: r.title,
+                            artist: r.artist,
+                            durationSeconds: r.duration_seconds,
+                            sizeBytes: r.size_bytes,
+                            url: urls.get(r.storage_path) || null,
+                        })),
+                    });
+                }
+
+                if (!isSongManager) {
+                    return res.status(403).json({ ok: false, error: 'Only the Pastor, Admins and Ka Link team Admins can manage songs.' });
+                }
+
+                if (songAction === 'upload-url') {
+                    const v = validateSongUpload(req.body);
+                    if (v.ok === false) return res.status(400).json({ ok: false, error: v.error });
+                    const { count } = await supabaseAdmin.from('ka_link_songs').select('id', { count: 'exact', head: true });
+                    if ((count || 0) >= MAX_LIBRARY_SONGS) {
+                        return res.status(400).json({ ok: false, error: `The library is full (${MAX_LIBRARY_SONGS} songs). Delete some first.` });
+                    }
+                    const songId = (globalThis.crypto as any).randomUUID();
+                    const path = songStoragePath(songId, v.ext);
+                    const { error: insertError } = await supabaseAdmin.from('ka_link_songs').insert({
+                        id: songId,
+                        title: v.title,
+                        artist: v.artist,
+                        storage_path: path,
+                        mime_type: v.mime,
+                        size_bytes: v.size,
+                        status: 'uploading',
+                        uploaded_by: authUserId,
+                    });
+                    if (insertError) return songsError(insertError);
+                    const { data: up, error: upError } = await supabaseAdmin.storage.from(KA_LINK_SONGS_BUCKET).createSignedUploadUrl(path);
+                    if (upError || !up?.signedUrl) {
+                        await supabaseAdmin.from('ka_link_songs').delete().eq('id', songId);
+                        return res.status(500).json({ ok: false, error: 'Could not start the upload. Check the ka-link-songs storage bucket exists.' });
+                    }
+                    return res.status(200).json({ ok: true, songId, signedUrl: up.signedUrl });
+                }
+
+                const songId = String(req.body?.songId || '').trim();
+                if (!/^[0-9a-f-]{36}$/i.test(songId)) return res.status(400).json({ ok: false, error: 'Choose a song.' });
+                const { data: song, error: songError } = await supabaseAdmin
+                    .from('ka_link_songs')
+                    .select('id, storage_path, status')
+                    .eq('id', songId)
+                    .maybeSingle();
+                if (songError) return songsError(songError);
+                if (!song) return res.status(404).json({ ok: false, error: 'Song not found.' });
+
+                if (songAction === 'confirm') {
+                    const duration = Math.round(Number(req.body?.durationSeconds));
+                    await supabaseAdmin
+                        .from('ka_link_songs')
+                        .update({ status: 'ready', ...(Number.isFinite(duration) && duration > 0 && duration < 6 * 3600 ? { duration_seconds: duration } : {}) })
+                        .eq('id', songId);
+                    return res.status(200).json({ ok: true });
+                }
+                if (songAction === 'update') {
+                    const title = cleanSongText(req.body?.title, 120);
+                    if (!title) return res.status(400).json({ ok: false, error: 'The song needs a title.' });
+                    await supabaseAdmin
+                        .from('ka_link_songs')
+                        .update({ title, artist: cleanSongText(req.body?.artist, 120) || null })
+                        .eq('id', songId);
+                    return res.status(200).json({ ok: true });
+                }
+                if (songAction === 'delete') {
+                    await supabaseAdmin.storage.from(KA_LINK_SONGS_BUCKET).remove([String((song as any).storage_path)]).catch(() => null);
+                    await supabaseAdmin.from('ka_link_songs').delete().eq('id', songId);
+                    return res.status(200).json({ ok: true });
+                }
+                return res.status(400).json({ ok: false, error: 'Unknown song action' });
+            }
             if (chatType === 'voice-recording') {
                 // #14 Ka Link recordings: moderators start/stop; room members list and play.
                 const cid = String(req.body?.channelId || '').trim();
@@ -9873,7 +10019,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }
