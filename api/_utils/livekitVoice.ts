@@ -23,7 +23,12 @@ export const VOICE_TOKEN_TTL_SECONDS = 6 * 60 * 60;
 /** Keep the room alive through brief ICE renegotiation when someone joins. */
 export const VOICE_ROOM_EMPTY_TIMEOUT_SECONDS = 60 * 30; // 30 minutes
 export const VOICE_ROOM_DEPARTURE_TIMEOUT_SECONDS = 30;
-export const VOICE_ROOM_MAX_PARTICIPANTS = 50;
+/** Seats for members. When these are taken, members are offered PLCC Sanctum's overflow room. */
+export const VOICE_ROOM_MEMBER_SEATS = 50;
+/** Extra seats kept for the Ka Link team and room moderators (Phase 3: Pr. Grace, altar leaders). */
+export const VOICE_ROOM_RESERVED_SEATS = 10;
+/** LiveKit's hard cap per room = member seats + reserved seats. */
+export const VOICE_ROOM_MAX_PARTICIPANTS = VOICE_ROOM_MEMBER_SEATS + VOICE_ROOM_RESERVED_SEATS;
 
 /** PLCC Sanctum's hidden overflow relay joins as `plcc-sanctum-bridge-…`; it is not a person. */
 export function countPeople(participants: unknown): number {
@@ -85,6 +90,8 @@ export type VoiceTokenClaimsInput = {
    * microphone permission and raises a hand to be allowed. Default true.
    */
   allowMicrophone?: boolean;
+  /** Ka Link team role (display + "I'm ready" button). Not a permission. */
+  kaLinkTeam?: 'admin' | 'leader' | null;
   ttlSeconds?: number;
 };
 
@@ -150,7 +157,10 @@ export async function mintLiveKitAccessToken(
     name: plan.name,
     ttl: plan.ttlSeconds,
     // Shown in the room (gold "Moderator" badge). Display only — permissions stay in the grant.
-    attributes: { 'plcc.role': plan.grant.roomAdmin || input.canModerate ? 'moderator' : 'member' },
+    attributes: {
+      'plcc.role': plan.grant.roomAdmin || input.canModerate ? 'moderator' : 'member',
+      ...(input.kaLinkTeam ? { 'plcc.team': input.kaLinkTeam } : {}),
+    },
   });
   at.addGrant(plan.grant);
   const token = await at.toJwt();
@@ -170,9 +180,11 @@ export async function mintLiveKitAccessToken(
 export async function isVoiceRoomFull(
   config: LiveKitServerConfig,
   channelId: string,
-  joiningIdentity: string
+  joiningIdentity: string,
+  opts: { priority?: boolean } = {}
 ): Promise<{ full: boolean; seated: number; capacity: number }> {
-  const capacity = VOICE_ROOM_MAX_PARTICIPANTS;
+  // Members fill the member seats; the team and moderators may also use the reserved seats.
+  const capacity = opts.priority ? VOICE_ROOM_MAX_PARTICIPANTS : VOICE_ROOM_MEMBER_SEATS;
   const host = config.url.replace(/^ws/i, 'http');
   const svc = new RoomServiceClient(host, config.apiKey, config.apiSecret);
   try {

@@ -13,7 +13,8 @@ import {
   ShieldAlert,
   BookOpen,
   Database,
-  Shield
+  Shield,
+  Radio
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,6 +37,14 @@ const MorePage: React.FC = () => {
       icon: <ShieldCheck size={28} />,
       color: 'bg-gold text-burgundy',
       shadow: 'shadow-gold/20'
+    },
+    {
+      label: 'Ka Link Team',
+      description: 'Who starts prayer rooms & who skips overflow',
+      path: '/admin/ka-link-team',
+      icon: <Radio size={28} />,
+      color: 'bg-emerald-600 text-white',
+      shadow: 'shadow-emerald-600/20'
     },
     { 
       label: 'Consent Forms', 

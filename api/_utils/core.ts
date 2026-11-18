@@ -180,6 +180,12 @@ import {
     getHuddleAttendanceForChannel,
 } from './huddleAttendance.js';
 import { isHuddleSessionModerator, parseHuddleModAction } from './huddleModeration.js';
+import {
+    canManageKaLinkTeam,
+    listKaLinkTeam,
+    parseKaLinkTeamRole,
+    resolveKaLinkStart,
+} from './kaLinkTeam.js';
 import { handleVoiceTokenFallback, signHuddleFallbackPass } from './huddleFallbackPass.js';
 import { DailyApiError, countDailyRoomParticipantsForChannels, getDailyApiKey, mintDailyMeetingToken } from './dailyVoice.js';
 import { claimHuddleProvider, mergeDailyIntoHuddleStatuses, resolveHuddleProvider } from './huddleProvider.js';
@@ -6037,6 +6043,15 @@ const handleCommunity = async (req: any, res: any) => {
                     role: authRole,
                     membershipRole: membership?.role ?? null,
                 });
+                // Phase 3 (#10): prayer rooms are started by the Ka Link admin team only.
+                const kaStart = await resolveKaLinkStart({
+                    supabase: supabaseAdmin,
+                    channelName: gate.channel.name,
+                    userId: authUserId,
+                    role: authRole,
+                    existingCanStart: startPerm.canStart,
+                });
+                startPerm.canStart = kaStart.canStart;
                 const entry = decideHuddleEntry({
                     isLive: await readHuddleIsLive(cid),
                     canStart: startPerm.canStart,
@@ -6064,7 +6079,10 @@ const handleCommunity = async (req: any, res: any) => {
 
                     // Room at its 50-seat cap: say so plainly so Ka Link can offer PLCC Sanctum's
                     // overflow room instead of a failed connection.
-                    const seats = await isVoiceRoomFull(lk, cid, authUserId);
+                    // Phase 3 (#19, #20): the Ka Link team and room moderators get a reserved
+                    // seat, so leaders like Pr. Grace are never sent to the overflow room.
+                    const prioritySeat = Boolean(kaStart.teamRole) || voiceDecision.canModerate;
+                    const seats = await isVoiceRoomFull(lk, cid, authUserId, { priority: prioritySeat });
                     if (seats.full) {
                         return res.status(409).json({
                             ok: false,
@@ -6123,6 +6141,7 @@ const handleCommunity = async (req: any, res: any) => {
                         canModerate,
                         roomAdmin,
                         allowMicrophone,
+                        kaLinkTeam: kaStart.teamRole,
                     });
                     if (entry.mode === 'start') {
                         await logHuddleAudit({
@@ -6340,7 +6359,15 @@ const handleCommunity = async (req: any, res: any) => {
                     userId: authUserId,
                     role: authRole,
                 });
-                return res.status(200).json({ ok: true, channelId: cid, canStart: perm.canStart });
+                // Phase 3 (#10): prayer rooms are started by the Ka Link admin team only.
+                const kaStart = await resolveKaLinkStart({
+                    supabase: supabaseAdmin,
+                    channelName: gate.channel.name,
+                    userId: authUserId,
+                    role: authRole,
+                    existingCanStart: perm.canStart,
+                });
+                return res.status(200).json({ ok: true, channelId: cid, canStart: kaStart.canStart });
             }
             if (chatType === 'voice-huddle-provider' || chatType === 'voice-daily-token') {
                 const cid = String(
@@ -6390,9 +6417,16 @@ const handleCommunity = async (req: any, res: any) => {
                     userId: authUserId,
                     role: authRole,
                 });
+                const lineKaStart = await resolveKaLinkStart({
+                    supabase: supabaseAdmin,
+                    channelName: gate.channel.name,
+                    userId: authUserId,
+                    role: authRole,
+                    existingCanStart: lineStartPerm.canStart,
+                });
                 const lineEntry = decideHuddleEntry({
                     isLive: await readHuddleIsLive(cid),
-                    canStart: lineStartPerm.canStart,
+                    canStart: lineKaStart.canStart,
                 });
                 if (lineEntry.ok === false) {
                     if (lineEntry.code === HUDDLE_START_FORBIDDEN_CODE) {
@@ -6772,6 +6806,53 @@ const handleCommunity = async (req: any, res: any) => {
                         error: 'Could not mute participant',
                     });
                 }
+            }
+            if (chatType === 'ka-link-team') {
+                // Phase 3: Pastor / Admin / Super Admin manage the Ka Link team in Canaan.
+                if (!canManageKaLinkTeam(authRole)) {
+                    return res.status(403).json({ ok: false, error: 'Only the Pastor, Admins and Super Admins can manage the Ka Link team.' });
+                }
+                const teamAction = String(req.body?.action || 'list').trim().toLowerCase();
+                if (teamAction === 'add' || teamAction === 'remove') {
+                    const targetUserId = String(req.body?.userId || '').trim();
+                    if (!/^[0-9a-f-]{36}$/i.test(targetUserId)) {
+                        return res.status(400).json({ ok: false, error: 'Choose a person first.' });
+                    }
+                    if (teamAction === 'add') {
+                        const teamRole = parseKaLinkTeamRole(req.body?.teamRole);
+                        if (!teamRole) return res.status(400).json({ ok: false, error: 'Choose Admin or Leader.' });
+                        const { data: target } = await supabaseAdmin.from('users').select('id').eq('id', targetUserId).maybeSingle();
+                        if (!target) return res.status(404).json({ ok: false, error: 'That person was not found.' });
+                        const { error } = await supabaseAdmin
+                            .from('ka_link_team')
+                            .upsert({ user_id: targetUserId, team_role: teamRole, added_by: authUserId }, { onConflict: 'user_id' });
+                        if (error) {
+                            return res.status(/ka_link_team|42P01|does not exist/i.test(String(error.message || error.code)) ? 503 : 500).json({
+                                ok: false,
+                                error: /ka_link_team|42P01|does not exist/i.test(String(error.message || error.code))
+                                    ? 'Run supabase/migrations/ka_link_team.sql in the Supabase SQL editor first.'
+                                    : 'Could not save the Ka Link team.',
+                            });
+                        }
+                    } else {
+                        const { error } = await supabaseAdmin.from('ka_link_team').delete().eq('user_id', targetUserId);
+                        if (error) return res.status(500).json({ ok: false, error: 'Could not update the Ka Link team.' });
+                    }
+                    const logAudit = await getAudit();
+                    await logAudit({
+                        userId: authUserId,
+                        action: teamAction === 'add' ? 'Ka Link team member added' : 'Ka Link team member removed',
+                        details: { targetUserId, teamRole: req.body?.teamRole ?? null },
+                        resourceType: 'ka_link_team',
+                        resourceId: targetUserId,
+                        req,
+                    });
+                }
+                const listed = await listKaLinkTeam(supabaseAdmin);
+                if (listed.ok === false) {
+                    return res.status(listed.setupNeeded ? 503 : 500).json({ ok: false, setupNeeded: listed.setupNeeded, error: listed.error });
+                }
+                return res.status(200).json({ ok: true, members: listed.members });
             }
             if (chatType === 'voice-huddle-stage') {
                 // Phase 2 moderator tools: mic lock, lower all hands, allow-to-speak,
@@ -9583,7 +9664,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }

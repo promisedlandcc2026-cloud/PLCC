@@ -1,11 +1,11 @@
 import { getSupabaseAdmin } from './auth.js';
 import { normalizeVisibility } from './communityChatSecurity.js';
-import { getLiveKitServerConfig, listVoiceHuddleStatusesForChannels, VOICE_ROOM_MAX_PARTICIPANTS } from './livekitVoice.js';
+import { getLiveKitServerConfig, listVoiceHuddleStatusesForChannels, VOICE_ROOM_MEMBER_SEATS } from './livekitVoice.js';
 import { countDailyRoomParticipantsForChannels, getDailyApiKey } from './dailyVoice.js';
 import { mergeDailyIntoHuddleStatuses } from './huddleProvider.js';
 import { timingSafeEqual } from 'node:crypto';
 
-const ROOM_CAPACITY = VOICE_ROOM_MAX_PARTICIPANTS;
+const ROOM_CAPACITY = VOICE_ROOM_MEMBER_SEATS;
 
 /**
  * PLCC Sanctum's server sends this key (env SANCTUM_SERVICE_KEY, same value on both sides)

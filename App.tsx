@@ -99,6 +99,7 @@ import GalleryPage from './pages/community/Gallery';
 import CommunityVoicesPage from './pages/community/CommunityVoices';
 import AdminUsersPage from './pages/admin/AdminUsers';
 import VaultRepairPage from './pages/admin/VaultRepair';
+import KaLinkTeamPage from './pages/admin/KaLinkTeam';
 import OrganizationSettingsPage from './pages/admin/OrganizationSettings';
 import ReportsLibraryPage from './pages/admin/Reports';
 import AuditLogPage from './pages/admin/AuditLog';
@@ -764,6 +765,7 @@ const App: React.FC = () => {
           {/* Administrative Settings */}
           <Route path="/admin/users" element={<ProtectedRoute><AppShell><AdminUsersPage /></AppShell></ProtectedRoute>} />
           <Route path="/admin/vault-repair" element={<ProtectedRoute><AppShell><VaultRepairPage /></AppShell></ProtectedRoute>} />
+          <Route path="/admin/ka-link-team" element={<ProtectedRoute><AppShell><KaLinkTeamPage /></AppShell></ProtectedRoute>} />
           <Route path="/admin/policies" element={<ProtectedRoute><AppShell><PoliciesPage /></AppShell></ProtectedRoute>} />
           <Route path="/admin/servant-keeper" element={<ProtectedRoute><AppShell><ServantKeeperIntegration /></AppShell></ProtectedRoute>} />
           <Route path="/admin/consent-management" element={<ProtectedRoute><AppShell><ConsentManagement /></AppShell></ProtectedRoute>} />
