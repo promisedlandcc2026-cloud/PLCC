@@ -68,7 +68,7 @@ import { handleFinance } from '../_handlers/finance.js';
 import { handleGiving } from '../_handlers/giving.js';
 import { handleStoreOrders } from '../_handlers/storeOrders.js';
 import { handleAskAdmin } from '../_handlers/askAdmin.js';
-import { handleReport } from '../_handlers/report.js';
+import { handleReport, sendChatReport } from '../_handlers/report.js';
 import { parseCookoutFoodContribution, parseRsvpContribution } from './cookoutFoodContribution.js';
 import {
     closedMessageForEvent,
@@ -213,8 +213,14 @@ import {
     cleanSearchQuery,
     decideCanPost,
     isAnnounceOnly,
+    BLOCKED_BY_ME_ERROR,
+    BLOCKED_ME_ERROR,
     clearDmForUser,
+    dmPartnerOf,
     filterClearedMessages,
+    getBlockStatus,
+    listBlockedIds,
+    setUserBlocked,
     isDmHiddenByClear,
     listArchivedChats,
     listDmClears,
@@ -4872,6 +4878,7 @@ const handleCommunity = async (req: any, res: any) => {
                 const last = new Map<string, { content: string; created_at: string }>();
                 for (const m of recent || []) if (!last.has(String(m.channel_id))) last.set(String(m.channel_id), m as any);
                 const clears = await listDmClears(supabaseAdmin, authUserId, ids);
+                const iBlocked = await listBlockedIds(supabaseAdmin, authUserId);
                 const conversations = dmRows
                     .map((c: any) => {
                         const partnerId = partnerOf(String(c.name));
@@ -4880,6 +4887,7 @@ const handleCommunity = async (req: any, res: any) => {
                             channelId: String(c.id),
                             partnerId,
                             partnerName: names.get(partnerId) || 'Member',
+                            blocked: iBlocked.has(partnerId),
                             lastMessageAt: lm?.created_at || null,
                             lastMessage: lm ? String(lm.content || '').slice(0, 120) : null,
                             createdAt: c.created_at || null,
@@ -5650,6 +5658,19 @@ const handleCommunity = async (req: any, res: any) => {
                     }
                 }
 
+                // Blocked DMs: neither side can send while a block is in place.
+                const dmPartner = dmPartnerOf(gate.channel.name, authUserId);
+                if (dmPartner) {
+                    const blockState = await getBlockStatus(supabaseAdmin, authUserId, dmPartner);
+                    if (blockState !== 'none') {
+                        return res.status(403).json({
+                            ok: false,
+                            code: 'blocked',
+                            error: blockState === 'i_blocked' ? BLOCKED_BY_ME_ERROR : BLOCKED_ME_ERROR,
+                        });
+                    }
+                }
+
                 // Phase 4E.1 — never trust client AI identity on the human message path.
                 if (isClientVaultAiSpoofAttempt(req.body)) {
                     return res.status(400).json({
@@ -6236,6 +6257,92 @@ const handleCommunity = async (req: any, res: any) => {
                             : 'Could not issue voice Ka Link token',
                     });
                 }
+            }
+            if (chatType === 'dm-block' || chatType === 'dm-report' || chatType === 'report-message') {
+                const loadReporter = async () => {
+                    const { data: u } = await supabaseAdmin.from('users').select('name, email').eq('id', authUserId).maybeSingle();
+                    return { id: authUserId, name: String(u?.name || 'Member'), email: String(u?.email || ''), role: String(authRole || '') };
+                };
+                const nameOf = async (id: string) => {
+                    const { data: u } = await supabaseAdmin.from('users').select('name').eq('id', id).maybeSingle();
+                    return String(u?.name || 'Member');
+                };
+                const transcriptFor = async (cid: string, limit = 20) => {
+                    const { data } = await supabaseAdmin
+                        .from('chat_messages')
+                        .select('user_id, user_name, content, created_at, deleted_at')
+                        .eq('channel_id', cid)
+                        .order('created_at', { ascending: false })
+                        .limit(limit);
+                    return (data || []).reverse().map((m: any) => ({
+                        who: String(m.user_name || 'Member'),
+                        at: new Date(m.created_at).toLocaleString('en-GB', { timeZone: 'Africa/Kampala' }),
+                        text: m.deleted_at ? '(message removed by sender)' : String(m.content || '(attachment)'),
+                    }));
+                };
+
+                if (chatType === 'report-message') {
+                    // A single message, from the message menu.
+                    const messageId = String(req.body?.messageId || '').trim();
+                    if (!messageId) return res.status(400).json({ ok: false, error: 'messageId is required' });
+                    const gate = await resolveMessageChannelAccess(messageId);
+                    if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+                    const authorId = String(gate.message.user_id || '');
+                    const isDmRoom = Boolean(dmPartnerOf(gate.channel.name, authUserId));
+                    const sent = await sendChatReport({
+                        reporter: await loadReporter(),
+                        scope: 'message',
+                        reason: String(req.body?.reason || 'other'),
+                        note: String(req.body?.note || ''),
+                        offender: { id: authorId, name: authorId ? await nameOf(authorId) : 'Unknown' },
+                        context: isDmRoom ? 'Private message' : `Room: ${gate.channel.name || 'Ka Link room'}`,
+                        itemId: messageId,
+                        transcript: [{
+                            who: 'Reported message',
+                            at: new Date(gate.message.created_at).toLocaleString('en-GB', { timeZone: 'Africa/Kampala' }),
+                            text: gate.message.deleted_at ? '(message removed by sender)' : String(gate.message.content || '(attachment)'),
+                        }],
+                    });
+                    if (sent.ok === false) return res.status(sent.status).json({ ok: false, error: sent.error });
+                    return res.status(200).json({ ok: true, messageId });
+                }
+
+                const cid = String(req.body?.channelId || '').trim();
+                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
+                const channel = await fetchChannel(supabaseAdmin, cid);
+                const gate = await assertChannelAccess(channel);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+                const partnerId = dmPartnerOf(gate.channel.name, authUserId);
+                if (!partnerId) return res.status(400).json({ ok: false, error: 'Only direct messages can be blocked or reported.' });
+
+                if (chatType === 'dm-block') {
+                    const on = req.body?.blocked === true;
+                    const result = await setUserBlocked(supabaseAdmin, authUserId, partnerId, on);
+                    if (result.ok === false) return res.status(503).json({ ok: false, error: result.error });
+                    return res.status(200).json({ ok: true, channelId: cid, blocked: on });
+                }
+
+                // dm-report: email leaders with the recent conversation; optionally block too.
+                const alsoBlock = req.body?.block === true;
+                if (alsoBlock) {
+                    const blocked = await setUserBlocked(supabaseAdmin, authUserId, partnerId, true);
+                    if (blocked.ok === false) return res.status(503).json({ ok: false, error: blocked.error });
+                }
+                const sent = await sendChatReport({
+                    reporter: await loadReporter(),
+                    scope: 'dm',
+                    reason: String(req.body?.reason || 'other'),
+                    note: String(req.body?.note || ''),
+                    offender: { id: partnerId, name: await nameOf(partnerId) },
+                    context: 'Private conversation (Ka Link Messages)',
+                    itemId: cid,
+                    transcript: await transcriptFor(cid),
+                    alsoBlocked: alsoBlock,
+                });
+                if (sent.ok === false) {
+                    return res.status(sent.status).json({ ok: false, error: sent.error, blocked: alsoBlock });
+                }
+                return res.status(200).json({ ok: true, channelId: cid, blocked: alsoBlock });
             }
             if (chatType === 'dm-delete') {
                 // Ka Link "Delete chat" for a direct message — only for you.
@@ -10068,7 +10175,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }

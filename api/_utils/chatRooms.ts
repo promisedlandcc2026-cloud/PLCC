@@ -215,6 +215,76 @@ export async function clearDmForUser(
   return { ok: true };
 }
 
+/* ---------- Block (DMs) ---------- */
+
+/** Pure: the other person in a DM named DM_<a>_<b>, or null if you're not in it. */
+export function dmPartnerOf(channelName: string | null | undefined, userId: string): string | null {
+  const parts = String(channelName || '').split('_');
+  if (parts.length !== 3 || parts[0] !== 'DM') return null;
+  if (parts[1] === userId) return parts[2] || null;
+  if (parts[2] === userId) return parts[1] || null;
+  return null;
+}
+
+export type BlockStatus = 'none' | 'i_blocked' | 'blocked_me';
+
+/** Pure: who blocked whom, from rows touching both people. */
+export function decideBlockStatus(
+  rows: Array<{ blocker_id: string; blocked_id: string }>,
+  userId: string,
+  partnerId: string
+): BlockStatus {
+  if (rows.some((r) => String(r.blocker_id) === userId && String(r.blocked_id) === partnerId)) return 'i_blocked';
+  if (rows.some((r) => String(r.blocker_id) === partnerId && String(r.blocked_id) === userId)) return 'blocked_me';
+  return 'none';
+}
+
+export const BLOCKED_BY_ME_ERROR = 'You blocked this person. Unblock them to send a message.';
+export const BLOCKED_ME_ERROR = 'You can’t send messages to this person.';
+
+/** People you blocked. Empty if the table isn't set up yet. */
+export async function listBlockedIds(supabase: SupabaseClient, userId: string): Promise<Set<string>> {
+  const { data, error } = await supabase.from('chat_user_blocks').select('blocked_id').eq('blocker_id', userId).limit(1000);
+  if (error || !data) return new Set();
+  return new Set((data as any[]).map((r) => String(r.blocked_id)));
+}
+
+export async function getBlockStatus(supabase: SupabaseClient, userId: string, partnerId: string): Promise<BlockStatus> {
+  const { data, error } = await supabase
+    .from('chat_user_blocks')
+    .select('blocker_id, blocked_id')
+    .or(
+      `and(blocker_id.eq.${userId},blocked_id.eq.${partnerId}),and(blocker_id.eq.${partnerId},blocked_id.eq.${userId})`
+    )
+    .limit(2);
+  if (error || !data) return 'none';
+  return decideBlockStatus(data as any, userId, partnerId);
+}
+
+export async function setUserBlocked(
+  supabase: SupabaseClient,
+  blockerId: string,
+  blockedId: string,
+  blocked: boolean
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!blocked) {
+    await supabase.from('chat_user_blocks').delete().eq('blocker_id', blockerId).eq('blocked_id', blockedId);
+    return { ok: true };
+  }
+  const { error } = await supabase
+    .from('chat_user_blocks')
+    .upsert({ blocker_id: blockerId, blocked_id: blockedId }, { onConflict: 'blocker_id,blocked_id' });
+  if (error) {
+    return {
+      ok: false,
+      error: /chat_user_blocks/.test(error.message)
+        ? 'Run supabase/migrations/chat_user_blocks.sql in the Supabase SQL editor first.'
+        : 'Could not block this person.',
+    };
+  }
+  return { ok: true };
+}
+
 export type SearchHit = {
   id: string;
   channel_id: string;

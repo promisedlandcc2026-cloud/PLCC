@@ -22,6 +22,79 @@ const APPS: Record<string, string> = {
 
 const SOURCE_APPS = new Set(['canaan', 'connect']);
 
+export type ChatReportInput = {
+  reporter: { id: string; name: string; email: string; role: string };
+  /** 'dm' = a whole private conversation; 'message' = one message. */
+  scope: 'dm' | 'message';
+  reason: string;
+  note: string;
+  offender: { id: string; name: string };
+  context: string;
+  itemId: string;
+  /** Recent messages (oldest first), for leaders to review. */
+  transcript: Array<{ who: string; at: string; text: string }>;
+  alsoBlocked?: boolean;
+};
+
+/** Ka Link reports (a private conversation or one message), emailed to REPORT_NOTIFY_EMAILS. */
+export async function sendChatReport(input: ChatReportInput): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+  if (throttled(input.reporter.id)) {
+    return { ok: false, status: 429, error: 'You have sent several reports recently. Please wait a few minutes.' };
+  }
+  const to = recipients();
+  if (to.length === 0) {
+    console.error('[chat report] REPORT_NOTIFY_EMAILS not set');
+    return { ok: false, status: 503, error: 'Reports inbox is not set up yet. Please tell a church leader directly.' };
+  }
+  const resend = await getResend();
+  if (!resend) return { ok: false, status: 503, error: 'Email service unavailable. Please try again later.' };
+
+  const reason = pick(REASON_LABEL, input.reason, 'other');
+  const urgent = ['impersonation', 'money', 'harassment', 'safety', 'spam'].includes(reason);
+  const label = input.scope === 'dm' ? 'Private conversation' : 'Ka Link message';
+  const when = new Date().toLocaleString('en-GB', { timeZone: 'Africa/Kampala' }) + ' (Kampala)';
+  const rows = [
+    row('Type', label),
+    row('Reason', REASON_LABEL[reason]),
+    row('Reporter note', clip(input.note, 1000)),
+    row('Reported member', clip(input.offender.name, 120)),
+    row('Reported member ID', clip(input.offender.id, 80)),
+    row('Where', clip(input.context, 200)),
+    row('Item ID', clip(input.itemId, 80)),
+    row('Reporter also blocked them', input.alsoBlocked ? 'Yes' : ''),
+    row('Reported by', clip(input.reporter.name, 120)),
+    row('Reporter email', clip(input.reporter.email, 200)),
+    row('Role', clip(input.reporter.role, 60)),
+    row('Sent from', APPS.chat),
+    row('When', when),
+  ].join('');
+  const transcript = input.transcript.slice(-20).map(
+    (m) =>
+      `<tr><td style="padding:4px 10px 4px 0;color:#6b7280;white-space:nowrap;vertical-align:top">${esc(clip(m.at, 40))}</td><td style="padding:4px 10px 4px 0;font-weight:bold;vertical-align:top;white-space:nowrap">${esc(clip(m.who, 80))}</td><td style="padding:4px 0;white-space:pre-wrap">${esc(clip(m.text, 600))}</td></tr>`
+  ).join('');
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:680px">
+      <h2 style="color:#7a1f2b;margin:0 0 12px">${esc(label)} reported</h2>
+      <table style="border-collapse:collapse;font-size:14px">${rows}</table>
+      ${transcript ? `<h3 style="margin:20px 0 8px;font-size:15px">Recent messages</h3><table style="border-collapse:collapse;font-size:13px">${transcript}</table>` : ''}
+      <p style="margin-top:20px;font-size:13px"><a href="${esc(appUrl())}">Open PLCC Canaan</a></p>
+    </div>`;
+  try {
+    const { error } = await resend.emails.send({
+      from: vaultFrom('PLCC Reports'),
+      to,
+      subject: `${urgent ? '⚠️ ' : ''}PLCC report: ${label} — ${REASON_LABEL[reason]}`.slice(0, 200),
+      html,
+      ...(input.reporter.email ? { reply_to: input.reporter.email } : {}),
+    } as any);
+    if (error) throw new Error(error.message || 'Send failed');
+    return { ok: true };
+  } catch (err: any) {
+    console.error('[chat report] send failed', err?.message || err);
+    return { ok: false, status: 502, error: 'Could not send the report. Please try again.' };
+  }
+}
+
 const CONTENT_TYPE_LABEL: Record<string, string> = {
   chat_message: 'Chat message',
   dm_message: 'Private message',
