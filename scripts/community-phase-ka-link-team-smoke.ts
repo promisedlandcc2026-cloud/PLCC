@@ -67,4 +67,21 @@ ok('server wiring', () => {
   assert.match(sql, /ENABLE ROW LEVEL SECURITY/);
 });
 
+ok('standing Bible readers (Nov 19): unmute while locked, no video, cannot start rooms', () => {
+  assert.equal(parseKaLinkTeamRole('Reader'), 'reader');
+  assert.equal(
+    decideKaLinkPrayerRoomStart({ isPrayerRoom: true, existingCanStart: true, teamRole: 'reader', teamHasAdmins: true, role: 'MEMBER' }),
+    false
+  );
+  const core = readFileSync(join(root, 'api/_utils/core.ts'), 'utf8');
+  assert.match(core, /kaStart\.teamRole === 'reader' \|\|\s*huddleMicAllowed/);
+  assert.match(core, /\.\.\.stage\.readerIds, \.\.\.standingReaders\]/);
+  assert.match(core, /restoreIsReader && !huddleMicAllowed|!restoreIsReader && !huddleMicAllowed/);
+  const lk = readFileSync(join(root, 'api/_utils/livekitVoice.ts'), 'utf8');
+  assert.match(lk, /allowCamera = canScreenShare \|\| input\.kaLinkTeam === 'admin' \|\| input\.kaLinkTeam === 'leader'/);
+  const sql = readFileSync(join(root, 'supabase/migrations/ka_link_team.sql'), 'utf8');
+  assert.match(sql, /CHECK \(team_role IN \('admin', 'leader', 'reader'\)\)/);
+  assert.match(readFileSync(join(root, 'pages/admin/KaLinkTeam.tsx'), 'utf8'), /reader: \{ label: 'Bible reader'/);
+});
+
 console.log(`\n${passed} checks passed`);

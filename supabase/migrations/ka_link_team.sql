@@ -14,3 +14,8 @@ CREATE TABLE IF NOT EXISTS public.ka_link_team (
 ALTER TABLE public.ka_link_team ENABLE ROW LEVEL SECURITY;
 -- No policies: only the Canaan server (service role) reads or writes this table.
 REVOKE ALL ON public.ka_link_team FROM anon, authenticated;
+
+-- Nov 19 2026: standing Bible readers (unmute in every prayer room while mics are locked).
+ALTER TABLE public.ka_link_team DROP CONSTRAINT IF EXISTS ka_link_team_team_role_check;
+ALTER TABLE public.ka_link_team ADD CONSTRAINT ka_link_team_team_role_check
+  CHECK (team_role IN ('admin', 'leader', 'reader'));

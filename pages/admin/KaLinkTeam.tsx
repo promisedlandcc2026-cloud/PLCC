@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, Crown, HandHeart, Loader2, Plus, Radio, Search, ShieldAlert, Trash2 } from 'lucide-react';
+import { ArrowLeft, BookOpen, Crown, HandHeart, Loader2, Plus, Radio, Search, ShieldAlert, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../../App';
 import { getAuthHeaders, parseApiJson } from '../../lib/api';
@@ -11,9 +11,11 @@ import { getAuthHeaders, parseApiJson } from '../../lib/api';
  *  Leader — altar leaders and those serving (e.g. Pr. Grace): may join any time
  *           on a reserved seat (never the overflow room) and can tell the
  *           moderators "I'm ready". #18, #19, #20
+ *  Bible reader — standing readers: may unmute in every prayer room even while
+ *           mics are locked (no video, can't start rooms). #11
  */
 
-type TeamRole = 'admin' | 'leader';
+type TeamRole = 'admin' | 'leader' | 'reader';
 type TeamMember = { userId: string; name: string; teamRole: TeamRole; addedAt: string | null };
 type Candidate = { id: string; name: string; role?: string | null; email?: string | null };
 
@@ -22,7 +24,8 @@ const MANAGER_ROLES = new Set(['SUPER_ADMIN', 'PASTOR', 'ADMIN']);
 
 const ROLE_INFO: Record<TeamRole, { label: string; blurb: string; Icon: React.ElementType }> = {
   admin: { label: 'Admin', blurb: 'Starts the prayer-room Ka Links', Icon: Crown },
-  leader: { label: 'Leader', blurb: 'Joins any time · never overflow · "I’m ready" button', Icon: HandHeart },
+  leader: { label: 'Leader', blurb: 'Joins any time · never overflow · video · "I’m ready" button', Icon: HandHeart },
+  reader: { label: 'Bible reader', blurb: 'Can unmute to read in every prayer room, even when mics are locked', Icon: BookOpen },
 };
 
 const KaLinkTeamPage: React.FC = () => {
@@ -104,6 +107,7 @@ const KaLinkTeamPage: React.FC = () => {
   const onTeam = new Set(members.map((m) => m.userId));
   const admins = members.filter((m) => m.teamRole === 'admin');
   const leaders = members.filter((m) => m.teamRole === 'leader');
+  const readers = members.filter((m) => m.teamRole === 'reader');
 
   const section = (role: TeamRole, list: TeamMember[]) => {
     const { label, blurb, Icon } = ROLE_INFO[role];
@@ -118,21 +122,25 @@ const KaLinkTeamPage: React.FC = () => {
           <p className="text-sm text-gray-400 mt-4">
             {role === 'admin'
               ? 'No admins yet. Until you add one, the prayer rooms keep the old start rules.'
-              : 'No leaders yet.'}
+              : role === 'reader'
+                ? 'No Bible readers yet.'
+                : 'No leaders yet.'}
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-black/5">
             {list.map((m) => (
               <li key={m.userId} className="flex items-center gap-3 py-3">
                 <span className="flex-1 min-w-0 font-bold text-[#0d1a14] truncate">{m.name}</span>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void call({ action: 'add', userId: m.userId, teamRole: role === 'admin' ? 'leader' : 'admin' })}
-                  className="min-h-[40px] px-3 rounded-xl bg-gray-100 text-xs font-bold text-gray-700 disabled:opacity-50"
-                >
-                  Make {role === 'admin' ? 'Leader' : 'Admin'}
-                </button>
+                {role !== 'reader' ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void call({ action: 'add', userId: m.userId, teamRole: role === 'admin' ? 'leader' : 'admin' })}
+                    className="min-h-[40px] px-3 rounded-xl bg-gray-100 text-xs font-bold text-gray-700 disabled:opacity-50"
+                  >
+                    Make {role === 'admin' ? 'Leader' : 'Admin'}
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   disabled={busy}
@@ -180,7 +188,7 @@ const KaLinkTeamPage: React.FC = () => {
       <section className="bg-white rounded-3xl border border-black/5 p-5 shadow-sm">
         <h2 className="text-lg font-black text-[#0d1a14]">Add someone</h2>
         <div className="mt-3 flex gap-2" role="radiogroup" aria-label="Team role">
-          {(['leader', 'admin'] as TeamRole[]).map((r) => (
+          {(['leader', 'reader', 'admin'] as TeamRole[]).map((r) => (
             <button
               key={r}
               type="button"
@@ -245,6 +253,7 @@ const KaLinkTeamPage: React.FC = () => {
         <>
           {section('admin', admins)}
           {section('leader', leaders)}
+          {section('reader', readers)}
         </>
       )}
     </div>

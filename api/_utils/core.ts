@@ -203,6 +203,7 @@ import {
     listKaLinkTeam,
     parseKaLinkTeamRole,
     resolveKaLinkStart,
+    fetchKaLinkTeamReaderIds,
 } from './kaLinkTeam.js';
 import { handleVoiceTokenFallback, signHuddleFallbackPass } from './huddleFallbackPass.js';
 import { DailyApiError, countDailyRoomParticipantsForChannels, getDailyApiKey, mintDailyMeetingToken } from './dailyVoice.js';
@@ -6200,8 +6201,10 @@ const handleCommunity = async (req: any, res: any) => {
 
                     // Mics locked (#8): members join without mic permission; Bible readers (#11)
                     // and moderators keep theirs.
+                    // Standing Bible readers (Ka Link team "reader") keep their mic too.
                     const allowMicrophone = stageNow
-                        ? huddleMicAllowed({ stage: stageNow.stage, userId: authUserId, isModerator: canModerate })
+                        ? kaStart.teamRole === 'reader' ||
+                          huddleMicAllowed({ stage: stageNow.stage, userId: authUserId, isModerator: canModerate })
                         : true;
                     const minted = await mintLiveKitAccessToken(lk, {
                         userId: authUserId,
@@ -7444,7 +7447,8 @@ const handleCommunity = async (req: any, res: any) => {
                     if (stageAction === 'mic-lock' || stageAction === 'mic-unlock') {
                         const err = await saveStage(stageAction);
                         if (err) return res.status(400).json({ ok: false, error: err });
-                        const exempt = new Set<string>([...moderatorIds, ...stage.readerIds]);
+                        const standingReaders = await fetchKaLinkTeamReaderIds(supabaseAdmin);
+                        const exempt = new Set<string>([...moderatorIds, ...stage.readerIds, ...standingReaders]);
                         detail = await applyHuddleMicLock(lk, cid, stageAction === 'mic-lock', exempt);
                     } else if (stageAction === 'lower-all-hands') {
                         detail = await lowerAllHuddleHands(lk, cid);
@@ -7528,7 +7532,8 @@ const handleCommunity = async (req: any, res: any) => {
                         String(gate.channel.created_by || '') === String(authUserId) ||
                         isBroadChatAdmin(authRole) ||
                         isHuddleSessionModerator(stageForRestore.roles, authUserId);
-                    if (!huddleMicAllowed({ stage: stageForRestore.stage, userId: authUserId, isModerator: restoreIsMod })) {
+                    const restoreIsReader = (await fetchKaLinkTeamRole(supabaseAdmin, authUserId)) === 'reader';
+                    if (!restoreIsReader && !huddleMicAllowed({ stage: stageForRestore.stage, userId: authUserId, isModerator: restoreIsMod })) {
                         return res.status(403).json({
                             ok: false,
                             code: 'HUDDLE_MIC_LOCKED',

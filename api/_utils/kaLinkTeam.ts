@@ -12,7 +12,13 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type KaLinkTeamRole = 'admin' | 'leader';
+/**
+ * admin  = may start prayer-room Ka Links
+ * leader = altar leaders / those serving (Pr. Grace): reserved seat, video, "I'm ready"
+ * reader = standing Bible readers: may unmute in every prayer room even while mics
+ *          are locked (no video, cannot start rooms); reserved seat
+ */
+export type KaLinkTeamRole = 'admin' | 'leader' | 'reader';
 
 /** The prayer gatherings whose Ka Links only the admin team may start. */
 export const KA_LINK_PRAYER_ROOM_NAMES = [
@@ -49,7 +55,7 @@ export function isKaLinkPrayerRoom(channelName: string | null | undefined): bool
 
 export function parseKaLinkTeamRole(raw: unknown): KaLinkTeamRole | null {
   const r = String(raw ?? '').trim().toLowerCase();
-  return r === 'admin' || r === 'leader' ? r : null;
+  return r === 'admin' || r === 'leader' || r === 'reader' ? r : null;
 }
 
 /**
@@ -85,6 +91,22 @@ export async function fetchKaLinkTeamRole(supabase: SupabaseClient, userId: stri
     return parseKaLinkTeamRole((data as any)?.team_role);
   } catch {
     return null;
+  }
+}
+
+/** Video is for the team's admins and leaders (Pr. Grace) — not Bible readers. */
+export function kaLinkTeamMayUseVideo(role: KaLinkTeamRole | null | undefined): boolean {
+  return role === 'admin' || role === 'leader';
+}
+
+/** User ids of the standing Bible readers (may unmute while mics are locked). */
+export async function fetchKaLinkTeamReaderIds(supabase: SupabaseClient): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.from('ka_link_team').select('user_id').eq('team_role', 'reader');
+    if (error || !Array.isArray(data)) return [];
+    return data.map((r: any) => String(r.user_id || '')).filter(Boolean);
+  } catch {
+    return [];
   }
 }
 

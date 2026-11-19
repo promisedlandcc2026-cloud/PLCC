@@ -91,7 +91,7 @@ export type VoiceTokenClaimsInput = {
    */
   allowMicrophone?: boolean;
   /** Ka Link team role (display + "I'm ready" button). Not a permission. */
-  kaLinkTeam?: 'admin' | 'leader' | null;
+  kaLinkTeam?: 'admin' | 'leader' | 'reader' | null;
   ttlSeconds?: number;
 };
 
@@ -131,7 +131,8 @@ export function planVoiceAccessToken(input: VoiceTokenClaimsInput): VoiceTokenPl
   const canScreenShare = Boolean(input.canModerate) || roomAdmin;
   const allowMicrophone = input.allowMicrophone !== false || canScreenShare;
   // Video only for moderators/hosts and the Ka Link team (Admins, Leaders such as Pr. Grace).
-  const allowCamera = canScreenShare || Boolean(input.kaLinkTeam);
+  // (Standing Bible readers are on the team list but get no video.)
+  const allowCamera = canScreenShare || input.kaLinkTeam === 'admin' || input.kaLinkTeam === 'leader';
   const restrictSources = !canScreenShare || !allowMicrophone;
   const sources = huddlePublishSources(allowMicrophone, canScreenShare, allowCamera);
   return {
