@@ -104,10 +104,12 @@ export type VoiceTokenPlan = {
     roomJoin: true;
     room: string;
     /**
-     * Members: microphone + camera. Moderators and up: unrestricted (screen share,
+     * Members: microphone only (video is for Pr. Grace, the Ka Link team and moderators).
+     * Ka Link team: microphone + camera. Moderators and up: unrestricted (screen share,
      * and the waiting-music track, which is neither mic, camera nor screen).
+     * A member whose mic is locked can publish nothing (canPublish false).
      */
-    canPublish: true;
+    canPublish: boolean;
     canPublishSources?: TrackSource[];
     canSubscribe: true;
     canPublishData: true;
@@ -128,7 +130,10 @@ export function planVoiceAccessToken(input: VoiceTokenClaimsInput): VoiceTokenPl
   // Screen sharing is for moderators and up: channel moderators/creator, church leaders, huddle host/co-hosts.
   const canScreenShare = Boolean(input.canModerate) || roomAdmin;
   const allowMicrophone = input.allowMicrophone !== false || canScreenShare;
+  // Video only for moderators/hosts and the Ka Link team (Admins, Leaders such as Pr. Grace).
+  const allowCamera = canScreenShare || Boolean(input.kaLinkTeam);
   const restrictSources = !canScreenShare || !allowMicrophone;
+  const sources = huddlePublishSources(allowMicrophone, canScreenShare, allowCamera);
   return {
     identity: userId,
     name: String(input.displayName || '').trim() || 'Member',
@@ -137,8 +142,10 @@ export function planVoiceAccessToken(input: VoiceTokenClaimsInput): VoiceTokenPl
     grant: {
       roomJoin: true,
       room: roomName,
-      canPublish: true,
-      ...(restrictSources ? { canPublishSources: huddlePublishSources(allowMicrophone, canScreenShare) } : {}),
+      // An empty source list means "everything" to LiveKit, so a member with nothing
+      // allowed gets canPublish: false (and a mic-only list kept for later unlocks).
+      canPublish: !restrictSources || sources.length > 0,
+      ...(restrictSources ? { canPublishSources: sources.length ? sources : [TrackSource.MICROPHONE] } : {}),
       canSubscribe: true,
       canPublishData: true,
       canUpdateOwnMetadata: true,
@@ -424,11 +431,22 @@ const HUDDLE_MUSIC_TRACK_NAME = 'awc-huddle-music';
  * What a huddle member may publish: camera always, microphone unless muted by a
  * moderator, screen share only for moderators and up.
  */
-export function huddlePublishSources(allowMicrophone: boolean, allowScreenShare = false): TrackSource[] {
-  const sources = [TrackSource.CAMERA];
+export function huddlePublishSources(
+  allowMicrophone: boolean,
+  allowScreenShare = false,
+  allowCamera = true
+): TrackSource[] {
+  const sources: TrackSource[] = [];
+  if (allowMicrophone) sources.push(TrackSource.MICROPHONE);
+  if (allowCamera) sources.push(TrackSource.CAMERA);
   if (allowScreenShare) sources.push(TrackSource.SCREEN_SHARE, TrackSource.SCREEN_SHARE_AUDIO);
-  if (allowMicrophone) sources.unshift(TrackSource.MICROPHONE);
   return sources;
+}
+
+/** Whether a member's current LiveKit permission includes the camera (empty list = legacy "everything"). */
+export function permissionAllowsCamera(sources: unknown): boolean {
+  if (!Array.isArray(sources) || sources.length === 0) return true;
+  return sources.some((s) => s === TrackSource.CAMERA || s === 'CAMERA' || Number(s) === Number(TrackSource.CAMERA));
 }
 
 /** Whether a member's current LiveKit permission includes screen share (empty list = legacy "everything"). */
@@ -487,15 +505,18 @@ async function setMicrophonePublishAllowed(
   allowMicrophone: boolean
 ): Promise<void> {
   const existing = participant?.permission;
-  // Muting or unmuting the mic never adds or removes screen-share rights.
+  // Muting or unmuting the mic never adds or removes screen-share or camera rights.
   const allowScreenShare = permissionAllowsScreenShare(existing?.canPublishSources);
+  const allowCamera = permissionAllowsCamera(existing?.canPublishSources);
+  const sources = huddlePublishSources(allowMicrophone, allowScreenShare, allowCamera);
   await svc.updateParticipant(roomName, identity, {
     permission: {
       canSubscribe: existing?.canSubscribe !== false,
-      canPublish: true,
+      canPublish: sources.length > 0,
       canPublishData: existing?.canPublishData !== false,
       canUpdateMetadata: existing?.canUpdateMetadata !== false,
-      canPublishSources: huddlePublishSources(allowMicrophone, allowScreenShare),
+      // Never send an empty list (LiveKit reads it as "everything").
+      canPublishSources: sources.length ? sources : [TrackSource.MICROPHONE],
     },
   });
 }

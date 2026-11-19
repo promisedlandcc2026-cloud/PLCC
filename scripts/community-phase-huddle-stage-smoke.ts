@@ -63,6 +63,17 @@ ok('Bible readers and moderators keep the mic when locked', () => {
   assert.equal(huddleMicAllowed({ stage: unlocked, userId: 'member', isModerator: false }), true);
 });
 
+ok('video only for the Ka Link team (Pr. Grace) and moderators', () => {
+  const member = planVoiceAccessToken({ userId: 'u', displayName: 'U', channelId: 'c', canModerate: false });
+  assert.equal(member.grant.canPublishSources?.includes(TrackSource.CAMERA), false);
+  const leader = planVoiceAccessToken({ userId: 'g', displayName: 'Pr. Grace', channelId: 'c', canModerate: false, kaLinkTeam: 'leader' });
+  assert.deepEqual(leader.grant.canPublishSources, [TrackSource.MICROPHONE, TrackSource.CAMERA]);
+  const lockedLeader = planVoiceAccessToken({ userId: 'g', displayName: 'G', channelId: 'c', canModerate: false, kaLinkTeam: 'leader', allowMicrophone: false });
+  assert.deepEqual(lockedLeader.grant.canPublishSources, [TrackSource.CAMERA]);
+  const mod = planVoiceAccessToken({ userId: 'm', displayName: 'M', channelId: 'c', canModerate: true });
+  assert.equal(mod.grant.canPublishSources, undefined);
+});
+
 ok('block keeps someone out and drops them as reader', () => {
   let stage = (applyHuddleStageAction(emptyHuddleStage(), 'reader-add', 'x') as any).stage;
   stage = (applyHuddleStageAction(stage, 'block', 'x') as any).stage;
@@ -73,9 +84,12 @@ ok('block keeps someone out and drops them as reader', () => {
 
 ok('locked token: member joins without microphone; moderator unrestricted', () => {
   const member = planVoiceAccessToken({ userId: 'u', displayName: 'U', channelId: 'c', canModerate: false, allowMicrophone: false });
-  assert.deepEqual(member.grant.canPublishSources, [TrackSource.CAMERA]);
+  // Nothing to publish: canPublish false (an empty source list would mean "everything").
+  assert.equal(member.grant.canPublish, false);
+  assert.deepEqual(member.grant.canPublishSources, [TrackSource.MICROPHONE]);
   const open = planVoiceAccessToken({ userId: 'u', displayName: 'U', channelId: 'c', canModerate: false });
-  assert.ok(open.grant.canPublishSources?.includes(TrackSource.MICROPHONE));
+  assert.deepEqual(open.grant.canPublishSources, [TrackSource.MICROPHONE]);
+  assert.equal(open.grant.canPublish, true);
   const mod = planVoiceAccessToken({ userId: 'm', displayName: 'M', channelId: 'c', canModerate: true, allowMicrophone: false });
   assert.equal(mod.grant.canPublishSources, undefined);
 });
