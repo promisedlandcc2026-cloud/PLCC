@@ -213,7 +213,11 @@ import {
     cleanSearchQuery,
     decideCanPost,
     isAnnounceOnly,
+    clearDmForUser,
+    filterClearedMessages,
+    isDmHiddenByClear,
     listArchivedChats,
+    listDmClears,
     listPinnedMessages,
     searchMessages,
     setChatArchived,
@@ -4867,6 +4871,7 @@ const handleCommunity = async (req: any, res: any) => {
                     .limit(1000);
                 const last = new Map<string, { content: string; created_at: string }>();
                 for (const m of recent || []) if (!last.has(String(m.channel_id))) last.set(String(m.channel_id), m as any);
+                const clears = await listDmClears(supabaseAdmin, authUserId, ids);
                 const conversations = dmRows
                     .map((c: any) => {
                         const partnerId = partnerOf(String(c.name));
@@ -4881,6 +4886,8 @@ const handleCommunity = async (req: any, res: any) => {
                         };
                     })
                     .filter((c) => c.lastMessageAt || c.partnerId)
+                    // "Delete chat": hidden for you until someone writes again.
+                    .filter((c) => !isDmHiddenByClear(c.lastMessageAt, clears.get(c.channelId)))
                     .sort((a, b) =>
                         String(b.lastMessageAt || b.createdAt || '').localeCompare(String(a.lastMessageAt || a.createdAt || ''))
                     )
@@ -5227,8 +5234,10 @@ const handleCommunity = async (req: any, res: any) => {
                     .eq('channel_id', cid)
                     .order('created_at', { ascending: true });
                 if (error) throw error;
+                // "Delete chat" on a DM: hide what came before your delete (for you only).
+                const myClears = await listDmClears(supabaseAdmin, authUserId, [cid]);
 
-                const rawMessages = (data || []).map((m: any) => {
+                const rawMessages = filterClearedMessages(data || [], myClears, cid).map((m: any) => {
                     if (m.deleted_at) {
                         return {
                             ...m,
@@ -6228,6 +6237,22 @@ const handleCommunity = async (req: any, res: any) => {
                     });
                 }
             }
+            if (chatType === 'dm-delete') {
+                // Ka Link "Delete chat" for a direct message — only for you.
+                const cid = String(req.body?.channelId || '').trim();
+                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
+                const channel = await fetchChannel(supabaseAdmin, cid);
+                const gate = await assertChannelAccess(channel);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+                const parts = String(gate.channel.name || '').split('_');
+                if (!(parts.length === 3 && parts[0] === 'DM' && (parts[1] === authUserId || parts[2] === authUserId))) {
+                    return res.status(400).json({ ok: false, error: 'Only direct messages can be deleted.' });
+                }
+                const result = await clearDmForUser(supabaseAdmin, authUserId, cid);
+                if (result.ok === false) return res.status(503).json({ ok: false, error: result.error });
+                await upsertChatReadStatus(supabaseAdmin, authUserId, cid).catch(() => undefined);
+                return res.status(200).json({ ok: true, channelId: cid, deleted: true });
+            }
             if (chatType === 'room-archive') {
                 const cid = String(req.body?.channelId || '').trim();
                 if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
@@ -6320,7 +6345,10 @@ const handleCommunity = async (req: any, res: any) => {
                     rooms = list.map((c: any) => ({ id: String(c.id), name: c.name || null }));
                 }
                 const names = new Map(rooms.map((r) => [r.id, r.name]));
-                const hits = await searchMessages(supabaseAdmin, rooms.map((r) => r.id), q);
+                const hits = filterClearedMessages(
+                    await searchMessages(supabaseAdmin, rooms.map((r) => r.id), q),
+                    await listDmClears(supabaseAdmin, authUserId)
+                );
                 return res.status(200).json({
                     ok: true,
                     results: hits.map((h) => ({
@@ -10040,7 +10068,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }

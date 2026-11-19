@@ -155,6 +155,66 @@ export async function setChatArchived(
   return { ok: true };
 }
 
+/* ---------- Delete chat (DMs, per person) ---------- */
+
+/** Pure: a deleted DM stays hidden until a message newer than the delete arrives. */
+export function isDmHiddenByClear(lastMessageAt: string | null | undefined, clearedAt: string | null | undefined): boolean {
+  if (!clearedAt) return false;
+  if (!lastMessageAt) return true;
+  return Date.parse(lastMessageAt) <= Date.parse(clearedAt);
+}
+
+/** Pure: drop messages you cleared (created at or before your delete). */
+export function filterClearedMessages<T extends { created_at?: string | null; channel_id?: string | null }>(
+  rows: T[],
+  clears: Map<string, string>,
+  channelId?: string
+): T[] {
+  if (!clears.size) return rows;
+  return rows.filter((m) => {
+    const cid = String(channelId || m.channel_id || '');
+    const cleared = clears.get(cid);
+    if (!cleared || !m.created_at) return true;
+    return Date.parse(m.created_at) > Date.parse(cleared);
+  });
+}
+
+/** Your deleted DMs → when you deleted them. Empty if the table isn't set up yet. */
+export async function listDmClears(
+  supabase: SupabaseClient,
+  userId: string,
+  channelIds?: string[]
+): Promise<Map<string, string>> {
+  let q = supabase.from('chat_dm_clears').select('channel_id, cleared_at').eq('user_id', userId);
+  if (channelIds?.length) q = q.in('channel_id', channelIds.slice(0, 1000));
+  const { data, error } = await q.limit(1000);
+  const out = new Map<string, string>();
+  if (error || !data) return out;
+  for (const r of data as any[]) out.set(String(r.channel_id), String(r.cleared_at));
+  return out;
+}
+
+export async function clearDmForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  channelId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { error } = await supabase
+    .from('chat_dm_clears')
+    .upsert({ user_id: userId, channel_id: channelId, cleared_at: new Date().toISOString() }, { onConflict: 'user_id,channel_id' });
+  if (error) {
+    return {
+      ok: false,
+      error: /chat_dm_clears/.test(error.message)
+        ? 'Run supabase/migrations/chat_dm_delete.sql in the Supabase SQL editor first.'
+        : 'Could not delete this chat.',
+    };
+  }
+  // A deleted chat shouldn't also sit under Archived.
+  await supabase.from('chat_archives').delete().eq('user_id', userId).eq('channel_id', channelId);
+  return { ok: true };
+}
+
 export type SearchHit = {
   id: string;
   channel_id: string;
