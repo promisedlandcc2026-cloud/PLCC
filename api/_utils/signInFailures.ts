@@ -30,7 +30,8 @@ export type SignInFailureReason =
   | 'email_code_wrong'
   | 'member_pending'
   | 'member_not_found'
-  | 'member_check_failed';
+  | 'member_check_failed'
+  | 'app_crash';
 
 /** What apps may report themselves (the rest come from the server). */
 export const CLIENT_REPORTABLE_REASONS = new Set<SignInFailureReason>([
@@ -41,6 +42,7 @@ export const CLIENT_REPORTABLE_REASONS = new Set<SignInFailureReason>([
   'member_pending',
   'member_not_found',
   'member_check_failed',
+  'app_crash',
 ]);
 
 export const SIGN_IN_FAILURE_LABELS: Record<SignInFailureReason, { label: string; fix: string }> = {
@@ -58,6 +60,7 @@ export const SIGN_IN_FAILURE_LABELS: Record<SignInFailureReason, { label: string
   member_pending: { label: 'Waiting for approval', fix: 'Approve them in People so they can use Ka Link.' },
   member_not_found: { label: 'No member profile', fix: 'Their sign-in is not linked to a member. Use Canaan Repair to link it.' },
   member_check_failed: { label: 'Member check failed', fix: 'The server could not confirm their membership. Usually temporary.' },
+  app_crash: { label: 'App crashed after sign-in', fix: 'Ask them to tap Reload, then Start fresh. Send the detail and phone type to the developer.' },
 };
 
 export function isSignInFailureReason(v: unknown): v is SignInFailureReason {
