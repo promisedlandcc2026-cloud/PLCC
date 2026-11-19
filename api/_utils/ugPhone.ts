@@ -18,6 +18,26 @@ export const HOME_COUNTRY_CODE = '256';
 export const PHONE_PLACEHOLDER = '0772 123456';
 
 /**
+ * A Ugandan number typed while "United States / Canada" was picked, e.g. +1 0772 557842
+ * or +1 772 557842. US/Canada numbers never start with 0 and always have 10 digits, so
+ * these can only be Ugandan. `national` = the digits after the 1. Null if not that case.
+ */
+export function ugandaFromUsMisdial(national: string): string | null {
+  let n = String(national || '').replace(/\D/g, '');
+  if (n.length === 10 && n.startsWith('0')) n = n.slice(1);
+  else if (n.length !== 9) return null;
+  if (!/^[237]/.test(n)) return null;
+  const e164 = `+${HOME_COUNTRY_CODE}${n}`;
+  try {
+    const p = parsePhoneNumberFromString(e164);
+    if (p && !p.isValid()) return null;
+  } catch {
+    /* keep the simple rule */
+  }
+  return e164;
+}
+
+/**
  * Any country's number → E.164. A number without a + code is read as Ugandan
  * (or as `defaultCountry` when the person picked their country). Older US-style
  * numbers saved before country codes still resolve the way they always did.
@@ -33,6 +53,13 @@ export function toE164Intl(raw: unknown, defaultCountry: string = 'UG'): string 
     /* fall through to the older rules */
   }
   const ok = (x: string) => (x.length >= 8 && x.length <= 15 ? `+${x}` : null);
+
+  // "+1 0772 557842": a Ugandan number with United States picked (no real US number looks like this).
+  const plain = d.startsWith('00') ? d.slice(2) : d;
+  if ((s.startsWith('+') || d.startsWith('00') || plain.length === 11) && plain.startsWith('1')) {
+    const ug = ugandaFromUsMisdial(plain.slice(1));
+    if (ug) return ug;
+  }
 
   if (s.startsWith('+')) return ok(d);
   if (d.startsWith('00')) return ok(d.slice(2));

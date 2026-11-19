@@ -31,7 +31,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { getSupabaseAdmin } from './auth.js';
 import { ensureMemberForUser } from './ensureMemberForUser.js';
 import { getBcrypt } from './deps.js';
-import { phoneEmailFor, phoneLookupValues, samePhone } from './authPhone.js';
+import { legacyPhoneEmailsFor, phoneEmailFor, phoneLookupValues, samePhone } from './authPhone.js';
 import { checkVerifyCode, normalizeUsPhone, phoneCodesEnabled, sendVerifyCode } from './twilioVerify.js';
 
 const UNIFORM_SIGNIN = {
@@ -82,11 +82,13 @@ export async function findAccountForPhone(
   } else if (verified.data?.[0]?.id && (await authEmail(verified.data[0].id))) {
     return { id: verified.data[0].id };
   }
-  // Phone sign-up: Auth login email is this number's internal address.
-  const placeholder = phoneEmailFor(e164);
-  const own = await admin.from('users').select('id').eq('email', placeholder).limit(1);
-  const id = !own.error ? own.data?.[0]?.id : null;
-  if (id && (await authEmail(id)) === placeholder) return { id };
+  // Phone sign-up: Auth login email is this number's internal address
+  // (or, for older sign-ups, one made from the number misdialled as +1).
+  for (const placeholder of [phoneEmailFor(e164), ...legacyPhoneEmailsFor(e164)]) {
+    const own = await admin.from('users').select('id').eq('email', placeholder).limit(1);
+    const id = !own.error ? own.data?.[0]?.id : null;
+    if (id && (await authEmail(id)) === placeholder) return { id };
+  }
   return null;
 }
 

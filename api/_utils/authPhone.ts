@@ -42,6 +42,16 @@ export function phoneEmailFor(e164: string): string {
   return `${e164.replace(/\D/g, '')}@${PHONE_EMAIL_DOMAIN}`;
 }
 
+/**
+ * Internal addresses that older sign-ups made from a misdialled Ugandan number
+ * (United States picked: +1 0772… / +1 772…). Kept so those accounts still sign in.
+ */
+export function legacyPhoneEmailsFor(e164: string): string[] {
+  if (!isUgandanE164(e164)) return [];
+  const n = e164.replace(/\D/g, '').slice(3);
+  return [`10${n}@${PHONE_EMAIL_DOMAIN}`, `1${n}@${PHONE_EMAIL_DOMAIN}`];
+}
+
 export function isPhonePlaceholderEmail(email: string | null | undefined): boolean {
   const e = String(email || '').trim().toLowerCase();
   return e.endsWith(`@${PHONE_EMAIL_DOMAIN}`);
@@ -83,6 +93,11 @@ export function phoneLookupValues(e164: string): string[] {
       ...new Set([
         e164,
         digits,
+        // saved while "United States" was picked (see ugandaFromUsMisdial)
+        `+10${n}`,
+        `10${n}`,
+        `+1${n}`,
+        `1${n}`,
         `0${n}`,
         n,
         `+256 ${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}`,
@@ -188,7 +203,9 @@ async function findEmailsForPhone(e164: string): Promise<string[]> {
 
   // Phone-only accounts (signed up without an email) use the internal address.
   add(phoneEmailFor(e164));
-  return out.slice(0, 5);
+  // …or, for older sign-ups, an address made from the number misdialled as +1.
+  for (const legacy of legacyPhoneEmailsFor(e164)) add(legacy);
+  return out.slice(0, 7);
 }
 
 export const handleAuthPhone = async (req: any, res: any) => {
