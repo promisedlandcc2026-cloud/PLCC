@@ -169,6 +169,8 @@ import {
     applyHuddleMicLock,
     lowerAllHuddleHands,
     removeHuddleParticipant,
+    removeFromAllHuddles,
+    sendHuddleConductNotice,
 } from './livekitVoice.js';
 import {
     applyHuddleStageAction,
@@ -4791,6 +4793,50 @@ const handleCommunity = async (req: any, res: any) => {
                     notifyUser(supabaseAdmin, uid, { type: 'assignment', title: payload.title, body: payload.body, link: payload.link, sourceId: payload.sourceId }),
             });
         }
+        // Member conduct: warn, then block, unruly members (calls, chat, Tribes posts).
+        if (chatType === 'member-conduct') {
+            const mc = await import('./memberConduct.js');
+            const lk = getLiveKitServerConfig();
+            const actor = { id: String(authUserId), role: authRole, name: authDisplayName };
+            if (req.method === 'GET') {
+                if (String(req.query?.can || '') === '1') {
+                    const cid = String(req.query?.channelId || '').trim() || null;
+                    return res.status(200).json({ ok: true, canModerate: await mc.canModerateConduct(supabaseAdmin, actor, { channelId: cid }) });
+                }
+                if (String(req.query?.list || '') === '1') {
+                    if (!(await mc.canUnblock(supabaseAdmin, actor))) return res.status(403).json({ ok: false, error: 'Only a pastor or admin can see this.' });
+                    return res.status(200).json({ ok: true, ...(await mc.listConduct(supabaseAdmin)) });
+                }
+                const target = String(req.query?.targetUserId || '').trim();
+                const cid = String(req.query?.channelId || '').trim() || null;
+                if (!/^[0-9a-f-]{36}$/i.test(target)) return res.status(400).json({ ok: false, error: 'targetUserId is required' });
+                let sessionModerator = false;
+                if (cid && lk) sessionModerator = (await resolveVoiceCanModerate(lk, cid, authUserId, false).catch(() => ({ canModerate: false }))).canModerate;
+                if (!(await mc.canModerateConduct(supabaseAdmin, actor, { channelId: cid, sessionModerator })) && !(await mc.canUnblock(supabaseAdmin, actor))) {
+                    return res.status(403).json({ ok: false, error: 'Only moderators and church leaders can do that.' });
+                }
+                return res.status(200).json({ ok: true, status: await mc.readConductStatus(supabaseAdmin, target), warnValidDays: mc.WARN_VALID_DAYS });
+            }
+            if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'GET or POST only' });
+            const parsed = mc.parseConductCommand(req.body);
+            if (parsed.ok === false) return res.status(400).json({ ok: false, error: parsed.error });
+            const cmd = parsed.cmd;
+            let sessionModerator = false;
+            if (cmd.channelId && lk) {
+                sessionModerator = (await resolveVoiceCanModerate(lk, cmd.channelId, authUserId, false).catch(() => ({ canModerate: false }))).canModerate;
+            }
+            const logAudit = await getAudit();
+            const result = await mc.applyConduct(supabaseAdmin, actor, cmd, {
+                sessionModerator,
+                sendNotice: lk ? (cid, identity, notice) => sendHuddleConductNotice(lk, cid, identity, { ...notice, by: authDisplayName }) : undefined,
+                removeEverywhere: lk ? (identity) => removeFromAllHuddles(lk, identity) : undefined,
+                notify: (uid, payload) => notifyUser(supabaseAdmin, uid, payload as any),
+                audit: (row) => logAudit({ ...row, req }),
+            });
+            if (result.ok === false) return res.status(result.status).json({ ok: false, error: result.error });
+            return res.status(200).json({ ok: true, status: result.status });
+        }
+
         // Issues (Ka Link / Tribes → Account → Issues): who had problems, why, and the fix.
         if (chatType === 'issue-report' || chatType === 'issues') {
             const { handleChatIssues } = await import('./plccIssues.js');
@@ -5637,6 +5683,13 @@ const handleCommunity = async (req: any, res: any) => {
                 return res.status(200).json({ ok: true, ...result, members });
             }
             if (chatType === 'messages') {
+                // Blocked after a warning (member conduct): can't send messages.
+                {
+                    const { isMemberBlocked, MEMBER_BLOCKED_CODE, MEMBER_BLOCKED_MESSAGE } = await import('./memberConduct.js');
+                    if (await isMemberBlocked(supabaseAdmin, authUserId)) {
+                        return res.status(403).json({ ok: false, code: MEMBER_BLOCKED_CODE, error: MEMBER_BLOCKED_MESSAGE });
+                    }
+                }
                 const cid = String(req.body?.channelId || '').trim();
                 const content = String(req.body?.content || '').trim();
                 // Attachment-only: allow empty content when client declares a follow-up upload.
@@ -6062,6 +6115,13 @@ const handleCommunity = async (req: any, res: any) => {
             }
             if (chatType === 'voice-token') {
                 // Never trust client userId/role — identity from requireAuth only.
+                // Blocked after a warning (member conduct): no call pass.
+                {
+                    const { isMemberBlocked, MEMBER_BLOCKED_CODE, MEMBER_BLOCKED_MESSAGE } = await import('./memberConduct.js');
+                    if (await isMemberBlocked(supabaseAdmin, authUserId)) {
+                        return res.status(403).json({ ok: false, code: MEMBER_BLOCKED_CODE, error: MEMBER_BLOCKED_MESSAGE });
+                    }
+                }
                 const cid = String(
                     req.body?.channelId || req.body?.channel_id || first(channelId) || ''
                 ).trim();
@@ -7961,6 +8021,13 @@ const handleCommunity = async (req: any, res: any) => {
             .maybeSingle();
         if (!feedUserRow || !isCommunityFeedEligibleUser(feedUserRow)) {
             return res.status(403).json({ error: 'Community Feed access denied' });
+        }
+        // Blocked after a warning (member conduct): can read, but not post or comment.
+        if (req.method === 'POST' && (feedType === 'posts' || feedType === 'comments')) {
+            const { isMemberBlocked, MEMBER_BLOCKED_CODE, MEMBER_BLOCKED_MESSAGE } = await import('./memberConduct.js');
+            if (await isMemberBlocked(supabaseAdmin, authUserId)) {
+                return res.status(403).json({ ok: false, code: MEMBER_BLOCKED_CODE, error: MEMBER_BLOCKED_MESSAGE });
+            }
         }
 
         if (feedType === 'mention-candidates' && req.method === 'GET') {
@@ -10190,7 +10257,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update' || subResource === 'issue-report' || subResource === 'issues') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update' || subResource === 'issue-report' || subResource === 'issues' || subResource === 'member-conduct') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }

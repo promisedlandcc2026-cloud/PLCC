@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { 
+import { ShieldBan, 
   Settings, 
   ShieldCheck, 
   Building2, 
@@ -55,6 +55,14 @@ const MorePage: React.FC = () => {
       icon: <KeyRound size={28} />,
       color: 'bg-amber-500 text-white',
       shadow: 'shadow-amber-500/20'
+    },
+    {
+      label: 'Blocked Members',
+      description: 'Warned & blocked members — unblock here',
+      path: '/admin/blocked-members',
+      icon: <ShieldBan size={28} />,
+      color: 'bg-red-600 text-white',
+      shadow: 'shadow-red-600/20'
     },
     {
       label: 'Ka Link Team',

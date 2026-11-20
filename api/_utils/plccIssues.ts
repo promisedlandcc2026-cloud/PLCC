@@ -21,7 +21,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export const CHAT_ISSUE_RESOURCE = 'plcc_app_issue';
 /** Server-side truth from LiveKit webhooks: every join / leave with LiveKit's reason. */
 export const HUDDLE_EVENT_RESOURCE = 'plcc_huddle_event';
-const DEFAULT_OWNER_EMAILS = ['jerlessm@gmail.com'];
+/** Extra viewers come only from CHAT_ISSUES_OWNER_EMAILS / CHAT_ISSUES_OWNER_IDS (no address in code). */
+const DEFAULT_OWNER_EMAILS: string[] = [];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const AREAS = new Set(['huddle', 'room', 'messages', 'signin', 'media', 'app', 'other']);
 const SOURCES = new Set(['ka-link-server', 'ka-link-app', 'tribes-server', 'tribes-app', 'canaan']);
@@ -287,6 +288,14 @@ export function describeChatIssue(action: string, d: Record<string, any>): strin
   if (action === 'Live Huddle started') return 'Started the Ka Link';
   if (action === 'Live Huddle ended for everyone') return 'Ended the Ka Link for everyone';
   if (action === 'Live Huddle end denied') return "Tried to end the Ka Link for everyone but isn't allowed to";
+  if (action === 'Member warn' || action === 'Member block' || action === 'Member unblock') {
+    const where = d.place === 'call' ? ' in a call' : d.place === 'chat' ? ' in chat' : d.place === 'post' ? ' on a Tribes post' : '';
+    const by = d.byName ? ` by ${d.byName}` : '';
+    const why = d.reason ? ` — "${String(d.reason)}"` : '';
+    if (action === 'Member warn') return `Warned${by}${where}${why}`;
+    if (action === 'Member block') return `Blocked${by}${where} after a warning${why} — can't join calls, chat or post until a leader unblocks`;
+    return `Unblocked${by}`;
+  }
   if (d.source === 'livekit') {
     if (d.event === 'joined') return 'Call server: joined the call';
     const why = describeLeaveReason(d.reason);
@@ -387,7 +396,7 @@ export async function listChatIssues(
       .select('id, created_at, user_id, action, details, resource_type, resource_id, severity')
       .gte('created_at', since)
       .or(
-        `resource_type.eq.${CHAT_ISSUE_RESOURCE},resource_type.eq.${HUDDLE_EVENT_RESOURCE},and(resource_type.eq.chat_channel,action.ilike.*huddle*)`
+        `resource_type.eq.${CHAT_ISSUE_RESOURCE},resource_type.eq.${HUDDLE_EVENT_RESOURCE},resource_type.eq.member_conduct,and(resource_type.eq.chat_channel,action.ilike.*huddle*)`
       )
       .order('created_at', { ascending: false })
       .range(from, to);
@@ -415,13 +424,16 @@ export async function listChatIssues(
     const d = parseDetails(r.details);
     const isReport = r.resource_type === CHAT_ISSUE_RESOURCE;
     const isServer = r.resource_type === HUDDLE_EVENT_RESOURCE;
-    const code = isServer
+    const isConduct = r.resource_type === 'member_conduct';
+    const code = isConduct
+      ? `conduct_${String(r.action).replace('Member ', '')}`
+      : isServer
       ? `lk_${d.event === 'joined' ? 'joined' : 'left'}`
       : isReport
         ? String(d.code || '')
         : String(r.action);
     const isActivity = isServer || (isReport && isHuddleActivityCode(code));
-    const isProblem = !isActivity && (isReport || /denied/i.test(String(r.action)));
+    const isProblem = !isActivity && (isReport || isConduct || /denied/i.test(String(r.action)));
     const cid = r.resource_id && UUID_RE.test(r.resource_id) ? String(r.resource_id) : null;
     const extra = isServer
       ? sanitizeIssueExtra({ reason: d.reason, durationSec: d.durationSec })
@@ -431,12 +443,12 @@ export async function listChatIssues(
       at: String(r.created_at),
       kind: isProblem ? 'problem' : 'activity',
       severity: String(r.severity || (isProblem ? 'warning' : 'info')),
-      area: isReport ? String(d.area || 'other') : 'huddle',
+      area: isReport ? String(d.area || 'other') : isConduct ? 'conduct' : 'huddle',
       code,
       title: describeChatIssue(String(r.action), d),
       message: d.message ? String(d.message) : null,
       status: typeof d.status === 'number' ? d.status : null,
-      source: isServer ? 'livekit' : isReport ? String(d.source || '') : 'vault',
+      source: isServer ? 'livekit' : isReport ? String(d.source || '') : 'canaan',
       path: d.path ? String(d.path) : null,
       device: d.device ? String(d.device) : null,
       userId: r.user_id || null,

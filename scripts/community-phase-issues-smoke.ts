@@ -52,7 +52,10 @@ await ok('plain-English titles say Ka Link and Canaan', () => {
 });
 
 await ok('leaders, Ka Link admins and the owner can open Issues; members cannot', async () => {
-  assert.equal(await canViewPlccIssues(fakeDb(null), { id: 'u1', email: 'jerlessm@gmail.com' }), true);
+  process.env.CHAT_ISSUES_OWNER_EMAILS = 'owner@example.org';
+  assert.equal(await canViewPlccIssues(fakeDb(null), { id: 'u1', email: 'owner@example.org' }), true);
+  assert.equal(await canViewPlccIssues(fakeDb(null), { id: 'u1b', email: 'someone@example.org', role: 'MEMBER' }), false);
+  delete process.env.CHAT_ISSUES_OWNER_EMAILS;
   assert.equal(await canViewPlccIssues(fakeDb(null), { id: 'u2', role: 'PASTOR' }), true);
   assert.equal(await canViewPlccIssues(fakeDb('admin'), { id: 'u3', role: 'MEMBER' }), true);
   assert.equal(await canViewPlccIssues(fakeDb('reader'), { id: 'u4', role: 'MEMBER' }), false);

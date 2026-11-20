@@ -2,7 +2,7 @@
  * PLCC Community Phase 3B — LiveKit voice huddle helpers (server-side).
  * Secrets never leave the server. Room names are deterministic from channel id.
  */
-import { AccessToken, RoomServiceClient, TrackSource } from 'livekit-server-sdk';
+import { AccessToken, DataPacket_Kind, RoomServiceClient, TrackSource } from 'livekit-server-sdk';
 import { buildLowerHandMetadata } from './voiceHandRaise.js';
 import { buildHuddleStageMetadata, parseHuddleStage, type HuddleStage } from './huddleStage.js';
 import {
@@ -1145,4 +1145,48 @@ export async function removeHuddleParticipant(
     if (isNotFoundError(err)) return { removed: false };
     throw err;
   }
+}
+
+/** Topic the apps listen on for a moderator's warning / block notice (member conduct, Nov 19 2026). */
+export const HUDDLE_CONDUCT_TOPIC = 'plcc.conduct';
+
+/** Send a warning or block notice to one person in a live Ka Link. Fail-soft. */
+export async function sendHuddleConductNotice(
+  config: LiveKitServerConfig,
+  channelId: string,
+  identity: string,
+  notice: { t: 'warn' | 'block'; reason?: string | null; by?: string | null }
+): Promise<boolean> {
+  try {
+    const data = new TextEncoder().encode(JSON.stringify({ v: 1, ...notice }));
+    await roomServiceClient(config).sendData(voiceRoomNameForChannel(channelId), data, DataPacket_Kind.RELIABLE, {
+      destinationIdentities: [identity],
+      topic: HUDDLE_CONDUCT_TOPIC,
+    });
+    return true;
+  } catch (err: any) {
+    if (!isNotFoundError(err)) console.warn('[conduct notice]', err?.message || err);
+    return false;
+  }
+}
+
+/** Take a blocked member out of every live Ka Link (they may be in more than one). */
+export async function removeFromAllHuddles(config: LiveKitServerConfig, identity: string): Promise<number> {
+  const svc = roomServiceClient(config);
+  let removed = 0;
+  try {
+    const rooms = await svc.listRooms();
+    for (const room of rooms || []) {
+      if (!channelIdFromVoiceRoomName(String(room.name || ''))) continue;
+      try {
+        await svc.removeParticipant(String(room.name), identity);
+        removed += 1;
+      } catch (err: any) {
+        if (!isNotFoundError(err)) console.warn('[conduct remove]', err?.message || err);
+      }
+    }
+  } catch (err: any) {
+    console.warn('[conduct remove] list rooms failed', err?.message || err);
+  }
+  return removed;
 }
