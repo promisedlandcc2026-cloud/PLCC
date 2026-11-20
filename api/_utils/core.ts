@@ -4794,6 +4794,52 @@ const handleCommunity = async (req: any, res: any) => {
                     notifyUser(supabaseAdmin, uid, { type: 'assignment', title: payload.title, body: payload.body, link: payload.link, sourceId: payload.sourceId }),
             });
         }
+        // Private calls (audio / video) between the two people in a DM.
+        if (chatType === 'dm-call') {
+            if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'POST only' });
+            const dc = await import('./dmCall.js');
+            const parsed = dc.parseDmCallCommand(req.body);
+            if (parsed.ok === false) return res.status(400).json({ ok: false, error: parsed.error });
+            const { isMemberBlocked } = await import('./memberConduct.js');
+            const { getBlockStatus } = await import('./chatRooms.js');
+            const { broadcastToTopic } = await import('./chatLive.js');
+            const { pushToUsers } = await import('./pushAlerts.js');
+            let callerName = sanitizeHumanChatDisplayName(authDisplayName);
+            const { data: me } = await supabaseAdmin.from('users').select('name').eq('id', authUserId).maybeSingle();
+            if ((me as any)?.name) callerName = sanitizeHumanChatDisplayName(String((me as any).name)) || callerName;
+            try {
+                const reply = await dc.handleDmCall(parsed.cmd, {
+                    userId: String(authUserId),
+                    displayName: callerName,
+                    lk: getLiveKitServerConfig(),
+                    loadChannel: async (cid) => {
+                        const channel = await fetchChannel(supabaseAdmin, cid);
+                        const gate = await assertChannelAccess(channel);
+                        if (gate.ok === false) return { ok: false, status: gate.status, error: gate.error };
+                        if (normalizeVisibility(gate.channel) !== 'dm') return { ok: false, status: 400, error: 'Calls are only for private chats.' };
+                        return { ok: true, channel: gate.channel };
+                    },
+                    partnerOf: (channel, uid) => dmPartnerOf(channel?.name, uid),
+                    blockStatus: (partnerId) => getBlockStatus(supabaseAdmin, String(authUserId), partnerId),
+                    memberBlocked: () => isMemberBlocked(supabaseAdmin, authUserId),
+                    broadcast: (topic, event, payload) => broadcastToTopic(topic, event, payload),
+                    push: (ids, msg) => pushToUsers(supabaseAdmin, ids, 'chat', msg),
+                    postNote: async (cid, content) => {
+                        const { data } = await supabaseAdmin
+                            .from('chat_messages')
+                            .insert({ channel_id: cid, content, user_id: authUserId, user_name: callerName, parent_id: null })
+                            .select('id')
+                            .single();
+                        if ((data as any)?.id) await broadcastChatEvent(cid, 'message', { id: String((data as any).id) });
+                    },
+                    later: (p) => waitUntil(p.catch((e) => console.warn('[dm-call]', e?.message || e))),
+                });
+                return res.status(reply.status).json(reply.body);
+            } catch (e: any) {
+                console.warn('[dm-call]', e?.message || e);
+                return res.status(500).json({ ok: false, error: 'Could not start the call. Please try again.' });
+            }
+        }
         // Member conduct: warn, then block, unruly members (calls, chat, Tribes posts).
         if (chatType === 'member-conduct') {
             const mc = await import('./memberConduct.js');
@@ -10325,7 +10371,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update' || subResource === 'issue-report' || subResource === 'issues' || subResource === 'member-conduct') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update' || subResource === 'issue-report' || subResource === 'issues' || subResource === 'member-conduct' || subResource === 'dm-call') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }

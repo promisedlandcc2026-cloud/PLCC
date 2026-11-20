@@ -43,9 +43,17 @@ export async function broadcastChatEvent(
   event: 'message' | 'deleted' | 'read',
   payload: Record<string, string>
 ): Promise<boolean> {
+  return broadcastToTopic(chatRealtimeTopic(channelId), event, payload);
+}
+
+/** Ping one Realtime topic (a room, or a person's call inbox). Never throws. */
+export async function broadcastToTopic(
+  topic: string,
+  event: string,
+  payload: Record<string, string>
+): Promise<boolean> {
   const url = String(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '');
   const key = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
-  const topic = chatRealtimeTopic(channelId);
   if (!url || !key || !topic) return false;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), BROADCAST_TIMEOUT_MS);
