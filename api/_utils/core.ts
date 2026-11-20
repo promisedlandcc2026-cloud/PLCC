@@ -7056,9 +7056,59 @@ const handleCommunity = async (req: any, res: any) => {
             }
             if (chatType === 'ka-link-songs') {
                 // #12 song library. Managers: Pastor / Admin / Super Admin + Ka Link team Admins.
+                // Music team (Nov 19): people the managers assign may upload songs the church
+                // bought, and delete their own uploads.
                 const songAction = String(req.body?.action || 'list').trim().toLowerCase();
-                const isSongManager =
+                const isTeamManager =
                     canManageKaLinkTeam(authRole) || (await fetchKaLinkTeamRole(supabaseAdmin, authUserId)) === 'admin';
+                let isMusicTeam = false;
+                if (!isTeamManager) {
+                    const { data: mt, error: mtError } = await supabaseAdmin
+                        .from('ka_link_music_team')
+                        .select('user_id')
+                        .eq('user_id', authUserId)
+                        .maybeSingle();
+                    isMusicTeam = !mtError && Boolean(mt);
+                }
+                const isSongManager = isTeamManager || isMusicTeam;
+
+                if (songAction === 'team-list' || songAction === 'team-add' || songAction === 'team-remove') {
+                    if (!isTeamManager) {
+                        return res.status(403).json({ ok: false, error: 'Only the Pastor, Admins and Ka Link team Admins can choose the music team.' });
+                    }
+                    const teamMissing = (error: any) =>
+                        res.status(503).json({
+                            ok: false,
+                            setupNeeded: true,
+                            error: /ka_link_music_team|42P01|does not exist/i.test(String(error?.message || error?.code || ''))
+                                ? 'Run the music team setup SQL in the Supabase SQL editor first.'
+                                : 'Could not update the music team.',
+                        });
+                    if (songAction !== 'team-list') {
+                        const memberId = String(req.body?.userId || '').trim();
+                        if (!/^[0-9a-f-]{36}$/i.test(memberId)) return res.status(400).json({ ok: false, error: 'Choose a member.' });
+                        const { error } =
+                            songAction === 'team-add'
+                                ? await supabaseAdmin.from('ka_link_music_team').upsert([{ user_id: memberId, added_by: authUserId }])
+                                : await supabaseAdmin.from('ka_link_music_team').delete().eq('user_id', memberId);
+                        if (error) return teamMissing(error);
+                    }
+                    const { data: team, error: teamError } = await supabaseAdmin
+                        .from('ka_link_music_team')
+                        .select('user_id, created_at')
+                        .order('created_at', { ascending: true });
+                    if (teamError) return teamMissing(teamError);
+                    const ids = (team || []).map((t: any) => t.user_id);
+                    const names = new Map<string, string>();
+                    if (ids.length) {
+                        const { data: users } = await supabaseAdmin.from('users').select('id, name').in('id', ids);
+                        (users || []).forEach((u: any) => names.set(u.id, String(u.name || 'Member')));
+                    }
+                    return res.status(200).json({
+                        ok: true,
+                        team: (team || []).map((t: any) => ({ userId: t.user_id, name: names.get(t.user_id) || 'Member', addedAt: t.created_at })),
+                    });
+                }
                 const songsError = (error: any) =>
                     res.status(isSongsTableMissing(error) ? 503 : 500).json({
                         ok: false,
@@ -7098,7 +7148,7 @@ const handleCommunity = async (req: any, res: any) => {
                     }
                     const { data, error } = await supabaseAdmin
                         .from('ka_link_songs')
-                        .select('id, title, artist, storage_path, duration_seconds, size_bytes, status, created_at')
+                        .select('id, title, artist, storage_path, duration_seconds, size_bytes, status, created_at, uploaded_by')
                         .eq('status', 'ready')
                         .order('title', { ascending: true })
                         .limit(MAX_LIBRARY_SONGS);
@@ -7114,7 +7164,11 @@ const handleCommunity = async (req: any, res: any) => {
                     return res.status(200).json({
                         ok: true,
                         canManage: isSongManager,
+                        canManageTeam: isTeamManager,
+                        isMusicTeam,
                         songs: rows.map((r) => ({
+                            // Music team may edit/delete only their own uploads.
+                            mine: String(r.uploaded_by || '') === String(authUserId),
                             id: r.id,
                             title: r.title,
                             artist: r.artist,
@@ -7126,10 +7180,14 @@ const handleCommunity = async (req: any, res: any) => {
                 }
 
                 if (!isSongManager) {
-                    return res.status(403).json({ ok: false, error: 'Only the Pastor, Admins and Ka Link team Admins can manage songs.' });
+                    return res.status(403).json({ ok: false, error: 'Only the music team, the Pastor, Admins and Ka Link team Admins can manage songs.' });
                 }
 
                 if (songAction === 'upload-url') {
+                    // Only music the church (or the uploader) has bought may be added.
+                    if (req.body?.purchased !== true) {
+                        return res.status(400).json({ ok: false, error: 'Please confirm this song was bought and may be played in church.' });
+                    }
                     const v = validateSongUpload(req.body);
                     if (v.ok === false) return res.status(400).json({ ok: false, error: v.error });
                     const { count } = await supabaseAdmin.from('ka_link_songs').select('id', { count: 'exact', head: true });
@@ -7161,11 +7219,14 @@ const handleCommunity = async (req: any, res: any) => {
                 if (!/^[0-9a-f-]{36}$/i.test(songId)) return res.status(400).json({ ok: false, error: 'Choose a song.' });
                 const { data: song, error: songError } = await supabaseAdmin
                     .from('ka_link_songs')
-                    .select('id, storage_path, status')
+                    .select('id, storage_path, status, uploaded_by')
                     .eq('id', songId)
                     .maybeSingle();
                 if (songError) return songsError(songError);
                 if (!song) return res.status(404).json({ ok: false, error: 'Song not found.' });
+                if (!isTeamManager && String((song as any).uploaded_by || '') !== String(authUserId)) {
+                    return res.status(403).json({ ok: false, error: 'You can only change songs you uploaded.' });
+                }
 
                 if (songAction === 'confirm') {
                     const duration = Math.round(Number(req.body?.durationSeconds));
