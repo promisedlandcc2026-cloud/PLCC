@@ -25,7 +25,7 @@ import {
   BarChart3,
   Clapperboard,
   Coins,
-  HandCoins, HandHeart, Archive, Bell } from 'lucide-react';
+  HandCoins, HandHeart, Archive, Bell, Radio, Music, ShieldBan, KeyRound } from 'lucide-react';
 import { NavItem, Section } from '../types';
 import {
   DEFAULT_FELLOWSHIP_EVENT_ID,
@@ -168,6 +168,18 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
       { label: 'Policies', path: '/admin/policies', icon: <BookOpen size={18} />, section: Section.More },
       { label: 'How To Videos', path: '/help/how-to-videos', icon: <Clapperboard size={18} />, section: Section.Community },
       { label: 'Chat', path: '/community/chat', icon: <MessageSquare size={18} />, section: Section.Community },
+    ],
+  },
+  {
+    // Ka Link leaders' tools (were only on the hidden More page) — Pastor / Admin / Super Admin.
+    id: 'ka-link',
+    label: 'Ka Link',
+    collapsible: true,
+    items: [
+      { label: 'Ka Link Team', path: '/admin/ka-link-team', icon: <Radio size={18} />, section: Section.More },
+      { label: 'Ka Link Music', path: '/admin/ka-link-music', icon: <Music size={18} />, section: Section.More },
+      { label: 'Blocked Members', path: '/admin/blocked-members', icon: <ShieldBan size={18} />, section: Section.More },
+      { label: 'Sign-in Problems', path: '/admin/sign-in-problems', icon: <KeyRound size={18} />, section: Section.More },
     ],
   },
   {
