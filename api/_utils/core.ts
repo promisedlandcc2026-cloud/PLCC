@@ -11,6 +11,7 @@ import {
     FINANCE_ROLES,
     sendAuthUnavailable,
     isTransientSupabaseError,
+    forgetCachedAppUser,
 } from './auth.js';
 import { ensureMemberForUser } from './ensureMemberForUser.js';
 import {
@@ -1040,6 +1041,8 @@ const handleUsers = async (req: any, res: any) => {
         let updatedUser;
         let error;
 
+        // The role/name cache (auth.ts) must not keep the old row on this server.
+        forgetCachedAppUser(id);
         if (existingUser) {
             const res = await supabaseAdmin.from('users').update(safeUpdates).eq('id', id).select().single();
             updatedUser = res.data;

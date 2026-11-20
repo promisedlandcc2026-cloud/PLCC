@@ -1,4 +1,4 @@
 {
-  "notes": "When our server is busy, Canaan now asks you to try again instead of signing you out. Also a security fix for profile changes.",
-  "critical": true
+  "notes": "Faster and steadier: Canaan now does far less work on every tap, so busy times should no longer slow things down.",
+  "critical": false
 }

@@ -528,6 +528,8 @@ export async function handleMemberSelfProfile(
   }
 
   if (Object.keys(userPatch).length) {
+    const { forgetCachedAppUser } = await import('./auth.js');
+    forgetCachedAppUser(user.id);
     const { error } = await supabase.from('users').update(userPatch).eq('id', user.id);
     if (error) console.error('[Vault API] member-self users:', error.message);
   }

@@ -12,6 +12,9 @@ import { fileURLToPath } from 'node:url';
 import {
   AUTH_UNAVAILABLE_CODE,
   AuthServiceUnavailableError,
+  APP_USER_CACHE_MS,
+  cachedAppUser,
+  clearAppUserCache,
   isTransientSupabaseError,
   requireAuth,
   resolveAppUser,
@@ -23,6 +26,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p: string) => readFileSync(join(root, p), 'utf8');
 let passed = 0;
 const ok = async (name: string, fn: () => void | Promise<void>) => {
+  clearAppUserCache();
   await fn();
   passed += 1;
   console.log(`ok - ${name}`);
@@ -33,13 +37,17 @@ const USER = { id: '11111111-1111-4111-8111-111111111111', email: 'member@exampl
 
 /** Fake Supabase: auth.getUser result + what the users lookups return. */
 function fakeSupabase(opts: {
-  getUser?: () => Promise<any>;
+  getClaims?: () => Promise<any>;
   byId?: () => Promise<any>;
   byEmail?: () => Promise<any>;
   inserts?: any[];
 }) {
   return {
-    auth: { getUser: opts.getUser || (async () => ({ data: { user: USER }, error: null })) },
+    auth: {
+      getClaims:
+        opts.getClaims ||
+        (async () => ({ data: { claims: { sub: USER.id, email: USER.email, role: 'authenticated', user_metadata: {} } }, error: null })),
+    },
     from: (_table: string) => {
       let col = '';
       const q: any = {
@@ -124,14 +132,14 @@ async function main() {
   });
 
   await ok('verifyAuth: Supabase Auth 5xx/timeout → unavailable', async () => {
-    const r1 = await verifyAuth(req(), fakeSupabase({ getUser: async () => ({ data: { user: null }, error: { status: 504, message: 'Gateway Timeout' } }) }));
+    const r1 = await verifyAuth(req(), fakeSupabase({ getClaims: async () => ({ data: null, error: { status: 504, message: 'Gateway Timeout' } }) }));
     assert.equal(r1.unavailable, true);
-    const r2 = await verifyAuth(req(), fakeSupabase({ getUser: async () => Promise.reject(new Error('auth.getUser timed out after 12000ms')) }));
+    const r2 = await verifyAuth(req(), fakeSupabase({ getClaims: async () => Promise.reject(new Error('auth.getClaims timed out after 12000ms')) }));
     assert.equal(r2.unavailable, true);
   });
 
   await ok('verifyAuth: a really bad token is still signed out (401 path)', async () => {
-    const r = await verifyAuth(req(), fakeSupabase({ getUser: async () => ({ data: { user: null }, error: { status: 401, message: 'invalid JWT' } }) }));
+    const r = await verifyAuth(req(), fakeSupabase({ getClaims: async () => ({ data: null, error: { name: 'AuthInvalidJwtError', message: 'Invalid JWT signature' } }) }));
     assert.equal(r.unavailable, undefined);
     assert.equal(r.user, null);
   });
@@ -152,6 +160,39 @@ async function main() {
     assert.equal(res.body.retryable, true);
     assert.match(res.body.error, /still signed in/);
     assert.equal(res.headers['Retry-After'], '5');
+  });
+
+  await ok('tokens are checked locally (getClaims), not with a Supabase Auth call per request', () => {
+    const auth = read('api/_utils/auth.ts');
+    assert.match(auth, /getAuthVerifier\(supabase\)\.auth\.getClaims\(token\)/);
+    assert.ok(!/supabase\.auth\.getUser\(token\)/.test(auth));
+    assert.match(auth, /claims\.role !== 'authenticated'/);
+  });
+
+  await ok('member rows are remembered for a minute; failures are never remembered', async () => {
+    let lookups = 0;
+    const sb = fakeSupabase({
+      byId: async () => {
+        lookups += 1;
+        return { data: { id: USER.id, role: 'MEMBER' }, error: null };
+      },
+    });
+    const t0 = 1_000_000;
+    await cachedAppUser(sb, USER.id, USER.email, null, t0);
+    await cachedAppUser(sb, USER.id, USER.email, null, t0 + 1000);
+    assert.equal(lookups, 1, 'second request uses the remembered row');
+    await cachedAppUser(sb, USER.id, USER.email, null, t0 + APP_USER_CACHE_MS + 1);
+    assert.equal(lookups, 2, 'refreshed after a minute');
+    clearAppUserCache();
+    const bad = fakeSupabase({ byId: async () => ({ data: null, error: { message: 'timed out' } }) });
+    await assert.rejects(cachedAppUser(bad, USER.id, USER.email, null, t0));
+    const good = fakeSupabase({ byId: async () => ({ data: { id: USER.id, role: 'MEMBER' }, error: null }) });
+    assert.equal((await cachedAppUser(good, USER.id, USER.email, null, t0 + 5))?.role, 'MEMBER');
+  });
+
+  await ok('saving a profile or role forgets the remembered row', () => {
+    assert.match(read('api/_utils/core.ts'), /forgetCachedAppUser\(id\);\s*if \(existingUser\)/);
+    assert.match(read('api/_utils/memberSelfProfileHandler.ts'), /forgetCachedAppUser\(user\.id\);/);
   });
 
   await ok('apps keep the session on a temporary failure', () => {

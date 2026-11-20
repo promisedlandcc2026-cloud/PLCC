@@ -426,6 +426,66 @@ export async function reconcileAuthPendingSignups(
   return { created, synced };
 }
 
+// ─── Load reduction (Nov 20 2026) ────────────────────────────────────────────
+
+let authVerifier: SupabaseClient | null = null;
+
+/**
+ * One long-lived client for token checks: supabase-js keeps the signing keys (JWKS) in memory
+ * for ~10 minutes, but a NEW client clears them — and Canaan makes a new admin client per request.
+ */
+function getAuthVerifier(fallback: SupabaseClient): SupabaseClient {
+  if (authVerifier) return authVerifier;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  if (!url || !key) return fallback;
+  authVerifier = createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false, storageKey: 'plcc-auth-verifier' },
+    global: { fetch: fetchWithSupabaseTimeout },
+  });
+  return authVerifier;
+}
+
+/** How long a member's role/name is remembered between requests on one server. */
+export const APP_USER_CACHE_MS = 60_000;
+const APP_USER_CACHE_MAX = 2000;
+const appUserCache = new Map<string, { row: Record<string, any>; at: number }>();
+
+/** Forget a member's cached row (after their profile or role changes). */
+export function forgetCachedAppUser(userId: string | null | undefined): void {
+  if (userId) appUserCache.delete(String(userId));
+}
+
+/** Test hook. */
+export function clearAppUserCache(): void {
+  appUserCache.clear();
+}
+
+/**
+ * resolveAppUser, remembered for a minute per member. Every request used to look the member up
+ * again (~185,000 lookups since Nov 4). A role change shows within a minute (instantly on the
+ * server that saved it). Only found rows are remembered; failures are never cached.
+ */
+export async function cachedAppUser(
+  supabase: SupabaseClient,
+  authUserId: string,
+  email?: string | null,
+  metadata?: Record<string, any> | null,
+  now = Date.now()
+): Promise<Record<string, any> | null> {
+  const hit = appUserCache.get(authUserId);
+  if (hit && now - hit.at < APP_USER_CACHE_MS) return hit.row;
+  const row = await resolveAppUser(supabase, authUserId, email, metadata);
+  if (row && String(row.id) === String(authUserId)) {
+    if (appUserCache.size >= APP_USER_CACHE_MAX) {
+      const oldest = appUserCache.keys().next().value;
+      if (oldest) appUserCache.delete(oldest);
+    }
+    appUserCache.set(authUserId, { row, at: now });
+  }
+  return row;
+}
+
 /**
  * Require a valid Bearer JWT. X-User-ID alone is never sufficient.
  * Role is read from the users table (linked by Auth id, or email when needed).
@@ -464,29 +524,33 @@ const verifyAuthUncached = async (req: any, supabase: SupabaseClient): Promise<A
       return { user: null, role: null };
     }
 
-    let got: Awaited<ReturnType<typeof supabase.auth.getUser>>;
+    // Nov 20 2026 (load): check the token's signature here (ES256 keys, cached) instead of asking
+    // Supabase Auth on every request — that was ~15,600 Auth calls an hour, each several DB queries.
+    // Old symmetric (HS256) tokens still fall back to Supabase Auth inside getClaims.
+    let got: { data: any; error: any };
     try {
-      got = await withSupabaseTimeout(supabase.auth.getUser(token), 12_000, 'auth.getUser');
+      got = await withSupabaseTimeout(getAuthVerifier(supabase).auth.getClaims(token), 12_000, 'auth.getClaims');
     } catch (err: any) {
       console.warn(`[Auth Check] UNAVAILABLE: ${err?.message || err}`);
       return { user: null, role: null, unavailable: true };
     }
-    const { data: { user }, error } = got;
+    const { data: claimsData, error } = got;
     if (error && isTransientSupabaseError(error)) {
-      // Supabase Auth itself is slow/down: the token may be perfectly good.
+      // Supabase Auth itself is slow/down (key download or HS256 fallback): the token may be fine.
       console.warn(`[Auth Check] UNAVAILABLE: ${error.message}`);
       return { user: null, role: null, unavailable: true };
     }
-    if (error || !user) {
+    const claims = claimsData?.claims;
+    if (error || !claims?.sub || claims.role !== 'authenticated') {
       console.log(`[Auth Check] FAILED: ${error?.message || 'No user for token'}`);
       return { user: null, role: null };
     }
 
-    const userId = user.id;
-    const email = user.email;
-    const metadata = user.user_metadata;
+    const userId = String(claims.sub);
+    const email = (claims.email as string | undefined) || null;
+    const metadata = (claims.user_metadata as Record<string, any> | undefined) || {};
 
-    const userData = await resolveAppUser(supabase, userId, email, metadata);
+    const userData = await cachedAppUser(supabase, userId, email, metadata);
 
     const role = userData?.role || 'PENDING';
     console.log(`[Auth Check] SUCCESS: User ${email || userId} authenticated with role ${role}`);
