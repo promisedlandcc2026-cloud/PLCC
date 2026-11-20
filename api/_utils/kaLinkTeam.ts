@@ -110,6 +110,17 @@ export async function fetchKaLinkTeamReaderIds(supabase: SupabaseClient): Promis
   }
 }
 
+/** Ka Link team admins + leaders (Pr. Grace): keep their mic when mics are locked. */
+export async function fetchKaLinkTeamLeaderIds(supabase: SupabaseClient): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.from('ka_link_team').select('user_id').in('team_role', ['admin', 'leader']);
+    if (error || !Array.isArray(data)) return [];
+    return data.map((r: any) => String(r.user_id || '')).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 export async function kaLinkTeamHasAdmins(supabase: SupabaseClient): Promise<boolean> {
   try {
     const { count, error } = await supabase

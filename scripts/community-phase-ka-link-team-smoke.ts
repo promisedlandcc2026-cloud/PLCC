@@ -74,8 +74,8 @@ ok('standing Bible readers (Nov 19): unmute while locked, no video, cannot start
     false
   );
   const core = readFileSync(join(root, 'api/_utils/core.ts'), 'utf8');
-  assert.match(core, /kaStart\.teamRole === 'reader' \|\|\s*huddleMicAllowed/);
-  assert.match(core, /\.\.\.stage\.readerIds, \.\.\.standingReaders\]/);
+  assert.match(core, /kaStart\.teamRole === 'reader' \|\|\s*kaStart\.teamRole === 'admin' \|\|\s*kaStart\.teamRole === 'leader' \|\|\s*huddleMicAllowed/);
+  assert.match(core, /\.\.\.stage\.readerIds, \.\.\.standingReaders, \.\.\.teamLeaders\]/);
   assert.match(core, /restoreIsReader && !huddleMicAllowed|!restoreIsReader && !huddleMicAllowed/);
   const lk = readFileSync(join(root, 'api/_utils/livekitVoice.ts'), 'utf8');
   assert.match(lk, /allowCamera = canScreenShare \|\| input\.kaLinkTeam === 'admin' \|\| input\.kaLinkTeam === 'leader'/);
