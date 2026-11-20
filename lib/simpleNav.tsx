@@ -1,6 +1,4 @@
-import React from 'react';
 import {
-  Gamepad2,
   LayoutDashboard,
   User,
   Users,
