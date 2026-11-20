@@ -107,7 +107,7 @@ export function dmCallAlertFor(opts: { callerName: string; channelId: string; vi
   const who = String(opts.callerName || 'Someone').trim() || 'Someone';
   return {
     title: opts.video ? `🎥 ${who} is video calling you` : `📞 ${who} is calling you`,
-    body: 'Tap to answer in PLCC Ka Link.',
+    body: 'Tap to answer.',
     url: `/community/chat/${opts.channelId}?call=answer`,
     tag: `call:${opts.channelId}`,
   };
