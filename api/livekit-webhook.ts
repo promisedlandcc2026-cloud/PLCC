@@ -8,7 +8,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { WebhookReceiver } from 'livekit-server-sdk';
 import { getSupabaseAdmin } from './_utils/auth.js';
-import { getLiveKitServerConfig } from './_utils/livekitVoice.js';
+import { channelIdFromVoiceRoomName, getLiveKitServerConfig } from './_utils/livekitVoice.js';
+import { buildLiveKitHuddleAudit } from './_utils/plccIssues.js';
 import {
   notifyHuddleStartedFromRoom,
   shouldNotifyForLiveKitEvent,
@@ -124,6 +125,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ? { identity: participant.identity, name: participant.name }
         : null,
     });
+  }
+
+  // Issues page: who joined/left each Ka Link and LiveKit's reason (server truth). Fail-soft.
+  try {
+    const audit = buildLiveKitHuddleAudit({
+      eventName,
+      channelId: channelIdFromVoiceRoomName(roomName),
+      roomSid,
+      participant,
+      createdAt: (event as any)?.createdAt,
+    });
+    if (audit) {
+      const row = {
+        user_id: audit.userId,
+        action: audit.action,
+        details: JSON.stringify(audit.details),
+        resource_type: audit.resourceType,
+        resource_id: audit.resourceId,
+        severity: audit.severity,
+      };
+      let { error } = await supabase.from('audit_logs').insert([row]);
+      // Identity isn't a Canaan user id (guest / old token): keep the row, drop the link.
+      if (error && (error as any).code === '23503') {
+        ({ error } = await supabase
+          .from('audit_logs')
+          .insert([{ ...row, user_id: null, details: JSON.stringify({ ...audit.details, identity: audit.userId }) }]));
+      }
+      if (error) console.warn('[livekit-webhook] huddle event log failed', error.message || error);
+    }
+  } catch (err: any) {
+    console.warn('[livekit-webhook] huddle event log skipped', err?.message || err);
   }
 
   if (!wantsNotify) {
