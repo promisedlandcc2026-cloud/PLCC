@@ -181,6 +181,15 @@ export function shouldAttemptAuthRecovery(status: number): boolean {
   return status === 401;
 }
 
+/**
+ * Pure (Nov 20 2026): the server could not check the account right now (Supabase slow/down).
+ * Keep the session, show "try again" — and do not let the person in until a check succeeds.
+ */
+export function isTemporaryAuthFailure(status: number, body?: unknown): boolean {
+  const code = body && typeof body === 'object' ? String((body as { code?: unknown }).code || '') : '';
+  return code === 'auth_service_unavailable' || status === 0 || status === 408 || status === 429 || status >= 500;
+}
+
 /** Pure: 403 / 5xx / network must not force logout. */
 export function shouldForceLogoutOnStatus(status: number): boolean {
   return status === 401;

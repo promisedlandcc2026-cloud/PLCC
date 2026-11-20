@@ -27,8 +27,7 @@ import {
   peekReturnTo,
   peekSessionExpiredNotice,
   returnToFromRouterLocation,
-  sanitizeReturnTo,
-} from '../../lib/authSession';
+  sanitizeReturnTo, isTemporaryAuthFailure } from '../../lib/authSession';
 import { isLocalDevHost, LOCAL_UI_PREVIEW_PROFILE } from '../../lib/localUiPreview';
 import { PlccLoginShell, PlccLoginHeading, PLCC_INPUT, PLCC_PRIMARY_BTN, PLCC_GREEN } from '../../components/awcone/PlccOneShell';
 import { TITHE_URL as AWC_ONE_TITHE_URL } from '../../lib/awcOne';
@@ -193,6 +192,8 @@ const LoginPortal: React.FC = () => {
   const [portal, setPortal] = useState<PortalView>('choose');
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [stage, setStage] = useState<Stage>('idle');
+  /** Signed in, but the member check couldn't finish (Supabase slow): stay here and offer Try again. */
+  const [verifyRetry, setVerifyRetry] = useState<{ user: any; accessToken?: string } | null>(null);
 
   // Login Data
   const [identifier, setIdentifier] = useState('');
@@ -492,6 +493,7 @@ const LoginPortal: React.FC = () => {
   };
 
   const handleAuthSuccess = async (user: any, accessToken?: string) => {
+    setVerifyRetry(null);
     setStage('authorizing');
     // Store the real Supabase JWT so the API can verify it
     if (accessToken) {
@@ -499,19 +501,35 @@ const LoginPortal: React.FC = () => {
     }
 
     // Fetch the user's profile from the database to check if they've already onboarded
+    // Nov 20 2026: if the server can't check the account (Supabase slow), never fall back to
+    // "PENDING" / onboarding — retry a couple of times, then show "Try again". The session stays.
     let dbUser: any = null;
-    try {
-      const res = await fetch('/api/vault?resource=users&self=true', {
-        headers: {
-          'x-user-id': user.id,
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
+    let temporaryFailure = false;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      temporaryFailure = false;
+      try {
+        const res = await fetch('/api/vault?resource=users&self=true', {
+          headers: {
+            'x-user-id': user.id,
+            ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
+          }
+        });
+        const data = await res.json().catch(() => null);
+        if (isTemporaryAuthFailure(res.status, data)) {
+          temporaryFailure = true;
+        } else {
+          // With self=true, we should only get the authenticated user's record
+          dbUser = data?.users?.[0] || null;
+          break;
         }
-      });
-      const data = await res.json();
-      // With self=true, we should only get the authenticated user's record
-      dbUser = data?.users?.[0] || null;
-    } catch (e) {
-      // If fetch fails, fall back to metadata check
+      } catch (e) {
+        temporaryFailure = true; // network
+      }
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+    }
+    if (temporaryFailure) {
+      setVerifyRetry({ user, accessToken });
+      return;
     }
 
     setTimeout(() => {
@@ -1334,7 +1352,23 @@ const LoginPortal: React.FC = () => {
           )}
 
           {/* ── AUTHORIZING ── */}
-          {stage === 'authorizing' && (
+          {stage === 'authorizing' && verifyRetry && (
+            <div className="text-center space-y-6" role="alert" data-testid="verify-retry">
+              <div className="bg-white/80 backdrop-blur-md px-8 py-6 rounded-[2rem] border border-white/60 shadow-xl">
+                <h3 className="text-xl font-black text-[#0d1a14] tracking-tight">We couldn’t check your account just now</h3>
+                <p className="text-sm text-gray-600 mt-2">You’re still signed in. Our server is busy — please try again in a moment.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleAuthSuccess(verifyRetry.user, verifyRetry.accessToken)}
+                className="min-h-[48px] px-8 rounded-full bg-burgundy text-white font-black shadow-lg active:scale-95"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
+          {stage === 'authorizing' && !verifyRetry && (
             <div className="text-center space-y-10 animate-in zoom-in-95 duration-1000">
               <div className="w-32 h-32 bg-white/90 rounded-full border-4 border-gold/20 flex items-center justify-center mx-auto relative shadow-2xl">
                 <Loader2 size={64} className="text-burgundy animate-spin opacity-30" strokeWidth={1} />

@@ -1,4 +1,4 @@
 {
-  "notes": "You will now see a message like this whenever there is a fix or upgrade. Tap Update to get it.",
-  "critical": false
+  "notes": "When our server is busy, Canaan now asks you to try again instead of signing you out. Also a security fix for profile changes.",
+  "critical": true
 }

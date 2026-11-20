@@ -74,7 +74,61 @@ export const getSupabaseAdmin = () => {
 export type AuthResult = {
   user: { id: string; email?: string | null; metadata?: any; name?: string; title?: string } | null;
   role: string | null;
+  /**
+   * Nov 20 2026: Supabase Auth or the members lookup was slow/down, so we could not check
+   * this session. That is NOT "signed out": callers answer 503 (try again) and keep the
+   * session; nobody gets access until the check actually succeeds.
+   */
+  unavailable?: boolean;
 };
+
+export const AUTH_UNAVAILABLE_CODE = 'auth_service_unavailable';
+export const AUTH_UNAVAILABLE_MESSAGE =
+  'We couldn’t check your account just now. You’re still signed in — please try again in a moment.';
+
+/** Supabase was too slow or failed while checking a session (temporary, retryable). */
+export class AuthServiceUnavailableError extends Error {
+  readonly code = AUTH_UNAVAILABLE_CODE;
+  constructor(detail: string) {
+    super(`Auth service unavailable: ${detail}`);
+    this.name = 'AuthServiceUnavailableError';
+  }
+}
+
+/**
+ * Pure: is this a temporary Supabase / network failure (timeout, overload, 5xx), as opposed to
+ * a real "no such user" / "bad token" answer?
+ */
+export function isTransientSupabaseError(err: unknown): boolean {
+  if (!err) return false;
+  if (err instanceof AuthServiceUnavailableError) return true;
+  const e = err as { message?: string; code?: string; status?: number; name?: string };
+  const status = Number(e.status);
+  if (Number.isFinite(status) && (status === 0 || status >= 500 || status === 408 || status === 429)) return true;
+  if (e.name === 'AuthRetryableFetchError' || e.name === 'AbortError' || e.name === 'TimeoutError') return true;
+  const code = String(e.code || '');
+  if (['57014', 'PGRST000', 'PGRST001', 'PGRST002', '53300', '08006', '08001', '08003', '08004'].includes(code)) return true;
+  return /timed out|timeout|fetch failed|network|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|socket hang up|other side closed|statement timeout|too many connections|remaining connection slots|upstream|Bad Gateway|Service Unavailable|Gateway Timeout/i.test(
+    String(e.message || '')
+  );
+}
+
+/** Answer 503 + Retry-After for a session we could not check (keeps the member signed in). */
+export function sendAuthUnavailable(res: any) {
+  try {
+    res.setHeader?.('Retry-After', '5');
+    res.setHeader?.('Cache-Control', 'no-store');
+  } catch {
+    /* headers already sent */
+  }
+  return res.status(503).json({
+    ok: false,
+    code: AUTH_UNAVAILABLE_CODE,
+    retryable: true,
+    error: AUTH_UNAVAILABLE_MESSAGE,
+    message: AUTH_UNAVAILABLE_MESSAGE,
+  });
+}
 
 function displayNameFromMetadata(
   metadata?: Record<string, any> | null,
@@ -111,14 +165,23 @@ export const resolveAppUser = async (
   email?: string | null,
   metadata?: Record<string, any> | null
 ): Promise<Record<string, any> | null> => {
-  const { data: byId, error: byIdError } = await withSupabaseTimeout(
-    supabase.from('users').select(APP_USER_SELECT).eq('id', authUserId).maybeSingle(),
-    8_000,
-    'users.byId'
-  );
-
+  // Nov 20 2026: a slow/failed lookup must never look like "no such member" — that used to
+  // fall through to the email lookup / PENDING stub / sign-in screen. Stop and say "try again".
+  let byIdResult: { data: any; error: any };
+  try {
+    byIdResult = await withSupabaseTimeout(
+      supabase.from('users').select(APP_USER_SELECT).eq('id', authUserId).maybeSingle(),
+      8_000,
+      'users.byId'
+    );
+  } catch (err: any) {
+    console.warn(`[Auth Link] users.byId unavailable: ${err?.message || err}`);
+    throw new AuthServiceUnavailableError(`users.byId: ${err?.message || 'failed'}`);
+  }
+  const { data: byId, error: byIdError } = byIdResult;
   if (byIdError) {
-    console.log(`[Auth Link] Lookup by id failed: ${byIdError.message}`);
+    console.warn(`[Auth Link] users.byId failed: ${byIdError.message}`);
+    throw new AuthServiceUnavailableError(`users.byId: ${byIdError.message}`);
   }
   if (byId) return byId;
 
@@ -126,15 +189,21 @@ export const resolveAppUser = async (
   if (!normalizedEmail) return null;
 
   // Prefer exact eq (index-friendly). Emails are stored lowercased on insert.
-  const { data: byEmail, error: byEmailError } = await withSupabaseTimeout(
-    supabase.from('users').select(APP_USER_SELECT).eq('email', normalizedEmail).maybeSingle(),
-    8_000,
-    'users.byEmail'
-  );
-
+  let byEmailResult: { data: any; error: any };
+  try {
+    byEmailResult = await withSupabaseTimeout(
+      supabase.from('users').select(APP_USER_SELECT).eq('email', normalizedEmail).maybeSingle(),
+      8_000,
+      'users.byEmail'
+    );
+  } catch (err: any) {
+    console.warn(`[Auth Link] users.byEmail unavailable: ${err?.message || err}`);
+    throw new AuthServiceUnavailableError(`users.byEmail: ${err?.message || 'failed'}`);
+  }
+  const { data: byEmail, error: byEmailError } = byEmailResult;
   if (byEmailError) {
-    console.log(`[Auth Link] Lookup by email failed: ${byEmailError.message}`);
-    return null;
+    console.warn(`[Auth Link] users.byEmail failed: ${byEmailError.message}`);
+    throw new AuthServiceUnavailableError(`users.byEmail: ${byEmailError.message}`);
   }
 
   if (!byEmail) {
@@ -395,11 +464,19 @@ const verifyAuthUncached = async (req: any, supabase: SupabaseClient): Promise<A
       return { user: null, role: null };
     }
 
-    const { data: { user }, error } = await withSupabaseTimeout(
-      supabase.auth.getUser(token),
-      12_000,
-      'auth.getUser'
-    );
+    let got: Awaited<ReturnType<typeof supabase.auth.getUser>>;
+    try {
+      got = await withSupabaseTimeout(supabase.auth.getUser(token), 12_000, 'auth.getUser');
+    } catch (err: any) {
+      console.warn(`[Auth Check] UNAVAILABLE: ${err?.message || err}`);
+      return { user: null, role: null, unavailable: true };
+    }
+    const { data: { user }, error } = got;
+    if (error && isTransientSupabaseError(error)) {
+      // Supabase Auth itself is slow/down: the token may be perfectly good.
+      console.warn(`[Auth Check] UNAVAILABLE: ${error.message}`);
+      return { user: null, role: null, unavailable: true };
+    }
     if (error || !user) {
       console.log(`[Auth Check] FAILED: ${error?.message || 'No user for token'}`);
       return { user: null, role: null };
@@ -425,6 +502,10 @@ const verifyAuthUncached = async (req: any, supabase: SupabaseClient): Promise<A
       role,
     };
   } catch (err: any) {
+    if (isTransientSupabaseError(err)) {
+      console.warn('[Auth Check] UNAVAILABLE:', err?.message || err);
+      return { user: null, role: null, unavailable: true };
+    }
     console.error('[Auth Check] CRITICAL ERROR:', err.message);
     return { user: null, role: null };
   }
@@ -433,6 +514,10 @@ const verifyAuthUncached = async (req: any, supabase: SupabaseClient): Promise<A
 /** Return 401 JSON if auth failed; otherwise return the auth result. */
 export const requireAuth = async (req: any, res: any, supabase: SupabaseClient): Promise<AuthResult | null> => {
   const auth = await verifyAuth(req, supabase);
+  if (auth.unavailable) {
+    sendAuthUnavailable(res);
+    return null;
+  }
   if (!auth.user) {
     res.status(401).json({ ok: false, error: 'Unauthorized: valid Bearer token required' });
     return null;

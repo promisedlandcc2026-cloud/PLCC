@@ -9,6 +9,8 @@ import {
     reconcileAuthPendingSignups,
     requireAuth,
     FINANCE_ROLES,
+    sendAuthUnavailable,
+    isTransientSupabaseError,
 } from './auth.js';
 import { ensureMemberForUser } from './ensureMemberForUser.js';
 import {
@@ -709,19 +711,19 @@ const handleUsers = async (req: any, res: any) => {
         return handleServeEligibilityAdmin(req, res);
     }
 
-    const { user, role } = await verifyAuth(req, supabaseAdmin);
+    const auth = await verifyAuth(req, supabaseAdmin);
+    if (auth.unavailable) return sendAuthUnavailable(res);
+    const { user, role } = auth;
 
-    // Allow onboarding self-profile creation: PATCH where body.id === x-user-id header
-    const isOnboardingPatch = req.method === 'PATCH'
-        && req.body?.id
-        && req.headers?.['x-user-id']
-        && req.body.id === req.headers['x-user-id'];
-
-    if (!user && !isOnboardingPatch) {
+    // Nov 20 2026 (security): every profile change needs a real sign-in token. The old
+    // "onboarding PATCH" shortcut trusted body.id + an x-user-id header with NO token, which
+    // let anyone edit anyone's name, email, phone or Canaan password. Onboarding always
+    // sends the member's token, so it keeps working.
+    if (!user) {
         return res.status(401).json({ error: 'Unauthorized: No active session' });
     }
 
-    const effectiveUser = user ?? { id: req.body.id, email: req.body.email || null, metadata: null, name: null, title: null };
+    const effectiveUser = user;
     const effectiveRole = role ?? 'user';
     const isAdmin = effectiveRole && ['SUPER_ADMIN', 'PASTOR', 'ADMIN_STAFF', 'ADMIN', 'SECRETARY', 'ASST_SECRETARY', 'FIRST_LADY', 'FINANCE'].includes(effectiveRole);
     const isSuperAdmin = effectiveRole === 'SUPER_ADMIN';
@@ -10591,6 +10593,9 @@ const handleSettings = async (req: any, res: any) => {
         if (req.headers?.authorization) {
             const { accountantRouteDecision } = await import('./routeAccess.js');
             const gateAuth = await verifyAuth(req, supabaseAdmin);
+            // Nov 20 2026: Supabase too slow to check the session → "try again" (503), never
+            // "signed out" (401). Every handler below reuses this same per-request result.
+            if (gateAuth.unavailable) return sendAuthUnavailable(res);
             const decision = accountantRouteDecision(gateAuth.role, {
                 resource: String(resource || ''),
                 subResource: String(subResource || ''),
@@ -12323,6 +12328,10 @@ const handleSettings = async (req: any, res: any) => {
         }
     } catch (err: any) {
         console.error('[Vault API Error]:', err);
+        if (!res.headersSent && isTransientSupabaseError(err)) {
+            // A member lookup (or other Supabase call) timed out: temporary, keep the session.
+            return sendAuthUnavailable(res);
+        }
         const responseBody = {
             ok: false,
             error: 'Internal Server Error',
