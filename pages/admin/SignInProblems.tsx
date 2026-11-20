@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, ArrowLeft, KeyRound, Loader2, RefreshCw, ShieldAlert, Smartphone } from 'lucide-react';
+import { ArrowLeft, KeyRound, Loader2, RefreshCw, ShieldAlert, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../../App';
 import { getAuthHeaders, parseApiJson } from '../../lib/api';
@@ -9,7 +9,30 @@ import { getAuthHeaders, parseApiJson } from '../../lib/api';
  * Ka Link and the other PLCC apps, the reason, and what to do about it.
  */
 
-type ReasonRow = { reason: string; label: string; fix: string; count: number };
+type ReasonRow = {
+  reason: string;
+  label: string;
+  fix: string;
+  count: number;
+  simple?: string;
+  emoji?: string;
+  fixer?: 'member' | 'leader' | 'developer' | 'wait';
+  steps?: string[];
+};
+
+/** Who fixes it — a coloured tag so it's clear at a glance. */
+const FIXER: Record<string, { text: string; className: string }> = {
+  member: { text: 'They can fix this', className: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+  leader: { text: 'A leader fixes this', className: 'bg-blue-50 text-blue-800 border-blue-200' },
+  wait: { text: 'Just wait and try again', className: 'bg-amber-50 text-amber-900 border-amber-200' },
+  developer: { text: 'Tell the developer', className: 'bg-red-50 text-red-800 border-red-200' },
+};
+
+/** "+10 772…" / "+1 0772…": a Ugandan number saved with the USA (+1) code. */
+function wrongCountryHint(identifier: string | null | undefined): string | null {
+  const id = String(identifier || '').replace(/\s/g, '');
+  return /^\+10\d/.test(id) ? 'This number was typed with the USA flag (+1) instead of Uganda (+256). Ask them to tap the flag and pick Uganda 🇺🇬.' : null;
+}
 type Group = {
   key: string;
   name: string | null;
@@ -24,7 +47,7 @@ type Group = {
 };
 
 const MANAGER_ROLES = new Set(['SUPER_ADMIN', 'PASTOR', 'ADMIN']);
-const APP_LABELS: Record<string, string> = { 'ka-link': 'Ka Link', canaan: 'Canaan' };
+const APP_LABELS: Record<string, string> = { 'ka-link': 'Ka Link', canaan: 'Canaan', tribes: 'Tribes' };
 const METHOD_LABELS: Record<string, string> = { phone: 'Mobile number', email: 'Email', session: 'Signed in', code: 'Text code' };
 
 function ago(iso: string): string {
@@ -101,7 +124,7 @@ const SignInProblemsPage: React.FC = () => {
           <h1 className="flex items-center gap-2 text-3xl font-black text-[#0d1a14]">
             <KeyRound className="text-burgundy" aria-hidden /> Sign-in Problems
           </h1>
-          <p className="text-gray-500 mt-1">Who couldn’t get in, why, and what to do.</p>
+          <p className="text-gray-500 mt-1">Who had trouble getting in, what happened, and how to fix it.</p>
         </div>
         <button
           type="button"
@@ -168,22 +191,51 @@ const SignInProblemsPage: React.FC = () => {
                     </div>
                     <span className="text-xs font-bold text-gray-400 shrink-0">{ago(g.lastAt)}</span>
                   </div>
-                  <ul className="mt-3 space-y-2">
-                    {g.reasons.map((r) => (
-                      <li key={r.reason} className="rounded-2xl bg-gray-50 px-3 py-2">
-                        <p className="flex items-center gap-2 text-sm font-bold text-[#0d1a14]">
-                          <AlertTriangle size={14} className="text-amber-500 shrink-0" aria-hidden />
-                          {r.label}
-                          {r.count > 1 ? <span className="text-xs font-bold text-gray-400">×{r.count}</span> : null}
-                        </p>
-                        <p className="text-xs text-gray-600 mt-1">{r.fix}</p>
-                      </li>
-                    ))}
+                  {wrongCountryHint(g.identifier) ? (
+                    <p className="mt-3 rounded-2xl bg-blue-50 border border-blue-200 px-3 py-2 text-sm text-blue-900">
+                      🌍 {wrongCountryHint(g.identifier)}
+                    </p>
+                  ) : null}
+                  <ul className="mt-3 space-y-3">
+                    {g.reasons.map((r) => {
+                      const who = FIXER[r.fixer || ''] || null;
+                      return (
+                        <li key={r.reason} className="rounded-2xl bg-gray-50 px-4 py-3" data-testid="sign-in-problem">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-2xl leading-none" aria-hidden>{r.emoji || '⚠️'}</span>
+                            <p className="text-base font-black text-[#0d1a14]">{r.label}</p>
+                            {r.count > 1 ? <span className="text-xs font-bold text-gray-500">{r.count} times</span> : null}
+                            {who ? (
+                              <span className={`ml-auto rounded-full border px-2.5 py-1 text-xs font-bold ${who.className}`}>{who.text}</span>
+                            ) : null}
+                          </div>
+                          <p className="mt-2 text-sm text-gray-800">
+                            <span className="font-bold">What happened: </span>
+                            {r.simple || r.label}
+                          </p>
+                          <div className="mt-2">
+                            <p className="text-sm font-bold text-gray-800">How to fix it:</p>
+                            {r.steps?.length ? (
+                              <ol className="mt-1 space-y-1 text-sm text-gray-700 list-decimal pl-5">
+                                {r.steps.map((step, i) => (
+                                  <li key={i}>{step}</li>
+                                ))}
+                              </ol>
+                            ) : (
+                              <p className="mt-1 text-sm text-gray-700">{r.fix}</p>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                   {g.lastDetail ? (
-                    <p className="mt-2 flex items-center gap-1 text-[11px] text-gray-400">
-                      <Smartphone size={12} aria-hidden /> {g.lastDetail}
-                    </p>
+                    <details className="mt-2 text-xs text-gray-500">
+                      <summary className="cursor-pointer min-h-[32px] flex items-center gap-1 font-semibold">
+                        <Smartphone size={12} aria-hidden /> For the developer
+                      </summary>
+                      <p className="mt-1 break-words rounded-xl bg-gray-50 px-3 py-2 font-mono text-[12px] text-gray-600">{g.lastDetail}</p>
+                    </details>
                   ) : null}
                 </li>
               ))}

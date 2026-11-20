@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  SIGN_IN_FAILURE_LABELS,
   CLIENT_REPORTABLE_REASONS,
   groupSignInFailures,
   identifierHash,
@@ -63,6 +64,18 @@ ok('wiring: phone sign-in logs failures, router + public access, migration', () 
   assert.match(core, /case 'sign-in-failures'/);
   const sql = readFileSync(join(root, 'supabase/migrations/sign_in_failures.sql'), 'utf8');
   assert.match(sql, /ENABLE ROW LEVEL SECURITY/);
+});
+
+ok('every problem says what happened in plain words, who fixes it, and how (step by step)', () => {
+  for (const [reason, h] of Object.entries(SIGN_IN_FAILURE_LABELS)) {
+    assert.ok(h.simple && h.simple.length < 120, `${reason}: simple`);
+    assert.ok(['member', 'leader', 'developer', 'wait'].includes(h.fixer), `${reason}: fixer`);
+    assert.ok(h.steps.length >= 1 && h.steps.length <= 4, `${reason}: steps`);
+    assert.ok(h.emoji, `${reason}: emoji`);
+  }
+  const page = readFileSync(join(root, 'pages/admin/SignInProblems.tsx'), 'utf8');
+  assert.match(page, /How to fix it:/);
+  assert.match(page, /For the developer/);
 });
 
 console.log(`\n${passed} checks passed`);

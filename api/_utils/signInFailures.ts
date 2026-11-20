@@ -45,22 +45,152 @@ export const CLIENT_REPORTABLE_REASONS = new Set<SignInFailureReason>([
   'app_crash',
 ]);
 
-export const SIGN_IN_FAILURE_LABELS: Record<SignInFailureReason, { label: string; fix: string }> = {
-  invalid_phone: { label: 'Number typed wrong', fix: 'Ask them to pick their country and type the number like 0772 123456.' },
-  short_password: { label: 'Password too short', fix: 'Passwords need at least 6 characters.' },
-  rate_limited: { label: 'Too many tries', fix: 'They are locked out for 15 minutes. Then try again carefully.' },
-  no_account: { label: 'No account for this number', fix: 'They need to tap “Create an account”, or their number is saved differently on their profile.' },
-  wrong_password: { label: 'Wrong password', fix: 'Reset their password in Staff & Roles, or they can use “Text me a code”.' },
-  account_exists: { label: 'Tried to join, already has an account', fix: 'Tell them to sign in instead of creating an account.' },
-  signup_failed: { label: 'Could not create account', fix: 'Check the detail below; contact the developer if it repeats.' },
-  server_error: { label: 'Server error', fix: 'Contact the developer if it repeats.' },
-  server_unreachable: { label: 'Could not reach the church server', fix: 'Usually weak internet. Ask them to try again on better data or Wi-Fi.' },
-  email_code_not_sent: { label: 'Email code not sent', fix: 'Check the email address; suggest signing in with their mobile number.' },
-  email_code_wrong: { label: 'Wrong or expired email code', fix: 'Codes expire quickly. Ask them to request a new one, or use their mobile number.' },
-  member_pending: { label: 'Waiting for approval', fix: 'Approve them in People so they can use Ka Link.' },
-  member_not_found: { label: 'No member profile', fix: 'Their sign-in is not linked to a member. Use Canaan Repair to link it.' },
-  member_check_failed: { label: 'Member check failed', fix: 'The server could not confirm their membership. Usually temporary.' },
-  app_crash: { label: 'App crashed after sign-in', fix: 'Ask them to tap Reload, then Start fresh. Send the detail and phone type to the developer.' },
+/** Who can fix it: the member themselves, a church leader in Canaan, or the developer. */
+export type SignInFixer = 'member' | 'leader' | 'developer' | 'wait';
+
+export type SignInFailureHelp = {
+  /** Short name (also used on the Issues page). */
+  label: string;
+  /** One-line fix (also used on the Issues page). */
+  fix: string;
+  /** What happened, in words a child understands. */
+  simple: string;
+  emoji: string;
+  fixer: SignInFixer;
+  /** How to fix it, step by step. */
+  steps: string[];
+};
+
+/** Nov 19 2026: written so anyone can understand it — what happened, who fixes it, and how. */
+export const SIGN_IN_FAILURE_LABELS: Record<SignInFailureReason, SignInFailureHelp> = {
+  invalid_phone: {
+    label: 'Number typed wrong',
+    emoji: '📱',
+    simple: 'They typed their phone number in a way the app didn’t understand.',
+    fixer: 'member',
+    steps: ['Tap the flag and pick their country (Uganda 🇺🇬).', 'Type the number like 0772 123456.', 'Tap Continue.'],
+    fix: 'Pick their country, then type the number like 0772 123456.',
+  },
+  short_password: {
+    label: 'Password too short',
+    emoji: '🔑',
+    simple: 'Their new password was too short.',
+    fixer: 'member',
+    steps: ['Make a password with at least 6 letters or numbers.', 'Write it down somewhere safe.'],
+    fix: 'Use a password with at least 6 letters or numbers.',
+  },
+  rate_limited: {
+    label: 'Too many tries',
+    emoji: '⏳',
+    simple: 'They tried too many times, so the app asked them to take a break.',
+    fixer: 'wait',
+    steps: ['Wait 15 minutes.', 'Try again slowly and carefully.', 'If they forgot the password, tap “Text me a code”.'],
+    fix: 'Wait 15 minutes, then try again carefully (or tap “Text me a code”).',
+  },
+  no_account: {
+    label: 'No account for this number',
+    emoji: '🤷',
+    simple: 'The app couldn’t find an account with that phone number.',
+    fixer: 'member',
+    steps: [
+      'Check the number and the country flag are right.',
+      'If they are new, tap “Create an account”.',
+      'If they have an account, a leader can check the number saved on their profile in Members.',
+    ],
+    fix: 'Check the number, or tap “Create an account” if they are new.',
+  },
+  wrong_password: {
+    label: 'Wrong password',
+    emoji: '🔒',
+    simple: 'They typed the wrong password.',
+    fixer: 'member',
+    steps: ['Tap “Text me a code” — a code comes by text message.', 'Type the 6-number code to get in.', 'Or a leader can reset their password in Staff & Roles.'],
+    fix: 'Tap “Text me a code”, or a leader resets the password in Staff & Roles.',
+  },
+  account_exists: {
+    label: 'Already has an account',
+    emoji: '👋',
+    simple: 'They tried to make a new account, but they already have one.',
+    fixer: 'member',
+    steps: ['Tap “Sign in” instead of “Create an account”.', 'Use the same phone number.'],
+    fix: 'Tap “Sign in” instead of making a new account.',
+  },
+  signup_failed: {
+    label: 'Could not create account',
+    emoji: '🧩',
+    simple: 'Making their new account didn’t work.',
+    fixer: 'developer',
+    steps: ['Ask them to try once more.', 'If it happens again, tell the developer (open “For the developer” below and send it).'],
+    fix: 'Try once more; if it happens again, tell the developer.',
+  },
+  server_error: {
+    label: 'Church server had a problem',
+    emoji: '🛠️',
+    simple: 'Something broke on the church’s computer, not on their phone.',
+    fixer: 'developer',
+    steps: ['Ask them to try again in a few minutes.', 'If it keeps happening, tell the developer.'],
+    fix: 'Try again in a few minutes; if it keeps happening, tell the developer.',
+  },
+  server_unreachable: {
+    label: 'Weak internet',
+    emoji: '📶',
+    simple: 'Their phone couldn’t reach the church’s computer — usually weak internet.',
+    fixer: 'member',
+    steps: ['Move to a place with better signal, or turn on Wi-Fi.', 'Try again.'],
+    fix: 'Get better signal or Wi-Fi, then try again.',
+  },
+  email_code_not_sent: {
+    label: 'Email code didn’t send',
+    emoji: '✉️',
+    simple: 'The app tried to email them a code, but it didn’t go out.',
+    fixer: 'member',
+    steps: ['Sign in with their mobile number instead of email.', 'Leaders: if this happens to many people, the email service may need setting up (ask the developer).'],
+    fix: 'Sign in with their mobile number instead of email.',
+  },
+  email_code_wrong: {
+    label: 'Wrong or old email code',
+    emoji: '⌛',
+    simple: 'The email code was wrong or too old.',
+    fixer: 'member',
+    steps: ['Ask for a new code and use it straight away.', 'Check the Spam folder if it doesn’t arrive.', 'Or sign in with their mobile number.'],
+    fix: 'Ask for a new code and use it straight away, or use their mobile number.',
+  },
+  member_pending: {
+    label: 'Waiting for approval',
+    emoji: '🙋',
+    simple: 'They signed up, but a leader hasn’t said “yes” yet.',
+    fixer: 'leader',
+    steps: ['Open Members (People) in Canaan.', 'Find their name and approve them.', 'Ask them to sign in again.'],
+    fix: 'A leader approves them in Members, then they sign in again.',
+  },
+  member_not_found: {
+    label: 'Account not linked to a member',
+    emoji: '🔗',
+    simple: 'Their sign-in works, but it isn’t joined to their church member card.',
+    fixer: 'leader',
+    steps: ['Open Canaan Repair (Super Admin).', 'Link their sign-in to their member card.', 'Ask them to sign in again.'],
+    fix: 'Link their sign-in to their member card in Canaan Repair.',
+  },
+  member_check_failed: {
+    label: 'Church server was busy',
+    emoji: '⏱️',
+    simple: 'The church’s computer was too busy to check who they are.',
+    fixer: 'wait',
+    steps: ['Wait a minute.', 'Try again — it usually works the second time.'],
+    fix: 'Wait a minute and try again.',
+  },
+  app_crash: {
+    label: 'App stopped working',
+    emoji: '💥',
+    simple: 'The app got stuck after they signed in. This is the app’s fault, not theirs.',
+    fixer: 'developer',
+    steps: [
+      'Ask them to tap Reload.',
+      'If it happens again, tap “Start fresh”.',
+      'Tell the developer: open “For the developer” below and send what it says, plus their phone type.',
+    ],
+    fix: 'Tap Reload, then Start fresh; tell the developer if it keeps happening.',
+  },
 };
 
 export function isSignInFailureReason(v: unknown): v is SignInFailureReason {
@@ -169,7 +299,7 @@ export type SignInProblemGroup = {
   identifier: string | null;
   app: string;
   method: string;
-  reasons: Array<{ reason: SignInFailureReason; label: string; fix: string; count: number }>;
+  reasons: Array<{ reason: SignInFailureReason; count: number } & SignInFailureHelp>;
   attempts: number;
   lastAt: string;
   lastDetail: string | null;
