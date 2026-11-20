@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { UpdateBanner } from './components/ui/UpdateBanner';
 import { AlertCircle, Home } from 'lucide-react';
 import { Role, Section } from './types';
 import { accountantHomePath, hasPermission, isAccountantRole, isKioskRole, kioskHomePath } from './lib/permissions';
@@ -616,6 +617,8 @@ const App: React.FC = () => {
     }}>
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <TitleManager />
+        {/* "A new version is ready — Update" after each fix or upgrade. */}
+        <UpdateBanner appName="PLCC Canaan" className="z-[200]" />
         <Routes>
           {/* Authentication & Public */}
           <Route path="/login" element={<LoginPortal />} />
