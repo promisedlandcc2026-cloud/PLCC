@@ -27,6 +27,10 @@ import { authedFetch } from '../../lib/authedFetch';
 import { formatEventWhenLabel } from '../../lib/eventDate';
 import { upcoming, type HomeEvent } from './PlccHomeExtras';
 import { openReport } from '../../lib/report';
+import NotificationDrawer from '../Admin/NotificationDrawer';
+import { fetchAuthorized } from '../../lib/api';
+import { useVaultPoll } from '../../lib/useVaultPoll';
+import { useNav } from '../../lib/NavContext';
 import { PLCC_GOLD, PLCC_GREEN, PLCC_GREEN_DEEP, WORDMARK_IMG } from './PlccOneShell';
 
 /**
@@ -321,6 +325,57 @@ export const PlccMobileBar: React.FC<{ name: string; onMenu: () => void; onSignO
 
 export type SearchItem = { label: string; hint: string; run: () => void };
 
+/**
+ * Nov 20 2026: the bell used to jump to Settings (/notifications only redirects to the
+ * notification preferences tab). Now it opens the member's alerts right here — the same list
+ * as Canaan's top bar — with a red dot when something is unread.
+ */
+function PlccNotificationBell() {
+  const { userId, isAuthenticated } = useNav();
+  const [open, setOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+  const userRef = useRef(userId);
+  userRef.current = userId;
+  const enabled = Boolean(isAuthenticated && userId);
+  const refresh = useVaultPoll(
+    async () => {
+      const uid = userId;
+      const res = await fetchAuthorized('/api/vault?resource=notifications');
+      const data = await res.json().catch(() => ({}));
+      if (userRef.current !== uid) return;
+      setUnread(res.ok && data.ok ? Number(data.unreadCount) || 0 : 0);
+    },
+    { intervalMs: 60_000, enabled, deps: [userId] }
+  );
+  return (
+    <div className="relative z-[120]">
+      <button
+        type="button"
+        data-notification-trigger="true"
+        onClick={() => setOpen((v) => !v)}
+        aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className={`relative w-11 h-11 rounded-full flex items-center justify-center text-[#16251f] hover:bg-[#16251f]/5 ${FOCUS}`}
+      >
+        <Bell size={22} aria-hidden />
+        {unread > 0 ? (
+          <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-[#FBF7EE]" aria-hidden />
+        ) : null}
+      </button>
+      <NotificationDrawer
+        isOpen={open}
+        onClose={() => {
+          setOpen(false);
+          refresh();
+        }}
+        onInboxChange={() => refresh()}
+        userId={userId}
+      />
+    </div>
+  );
+}
+
 export const PlccDesktopBar: React.FC<{
   name: string;
   items: SearchItem[];
@@ -411,14 +466,7 @@ export const PlccDesktopBar: React.FC<{
         ) : null}
       </div>
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => navigate('/notifications')}
-          aria-label="Notifications"
-          className={`w-11 h-11 rounded-full flex items-center justify-center text-[#16251f] hover:bg-[#16251f]/5 ${FOCUS}`}
-        >
-          <Bell size={22} aria-hidden />
-        </button>
+        <PlccNotificationBell />
         <ProfileMenu name={name} onSignOut={onSignOut} />
       </div>
     </div>
