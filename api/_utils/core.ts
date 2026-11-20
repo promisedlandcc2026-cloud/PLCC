@@ -7606,9 +7606,10 @@ const handleCommunity = async (req: any, res: any) => {
                         detail = await removeHuddleParticipant(lk, cid, targetIdentity);
                     }
 
-                    if (['mic-lock', 'mic-unlock', 'remove', 'block'].includes(stageAction)) {
+                    // Logged (incl. Let them speak) so Issues can show who was given the mic and when.
+                    if (['mic-lock', 'mic-unlock', 'remove', 'block', 'allow-mic', 'revoke-mic'].includes(stageAction)) {
                         await logHuddleAudit({
-                            action: `Ka Link moderator: ${stageAction as 'mic-lock' | 'mic-unlock' | 'remove' | 'block'}`,
+                            action: `Ka Link moderator: ${stageAction as 'mic-lock' | 'mic-unlock' | 'remove' | 'block' | 'allow-mic' | 'revoke-mic'}`,
                             userId: authUserId,
                             channelId: cid,
                             details: { targetIdentity: targetIdentity || null, ...detail },
