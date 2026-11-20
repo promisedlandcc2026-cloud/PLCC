@@ -19,9 +19,13 @@ import { ShieldBan,
   Music
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useNav } from '../App';
+import { hasPermission } from '../lib/permissions';
 
 const MorePage: React.FC = () => {
   const navigate = useNavigate();
+  // Only show tools this person can open (same rules as the sidebar).
+  const { userRole } = useNav();
 
   const menuItems = [
     { 
@@ -155,7 +159,7 @@ const MorePage: React.FC = () => {
       {/* Grid Content */}
       <div className="max-w-4xl mx-auto px-6 mt-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {menuItems.map((item, index) => (
+          {menuItems.filter((item) => hasPermission(userRole, undefined, item.path)).map((item, index) => (
             <button
               key={index}
               onClick={() => navigate(item.path)}

@@ -25,7 +25,7 @@ import {
   BarChart3,
   Clapperboard,
   Coins,
-  HandCoins, HandHeart, Archive, Bell, Radio, Music, ShieldBan, KeyRound } from 'lucide-react';
+  HandCoins, HandHeart, Archive, Bell, Radio, Music, ShieldBan, KeyRound, LayoutGrid } from 'lucide-react';
 import { NavItem, Section } from '../types';
 import {
   DEFAULT_FELLOWSHIP_EVENT_ID,
@@ -186,6 +186,8 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
     id: 'account',
     label: 'Account',
     items: [
+      // All the extra tools (Ka Link Team, Music, Blocked Members, Reports…) in one place.
+      { label: 'More', path: '/more', icon: <LayoutGrid size={18} />, section: Section.More },
       { label: 'Settings', path: '/settings', icon: <Settings size={18} />, section: Section.More },
     ],
   },

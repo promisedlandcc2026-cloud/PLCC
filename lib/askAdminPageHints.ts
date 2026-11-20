@@ -39,6 +39,7 @@ export const ASK_ADMIN_PAGE_HINTS: Record<string, string> = {
   '/communication/announcements': 'How do I post or find announcements?',
   '/communication/minutes': 'How do I find meeting minutes?',
   '/admin/policies': 'Where are church policies and playbooks?',
+  '/more': 'Where are the extra tools like Ka Link Team, Music and Blocked Members?',
   '/admin/ka-link-team': 'Who starts prayer rooms, leads, and reads the Bible in Ka Link?',
   '/admin/ka-link-music': 'How do I add songs or choose the Ka Link music team?',
   '/admin/blocked-members': 'Who is blocked or warned, and how do I unblock someone?',
