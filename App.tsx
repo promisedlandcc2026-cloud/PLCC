@@ -125,7 +125,6 @@ import CountingSessionPage from './pages/finance/CountingSession';
 import StoreOrdersPage from './pages/store/StoreOrders';
 import MinutesManagerPage from './pages/communication/MinutesManager';
 import MinutesViewPage from './pages/communication/MinutesView';
-import MorePage from './pages/More';
 
 /** Old Contribution Book links now open PLCC's Treasury Ledger. */
 const RedirectToContributionBook: React.FC = () => <Navigate to="/finance/ledger" replace />;
@@ -633,7 +632,8 @@ const App: React.FC = () => {
           <Route path="/" element={<ProtectedRoute><AwcOneLauncherPage /></ProtectedRoute>} />
           <Route path="/launcher" element={<ProtectedRoute><AwcOneLauncherPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
-          <Route path="/more" element={<ProtectedRoute><AppShell><MorePage /></AppShell></ProtectedRoute>} />
+          {/* The old More page: everything moved into the menu (Admin, Ka Link tools, Settings tabs). */}
+          <Route path="/more" element={<Navigate to="/dashboard" replace />} />
 
           {/* People Management */}
           <Route path="/family" element={<ProtectedRoute><AppShell><MyFamilyPage /></AppShell></ProtectedRoute>} />

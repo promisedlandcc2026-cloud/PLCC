@@ -206,7 +206,7 @@ const KaLinkMusicPage: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 pb-24 pt-6 space-y-5">
-      <button type="button" onClick={() => navigate('/more')} className="flex items-center gap-2 text-sm font-bold text-gray-500">
+      <button type="button" onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-sm font-bold text-gray-500">
         <ArrowLeft size={16} aria-hidden /> Back
       </button>
       <header>

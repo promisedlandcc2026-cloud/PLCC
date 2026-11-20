@@ -304,6 +304,9 @@ export const PATH_PERMISSIONS: Record<string, Role[]> = {
   '/admin/blocked-members': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
   '/admin/sign-in-problems': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
   '/admin/users': [Role.SUPER_ADMIN],
+  // Leaders only (Admin / Pastor / Super Admin pass the check above).
+  '/reports': [Role.ADMIN, Role.PASTOR],
+  '/admin/servant-keeper': [Role.ADMIN, Role.PASTOR],
   '/admin/vault-repair': [Role.SUPER_ADMIN],
   '/admin/organization': [Role.ADMIN, Role.PASTOR],
   '/admin/audit': [Role.ADMIN, Role.PASTOR],

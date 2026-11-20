@@ -180,7 +180,8 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
     ],
   },
   {
-    // Records and rules in one place (each still only shows for the roles allowed to open it).
+    // Records, rules and reports in one place (each only shows for the roles allowed to open it).
+    // Organization, Security log and Audit log are tabs in Settings.
     id: 'admin',
     label: 'Admin',
     collapsible: true,
@@ -189,6 +190,8 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
       { label: 'Policies', path: '/admin/policies', icon: <BookOpen size={18} />, section: Section.More },
       { label: 'Consent', path: '/admin/consent-management', icon: <Shield size={18} />, section: Section.Events },
       { label: 'Staff & Roles', path: '/admin/users', icon: <UserCog size={18} />, section: Section.More },
+      { label: 'Reports & Insights', path: '/reports', icon: <BarChart3 size={18} />, section: Section.More },
+      { label: 'Servant Keeper', path: '/admin/servant-keeper', icon: <Archive size={18} />, section: Section.More },
     ],
   },
   {
@@ -198,8 +201,6 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
       { label: 'Settings', path: '/settings', icon: <Settings size={18} />, section: Section.More },
       // Phones: the top-bar Apps button is hidden on narrow screens, so the switcher is here too.
       { label: 'Other PLCC apps', path: '/launcher', icon: <LayoutGrid size={18} />, section: Section.Dashboard },
-      // Only the tools that are not in this menu (logs, organization, integrations…).
-      { label: 'More tools', path: '/more', icon: <LayoutGrid size={18} />, section: Section.More },
     ],
   },
 ];

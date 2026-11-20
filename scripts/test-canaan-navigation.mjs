@@ -34,11 +34,18 @@ describe('Canaan navigation', () => {
     assert.match(read('components/Layout/MobileBottomNav.tsx'), /label: 'Ka Link', path: '\/community\/chat'/);
   });
 
-  it('More lists only tools that are not in the menu', () => {
-    const more = read('pages/More.tsx');
-    assert.match(more, /const MENU_PATHS = new Set\(SIMPLE_NAV\.map\(\(n\) => n\.path\)\)/);
-    assert.match(more, /!MENU_PATHS\.has\(item\.path\)/);
-    assert.match(more, /data-testid="more-empty"/);
+  it('no More page: its tools are in the menu (Admin) or Settings tabs; old links go Home', () => {
+    assert.ok(!/path: '\/more'/.test(nav));
+    assert.match(nav, /label: 'Reports & Insights', path: '\/reports'/);
+    assert.match(nav, /label: 'Servant Keeper', path: '\/admin\/servant-keeper'/);
+    const app = read('App.tsx');
+    assert.match(app, /<Route path="\/more" element=\{<Navigate to="\/dashboard" replace \/>\} \/>/);
+    assert.ok(!/MorePage/.test(app));
+    const perms = read('lib/permissions.ts');
+    assert.match(perms, /'\/reports': \[Role\.ADMIN, Role\.PASTOR\]/);
+    for (const f of ['pages/admin/BlockedMembers.tsx', 'pages/admin/KaLinkTeam.tsx', 'pages/admin/SignInProblems.tsx', 'pages/admin/KaLinkMusic.tsx', 'pages/admin/Policies.tsx']) {
+      assert.ok(!read(f).includes("navigate('/more')"), f);
+    }
   });
 
   it('one tap to other PLCC apps: top bar (bigger screens) and the menu (phones)', () => {

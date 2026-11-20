@@ -13,7 +13,7 @@ export function routeForSection(section: Section): string {
     [Section.Forms]: '/elements/forms',
     [Section.FollowUps]: '/follow-ups',
     [Section.Communication]: '/communication/announcements',
-    [Section.More]: '/more',
+    [Section.More]: '/settings',
   };
 
   return routes[section];

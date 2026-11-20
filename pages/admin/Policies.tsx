@@ -164,11 +164,11 @@ const PoliciesPage: React.FC = () => {
       <div className="bg-white border-b border-gray-100 px-6 py-8 md:py-12">
         <div className="max-w-4xl mx-auto">
           <button 
-            onClick={() => navigate('/more')}
+            onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2 text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-6 hover:text-burgundy transition-colors group"
           >
             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-            Back to More Tools
+            Back to Home
           </button>
           
           <div className="flex items-center gap-3 mb-2">
