@@ -542,6 +542,8 @@ export async function muteParticipantMicrophoneTracks(
   participantFound: boolean;
   micPublishRevoked: boolean;
   micPublishRestored: boolean;
+  /** Unmute: LiveKit won't switch on someone else's mic, so we asked them to (see below). */
+  unmuteRequested?: boolean;
 }> {
   const identity = String(targetIdentity || '').trim();
   if (!identity) throw new Error('targetIdentity is required');
@@ -575,30 +577,51 @@ export async function muteParticipantMicrophoneTracks(
   }
 
   const sids = selectMicrophoneTrackSids(participant?.tracks);
-  let tracksMuted = 0;
-  for (const sid of sids) {
-    await svc.mutePublishedTrack(roomName, identity, sid, muted);
-    tracksMuted += 1;
+
+  if (muted) {
+    let tracksMuted = 0;
+    for (const sid of sids) {
+      await svc.mutePublishedTrack(roomName, identity, sid, true);
+      tracksMuted += 1;
+    }
+    return { roomName, identity, muted: true, tracksMuted, participantFound: true, micPublishRevoked: false, micPublishRestored: false };
   }
 
+  // Unmute (Nov 20 2026): first make sure they are ALLOWED to talk.
   let micPublishRestored = false;
-  if (!muted) {
+  try {
+    await setMicrophonePublishAllowed(svc, roomName, identity, participant, true);
+    micPublishRestored = true;
+  } catch (err: any) {
+    console.warn('[voice-participant-mute] restore', err?.message || err);
+  }
+  // LiveKit refuses to switch on someone else's microphone unless "remote unmute" is turned on
+  // for the project (privacy). That refusal used to come back as a 500 ("Chat is temporarily
+  // unavailable"). Now: try, and if it is refused (or they have no mic track yet), ask them.
+  let tracksUnmuted = 0;
+  let refused = sids.length === 0;
+  for (const sid of sids) {
     try {
-      await setMicrophonePublishAllowed(svc, roomName, identity, participant, true);
-      micPublishRestored = true;
+      await svc.mutePublishedTrack(roomName, identity, sid, false);
+      tracksUnmuted += 1;
     } catch (err: any) {
-      console.warn('[voice-participant-mute] restore', err?.message || err);
+      refused = true;
+      console.info('[voice-participant-mute] remote unmute refused, asking instead:', err?.message || err);
     }
   }
-
+  let unmuteRequested = false;
+  if (refused) {
+    unmuteRequested = await sendHuddleConductNotice(config, channelId, identity, { t: 'ask-unmute' });
+  }
   return {
     roomName,
     identity,
-    muted: muted ? true : false,
-    tracksMuted,
+    muted: false,
+    tracksMuted: tracksUnmuted,
     participantFound: true,
     micPublishRevoked: false,
     micPublishRestored,
+    unmuteRequested,
   };
 }
 
@@ -1155,7 +1178,7 @@ export async function sendHuddleConductNotice(
   config: LiveKitServerConfig,
   channelId: string,
   identity: string,
-  notice: { t: 'warn' | 'block'; reason?: string | null; by?: string | null }
+  notice: { t: 'warn' | 'block' | 'ask-unmute'; reason?: string | null; by?: string | null }
 ): Promise<boolean> {
   try {
     const data = new TextEncoder().encode(JSON.stringify({ v: 1, ...notice }));

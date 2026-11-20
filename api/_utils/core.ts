@@ -701,6 +701,11 @@ async function ensureAccountantFundraiserSwitch(supabaseAdmin: any, userId: stri
     }
 }
 
+/** voice-participant-mute: was this a mute (true) or an unmute (false)? */
+function wantMutedLabel(req: any): boolean {
+    return req?.body?.muted !== false && req?.body?.unmute !== true;
+}
+
 const handleUsers = async (req: any, res: any) => {
     const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) return res.status(503).json({ error: 'Supabase Admin not initialized' });
@@ -7092,16 +7097,17 @@ const handleCommunity = async (req: any, res: any) => {
                     if (!result.participantFound) {
                         return res.status(404).json({
                             ok: false,
-                            error: 'Participant is not in the active Ka Link',
+                            error: 'That person is not in the Ka Link right now.',
                             ...result,
                         });
                     }
                     return res.status(200).json({ ok: true, ...result });
                 } catch (e: any) {
                     console.warn('[voice-participant-mute]', e);
-                    return res.status(500).json({
+                    // 503 + a sentence for people: the apps show it as written.
+                    return res.status(503).json({
                         ok: false,
-                        error: 'Could not mute participant',
+                        error: wantMutedLabel(req) ? 'Could not mute them just now. Please try again.' : 'Could not unmute them just now. Please try again.',
                     });
                 }
             }
