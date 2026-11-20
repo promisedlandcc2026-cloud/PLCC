@@ -47,6 +47,7 @@ function fakeRooms() {
     remove: async (name) => {
       rooms.delete(name);
     },
+    listCalls: async () => [...rooms.entries()].map(([name, r]) => ({ name, metadata: r.metadata, people: r.participantIds.length })),
     mint: async (plan) => `token-for-${plan.identity}-${plan.roomName}`,
   };
   return { rooms, api };
@@ -213,6 +214,21 @@ await ok('status helper ignores stale rings', () => {
     userId: B,
   });
   assert.equal(old.ringing, false);
+});
+
+await ok('pending: finds a call ringing for me even if the ring ping was missed', async () => {
+  const { rooms, api } = fakeRooms();
+  const none = await handleDmCall({ action: 'pending', channelId: null, video: false }, ctxFor(B, api).ctx);
+  assert.equal(none.body.ringing, false);
+  await handleDmCall({ action: 'ring', channelId: C, video: true }, ctxFor(A, api).ctx);
+  rooms.get(dmCallRoomName(C))!.participantIds = [A];
+  const p = await handleDmCall({ action: 'pending', channelId: null, video: false }, ctxFor(B, api).ctx);
+  assert.equal(p.body.ringing, true);
+  assert.equal(p.body.channelId, C);
+  assert.equal(p.body.video, true);
+  const mine = await handleDmCall({ action: 'pending', channelId: null, video: false }, ctxFor(A, api).ctx);
+  assert.equal(mine.body.ringing, false, 'never for the caller');
+  assert.equal(parseDmCallCommand({ action: 'pending' }).ok, true);
 });
 
 await ok('route is wired in core.ts', () => {

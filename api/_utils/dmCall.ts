@@ -25,7 +25,7 @@ export const DM_CALL_RING_SECONDS = 45;
 export const DM_CALL_EMPTY_TIMEOUT_SECONDS = 60;
 export const DM_CALL_TOKEN_TTL_SECONDS = 3 * 60 * 60;
 
-export type DmCallAction = 'inbox' | 'ring' | 'join' | 'decline' | 'end' | 'status';
+export type DmCallAction = 'inbox' | 'ring' | 'join' | 'decline' | 'end' | 'status' | 'pending';
 export type DmCallCommand = { action: DmCallAction; channelId: string | null; video: boolean };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -51,16 +51,16 @@ export function callInboxTopic(userId: string, secret = topicSecret()): string {
 export function parseDmCallCommand(raw: unknown): { ok: true; cmd: DmCallCommand } | { ok: false; error: string } {
   const b = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : null;
   const action = String(b?.action || '') as DmCallAction;
-  if (!['inbox', 'ring', 'join', 'decline', 'end', 'status'].includes(action)) {
+  if (!['inbox', 'ring', 'join', 'decline', 'end', 'status', 'pending'].includes(action)) {
     return { ok: false, error: 'That call request was not valid.' };
   }
-  if (action === 'inbox') return { ok: true, cmd: { action, channelId: null, video: false } };
+  if (action === 'inbox' || action === 'pending') return { ok: true, cmd: { action, channelId: null, video: false } };
   const channelId = String(b?.channelId || '').trim();
   if (!UUID_RE.test(channelId)) return { ok: false, error: 'Pick the chat first.' };
   return { ok: true, cmd: { action, channelId, video: action === 'ring' && b?.video === true } };
 }
 
-export type DmCallMeta = { callerId: string; callerName: string; video: boolean; startedAt: number };
+export type DmCallMeta = { callerId: string; callerName: string; video: boolean; startedAt: number; calleeId?: string };
 
 export function buildDmCallMetadata(meta: DmCallMeta): string {
   return JSON.stringify({ plccCall: 1, ...meta });
@@ -75,6 +75,7 @@ export function parseDmCallMetadata(raw: unknown): DmCallMeta | null {
       callerName: String(m.callerName || 'Someone'),
       video: m.video === true,
       startedAt: Number(m.startedAt) || 0,
+      ...(m.calleeId ? { calleeId: String(m.calleeId) } : {}),
     };
   } catch {
     return null;
@@ -159,6 +160,8 @@ export type DmCallContext = {
 export type DmCallRooms = {
   create: (name: string, metadata: string) => Promise<void>;
   read: (name: string) => Promise<{ metadata: string; participantIds: string[] } | null>;
+  /** Every call room right now (name + metadata + how many people are in it). */
+  listCalls: () => Promise<Array<{ name: string; metadata: string; people: number }>>;
   remove: (name: string) => Promise<void>;
   mint: (plan: ReturnType<typeof planDmCallToken>) => Promise<string>;
 };
@@ -190,6 +193,12 @@ export function liveKitDmCallRooms(lk: LiveKitServerConfig): DmCallRooms {
     remove: async (name) => {
       await svc.deleteRoom(name).catch(() => {});
     },
+    listCalls: async () => {
+      const rooms = await svc.listRooms().catch(() => []);
+      return (Array.isArray(rooms) ? rooms : [])
+        .filter((r: any) => String(r?.name || '').startsWith(DM_CALL_ROOM_PREFIX))
+        .map((r: any) => ({ name: String(r.name), metadata: String(r.metadata || ''), people: Number(r.numParticipants || 0) }));
+    },
     mint: async (plan) => {
       const at = new AccessToken(lk.apiKey, lk.apiSecret, { identity: plan.identity, name: plan.name, ttl: plan.ttlSeconds });
       at.addGrant(plan.grant);
@@ -208,6 +217,20 @@ export async function handleDmCall(cmd: DmCallCommand, ctx: DmCallContext): Prom
   }
   if (!ctx.lk) return fail(503, 'Calls are not available right now.');
   const rooms = ctx.rooms || liveKitDmCallRooms(ctx.lk);
+  if (cmd.action === 'pending') {
+    // Safety net for the ring ping: is anyone calling me right now?
+    const calls = await rooms.listCalls();
+    for (const c of calls) {
+      const meta = parseDmCallMetadata(c.metadata);
+      if (!meta || meta.calleeId !== ctx.userId || c.people !== 1) continue;
+      if (meta.startedAt && Date.now() - meta.startedAt > (DM_CALL_RING_SECONDS + 5) * 1000) continue;
+      return {
+        status: 200,
+        body: { ok: true, ringing: true, channelId: c.name.slice(DM_CALL_ROOM_PREFIX.length), callerId: meta.callerId, callerName: meta.callerName, video: meta.video },
+      };
+    }
+    return { status: 200, body: { ok: true, ringing: false } };
+  }
   const channelId = String(cmd.channelId);
   const gate = await ctx.loadChannel(channelId);
   if (gate.ok === false) return fail(gate.status, gate.error);
@@ -259,7 +282,7 @@ export async function handleDmCall(cmd: DmCallCommand, ctx: DmCallContext): Prom
   }
 
   // ring
-  const meta: DmCallMeta = { callerId: ctx.userId, callerName: ctx.displayName, video: cmd.video, startedAt: Date.now() };
+  const meta: DmCallMeta = { callerId: ctx.userId, callerName: ctx.displayName, video: cmd.video, startedAt: Date.now(), calleeId: partnerId };
   const existing = await rooms.read(roomName);
   const existingMeta = existing ? parseDmCallMetadata(existing.metadata) : null;
   if (existing && existingMeta && existing.participantIds.includes(partnerId) && existingMeta.callerId === partnerId) {
