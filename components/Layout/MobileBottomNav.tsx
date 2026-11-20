@@ -53,7 +53,7 @@ const MobileBottomNav: React.FC = () => {
     { label: 'Home', path: '/dashboard', icon: Home, section: Section.Dashboard },
     { label: 'Prayer', path: '/community/prayer-wall', icon: Heart, section: Section.Community },
     { label: 'Events', path: '/events/overview', icon: Calendar, section: Section.Events },
-    { label: 'Chat', path: '/community/chat', icon: MessageSquare, section: Section.Community, hasBadge: true },
+    { label: 'Ka Link', path: '/community/chat', icon: MessageSquare, section: Section.Community, hasBadge: true },
   ];
 
   const handleNavigate = (path: string, section: Section) => {

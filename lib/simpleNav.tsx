@@ -23,7 +23,7 @@ import {
   BarChart3,
   Clapperboard,
   Coins,
-  HandCoins, HandHeart, Archive, Bell, Radio, Music, ShieldBan, KeyRound, LayoutGrid } from 'lucide-react';
+  HandCoins, HandHeart, Archive, Bell, Radio, Music, ShieldBan, KeyRound, LayoutGrid, UserCog } from 'lucide-react';
 import { NavItem, Section } from '../types';
 import {
   DEFAULT_FELLOWSHIP_EVENT_ID,
@@ -69,7 +69,7 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
         section: Section.Attendance,
       },
       {
-        label: 'Dashboard',
+        label: 'Attendance dashboard',
         path: '/attendance/dashboard',
         icon: <BarChart3 size={18} />,
         section: Section.Attendance,
@@ -134,7 +134,6 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
       },
       // Moved here from the account menu ("System Alerts")
       { label: 'Event alerts', path: '/events/alerts', icon: <Bell size={18} />, section: Section.Events },
-      { label: 'Consent', path: '/admin/consent-management', icon: <Shield size={18} />, section: Section.Events },
     ],
   },
   {
@@ -152,26 +151,26 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
     ],
   },
   {
-    id: 'connect',
-    label: 'Connect',
+    // Was "Connect" (Tribes' old name). Everyday church life for everyone.
+    id: 'church-life',
+    label: 'Church life',
     items: [
       { label: 'Community', path: '/community/feed', icon: <Users2 size={18} />, section: Section.Community },
-      { label: 'Sermon Notes', path: '/community/sermon-notes', icon: <BookOpen size={18} />, section: Section.Community },
-      { label: 'Sermon Manager', path: '/community/sermons', icon: <FileEdit size={18} />, section: Section.Community },
-      { label: 'Daily Devotional', path: '/community/daily-devotional', icon: <BookOpen size={18} />, section: Section.Community },
       { label: 'Prayer', path: '/community/prayer-wall', icon: <Heart size={18} />, section: Section.Community },
       { label: 'Prayer Watch', path: '/community/prayer-watch', icon: <HandHeart size={18} />, section: Section.Community },
+      { label: 'Daily Devotional', path: '/community/daily-devotional', icon: <BookOpen size={18} />, section: Section.Community },
+      { label: 'Sermon Notes', path: '/community/sermon-notes', icon: <BookOpen size={18} />, section: Section.Community },
+      { label: 'Sermon Manager', path: '/community/sermons', icon: <FileEdit size={18} />, section: Section.Community },
       { label: 'Announcements', path: '/communication/announcements', icon: <Megaphone size={18} />, section: Section.Communication },
-      { label: 'Minutes', path: '/communication/minutes', icon: <ClipboardList size={18} />, section: Section.Communication },
-      { label: 'Policies', path: '/admin/policies', icon: <BookOpen size={18} />, section: Section.More },
       { label: 'How To Videos', path: '/help/how-to-videos', icon: <Clapperboard size={18} />, section: Section.Community },
-      { label: 'Chat', path: '/community/chat', icon: <MessageSquare size={18} />, section: Section.Community },
+      // Chat lives in Ka Link now; this opens it signed in.
+      { label: 'Ka Link (chat & calls)', path: '/community/chat', icon: <MessageSquare size={18} />, section: Section.Community },
     ],
   },
   {
-    // Ka Link leaders' tools (were only on the hidden More page) — Pastor / Admin / Super Admin.
+    // Ka Link leaders' tools — Pastor / Admin / Super Admin.
     id: 'ka-link',
-    label: 'Ka Link',
+    label: 'Ka Link tools',
     collapsible: true,
     items: [
       { label: 'Ka Link Team', path: '/admin/ka-link-team', icon: <Radio size={18} />, section: Section.More },
@@ -181,12 +180,26 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
     ],
   },
   {
+    // Records and rules in one place (each still only shows for the roles allowed to open it).
+    id: 'admin',
+    label: 'Admin',
+    collapsible: true,
+    items: [
+      { label: 'Minutes', path: '/communication/minutes', icon: <ClipboardList size={18} />, section: Section.Communication },
+      { label: 'Policies', path: '/admin/policies', icon: <BookOpen size={18} />, section: Section.More },
+      { label: 'Consent', path: '/admin/consent-management', icon: <Shield size={18} />, section: Section.Events },
+      { label: 'Staff & Roles', path: '/admin/users', icon: <UserCog size={18} />, section: Section.More },
+    ],
+  },
+  {
     id: 'account',
     label: 'Account',
     items: [
-      // All the extra tools (Ka Link Team, Music, Blocked Members, Reports…) in one place.
-      { label: 'More', path: '/more', icon: <LayoutGrid size={18} />, section: Section.More },
       { label: 'Settings', path: '/settings', icon: <Settings size={18} />, section: Section.More },
+      // Phones: the top-bar Apps button is hidden on narrow screens, so the switcher is here too.
+      { label: 'Other PLCC apps', path: '/launcher', icon: <LayoutGrid size={18} />, section: Section.Dashboard },
+      // Only the tools that are not in this menu (logs, organization, integrations…).
+      { label: 'More tools', path: '/more', icon: <LayoutGrid size={18} />, section: Section.More },
     ],
   },
 ];

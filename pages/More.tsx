@@ -21,13 +21,17 @@ import { ShieldBan,
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../App';
 import { hasPermission } from '../lib/permissions';
+import { SIMPLE_NAV } from '../lib/simpleNav';
+
+/** Paths already in the left menu: More only lists the extra tools, so there is one place for each. */
+const MENU_PATHS = new Set(SIMPLE_NAV.map((n) => n.path));
 
 const MorePage: React.FC = () => {
   const navigate = useNavigate();
   // Only show tools this person can open (same rules as the sidebar).
   const { userRole } = useNav();
 
-  const menuItems = [
+  const menuItems: Array<{ label: string; path: string; description: string; icon: React.ReactNode; color: string; shadow: string }> = [
     { 
       label: 'Settings Hub', 
       description: 'System preferences & tools',
@@ -134,6 +138,8 @@ const MorePage: React.FC = () => {
     },
   ];
 
+  const extraTools = menuItems.filter((item) => !MENU_PATHS.has(item.path) && hasPermission(userRole, undefined, item.path));
+
   return (
     <div className="min-h-screen bg-[#FDFDFB] pb-32 animate-in fade-in duration-700">
       {/* Header Area */}
@@ -152,14 +158,19 @@ const MorePage: React.FC = () => {
             <h2 className="text-[10px] font-black text-gold uppercase tracking-[0.4em]">Administration</h2>
           </div>
           <h1 className="text-4xl font-black text-[#0d1a14] tracking-tighter leading-none mb-1">More Tools<span className="text-gold">.</span></h1>
-          <p className="text-gray-400 font-medium text-sm">Auxiliary modules and system configuration.</p>
+          <p className="text-gray-400 font-medium text-sm">Extra tools that are not in the menu: logs, organization and integrations. Everything else is in the menu (☰).</p>
         </div>
       </div>
 
       {/* Grid Content */}
       <div className="max-w-4xl mx-auto px-6 mt-10">
+        {extraTools.length === 0 ? (
+          <p className="rounded-3xl bg-white border border-gray-100 p-6 text-sm text-gray-600" data-testid="more-empty">
+            Everything you can open is in the menu (☰). Nothing extra here for your role.
+          </p>
+        ) : null}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {menuItems.filter((item) => hasPermission(userRole, undefined, item.path)).map((item, index) => (
+          {extraTools.map((item, index) => (
             <button
               key={index}
               onClick={() => navigate(item.path)}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { VaultSearch } from './VaultSearch';
+import { AppsMenu } from './AppsMenu';
 import {
   Menu,
   ChevronDown,
@@ -160,6 +161,8 @@ const Topbar: React.FC = () => {
       <VaultSearch />
 
       <div className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-4 ml-auto">
+        {/* One tap to Ka Link, Tribes, Firstfruits or all PLCC apps. */}
+        <AppsMenu isAuthenticated={Boolean(isAuthenticated)} />
         <div className="relative z-[120]">
           <button
             type="button"
