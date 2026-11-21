@@ -422,40 +422,24 @@ const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      <div className="p-3 lg:p-2.5 border-t border-gray-50 bg-gold-cream/10 space-y-3 lg:space-y-2.5">
-        <div className="flex items-center space-x-2.5 p-2 bg-white/50 rounded-2xl border border-white shadow-sm">
-          <div className="w-9 h-9 lg:w-8 lg:h-8 rounded-xl bg-[#1d372c] flex items-center justify-center text-[#C9A35A] font-bold text-sm shadow-lg">
+      <div className="shrink-0 border-t border-[#e8e6dd] bg-[#faf9f4] px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1d372c] text-xs font-bold text-[#e6c36f]" aria-hidden>
             {userRole.charAt(0)}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-black text-burgundy truncate uppercase tracking-tighter">Signed in</p>
-            <p className="text-[11px] text-gray-600 font-bold uppercase tracking-widest">{userRole}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold leading-tight text-[#1d372c]">Signed in</p>
+            <p className="truncate text-xs leading-tight text-gray-600">{String(userRole).replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())}</p>
           </div>
         </div>
-
         {isBirthdayToday ? (
-          <div
-            className="bg-burgundy p-3 lg:p-2.5 rounded-2xl border border-gold/40 flex items-start gap-2.5 shadow-xl animate-pulse ring-2 ring-gold/20 cursor-pointer"
-            onClick={() => navigate('/dashboard')}
-          >
-            <PartyPopper size={16} className="text-gold shrink-0 mt-0.5" />
-            <div>
-              <p className="text-xs font-black text-gold leading-tight uppercase tracking-widest">
-                Happy Birthday!
-              </p>
-              <p className="text-[11px] text-white/80 mt-1 uppercase tracking-tighter font-bold">Enjoy your special day</p>
-            </div>
-          </div>
+          <button type="button" onClick={() => navigate('/dashboard')} className="mt-2 flex min-h-[36px] w-full items-center gap-2 rounded-lg px-1 text-left text-xs font-semibold text-[#6d541b] hover:bg-[#eee9d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b9944e]">
+            <PartyPopper size={15} className="shrink-0" aria-hidden /> Happy birthday!
+          </button>
         ) : (
-          <div className="bg-white/80 p-3 lg:p-2.5 rounded-2xl border border-gold/10 flex items-start gap-2.5 shadow-sm hover:shadow-md transition-shadow">
-            <Cake size={16} className="text-gold shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm lg:text-[13px] font-bold text-gray-600 leading-tight">
-                Maintain your <Link to="/settings?tab=personal" className="text-burgundy hover:underline font-black">Profile</Link>
-              </p>
-              <p className="text-[11px] text-gray-500 mt-1 uppercase tracking-widest font-bold">Anniversary tracking</p>
-            </div>
-          </div>
+          <Link to="/settings?tab=personal" onClick={() => { if (window.innerWidth < 1024) setIsSidebarOpen(false); }} className="mt-2 flex min-h-[36px] items-center gap-2 rounded-lg px-1 text-xs font-semibold text-[#31513d] hover:bg-[#eee9d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b9944e]">
+            <Cake size={15} className="shrink-0 text-[#a8802c]" aria-hidden /> Update profile &amp; anniversaries
+          </Link>
         )}
       </div>
     </div>
