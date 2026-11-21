@@ -13,3 +13,12 @@ describe('Pastoral requests API',()=>{
  it('rejects invalid time zones and missing explicit offsets',async()=>{const d=setup(),r=res();await handlePastoralRequests({method:'POST',body:{action:'submit',officeId:office,category:'appointment',preferredStart:'2027-01-01T10:00',timeZone:'Africa/Kampala',contactPreference:'app'}},r,d);assert.equal(r.statusCode,400);assert.equal(d.calls.length,0)});
  it('passes version and actor into transition transaction',async()=>{const d=setup(),r=res();await handlePastoralRequests({method:'POST',body:{action:'approve',requestId:request,version:2}},r,d);assert.equal(r.statusCode,200);assert.equal(d.calls[0].name,'pastoral_transition_request');assert.equal(d.calls[0].args.p_actor,actor)});
 });
+
+describe('assistant request privacy',()=>{
+ it('exposes only an approved service label, never the member message',async()=>{
+  const rows=[{id:request,category:'appointment',brief_message:'[Service: Wedding]\nprivate details'},{id:office,category:'counseling',brief_message:'sensitive counseling details'}];
+  const admin={from(name){return {select(){return this},eq(){return this},is(){return this},order(){return this},limit:async()=>({data:rows,error:null}),maybeSingle:async()=>({data:name==='pastoral_office_assignments'?{office_id:office}:null,error:null})}}};
+  const r=res();await handlePastoralRequests({method:'GET',query:{scope:'office',officeId:office}},r,{admin,verify:async()=>({user:{id:actor},role:'MEMBER'})});
+  assert.equal(r.statusCode,200);assert.equal(r.body.requests[0].service_label,'Wedding');assert.equal(r.body.requests[0].brief_message,undefined);assert.equal(r.body.requests[1].brief_message,undefined);assert.equal(r.body.requests[1].service_label,undefined);
+ });
+});
