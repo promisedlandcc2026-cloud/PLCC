@@ -1,13 +1,14 @@
 /** Pure validation for the Pastor's Office. Authorization and persistence are server-side. */
-export type RequestStatus = 'requested' | 'proposed' | 'awaiting_approval' | 'confirmed' | 'completed' | 'declined' | 'cancelled' | 'no_show';
+export type RequestStatus = 'requested' | 'proposed' | 'awaiting_approval' | 'confirmed' | 'reschedule_requested' | 'completed' | 'declined' | 'cancelled' | 'no_show';
 export type OfficeActor = 'member' | 'assistant' | 'pastor';
-export type WorkflowAction = 'propose' | 'request_approval' | 'approve' | 'decline' | 'cancel' | 'complete' | 'mark_no_show';
+export type WorkflowAction = 'propose' | 'request_approval' | 'approve' | 'decline' | 'cancel' | 'complete' | 'mark_no_show' | 'request_reschedule';
 const transitions: Partial<Record<WorkflowAction, { from: RequestStatus[]; by: OfficeActor[]; to: RequestStatus }>> = {
-  propose: { from: ['requested', 'proposed', 'declined'], by: ['assistant', 'pastor'], to: 'proposed' },
+  propose: { from: ['requested', 'proposed', 'declined', 'reschedule_requested'], by: ['assistant', 'pastor'], to: 'proposed' },
+  request_reschedule: { from: ['confirmed'], by: ['member'], to: 'reschedule_requested' },
   request_approval: { from: ['proposed'], by: ['assistant', 'pastor'], to: 'awaiting_approval' },
   approve: { from: ['awaiting_approval'], by: ['pastor'], to: 'confirmed' },
   decline: { from: ['requested', 'proposed', 'awaiting_approval'], by: ['pastor'], to: 'declined' },
-  cancel: { from: ['requested', 'proposed', 'awaiting_approval', 'confirmed'], by: ['member', 'assistant', 'pastor'], to: 'cancelled' },
+  cancel: { from: ['requested', 'proposed', 'awaiting_approval', 'confirmed', 'reschedule_requested'], by: ['member', 'assistant', 'pastor'], to: 'cancelled' },
   complete: { from: ['confirmed'], by: ['assistant', 'pastor'], to: 'completed' },
   mark_no_show: { from: ['confirmed'], by: ['assistant', 'pastor'], to: 'no_show' },
 };
