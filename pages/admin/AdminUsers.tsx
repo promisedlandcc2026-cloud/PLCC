@@ -16,6 +16,7 @@ import { useNav } from '../../App';
 import { Role } from '../../types';
 import { getAuthHeaders, parseApiJson } from '../../lib/api';
 import { formatAccountContact, isPhonePlaceholderEmail } from '../../api/_utils/authPhone';
+import PastorsAssistantAssignments from './PastorsAssistantAssignments';
 
 const ROLE_OPTIONS: { group: string; roles: { value: string; label: string }[] }[] = [
   {
@@ -493,6 +494,8 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
           </div>
         </div>
       )}
+
+      <PastorsAssistantAssignments users={users} />
 
       <div className="bg-white border border-black/[0.06] rounded-2xl overflow-hidden shadow-sm">
         <div className="p-4 sm:p-5 border-b border-black/[0.04]">

@@ -10620,6 +10620,10 @@ const handleSettings = async (req: any, res: any) => {
         }
 
         switch (resource) {
+            case 'pastors-office-assignments': {
+                const { handleOfficeAssignments } = await import('./pastorsOffice/assignments.js');
+                return handleOfficeAssignments(req, res);
+            }
             case 'auth': return await handleAuth(req, res);
             case 'auth-otp': return await handleAuthOtp(req, res);
             case 'auth-phone': {
