@@ -35,6 +35,7 @@ export async function handlePastoralRequests(req: any, res: any, injected?: { ad
         return res.status(200).json({ok:true,note:result.data || ''});
       }
       let query;
+      let redactAssistantMessage=false;
       if (scope === 'mine') {
         query = admin.from('pastoral_requests').select('id,office_id,category,preferred_start,preferred_zone,contact_preference,status,version,created_at,pastoral_appointments(starts_at,ends_at,display_zone,status)').eq('requester_user_id', auth.user.id);
       } else if (['office','blocks','calendar'].includes(scope) && UUID.test(String(req.query?.officeId || ''))) {
@@ -65,11 +66,17 @@ export async function handlePastoralRequests(req: any, res: any, injected?: { ad
           return res.status(200).json({ok:true,blocks:data || []});
         }
         const fields = 'id,office_id,category,preferred_start,preferred_zone,contact_preference,status,version,created_at,requester:users!pastoral_requests_requester_user_id_fkey(name),pastoral_appointments(starts_at,ends_at,display_zone,status)';
-        query = admin.from('pastoral_requests').select(owner.data ? fields + ',brief_message' : fields).eq('office_id', officeId);
+        redactAssistantMessage=!owner.data;
+        query = admin.from('pastoral_requests').select(fields + ',brief_message').eq('office_id', officeId);
       } else return res.status(400).json({ ok:false,error:'Invalid request view.' });
       const { data, error } = await query.order('created_at', { ascending:false }).limit(100);
       if (error) return res.status(503).json({ ok:false,error:'Could not load requests.' });
-      return res.status(200).json({ ok:true, requests:data || [] });
+      const requests = redactAssistantMessage ? (data || []).map((row:any) => {
+        const {brief_message,...safe} = row;
+        const service = typeof brief_message==='string' ? /^\[Service: (Child dedication|Wedding|Other)\](?:\n|$)/.exec(brief_message)?.[1] : null;
+        return {...safe,...(service && row.category==='appointment' ? {service_label:service} : {})};
+      }) : data || [];
+      return res.status(200).json({ ok:true, requests });
     }
     if (req.method !== 'POST') return res.status(405).json({ ok:false,error:'Method not allowed.' });
     const body = req.body || {};
