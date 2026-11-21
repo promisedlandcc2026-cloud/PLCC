@@ -37,7 +37,7 @@ export async function handlePastoralRequests(req: any, res: any, injected?: { ad
       let query;
       if (scope === 'mine') {
         query = admin.from('pastoral_requests').select('id,office_id,category,preferred_start,preferred_zone,contact_preference,status,version,created_at,pastoral_appointments(starts_at,ends_at,display_zone,status)').eq('requester_user_id', auth.user.id);
-      } else if (['office','blocks'].includes(scope) && UUID.test(String(req.query?.officeId || ''))) {
+      } else if (['office','blocks','calendar'].includes(scope) && UUID.test(String(req.query?.officeId || ''))) {
         const officeId = String(req.query.officeId);
         const [owner, assistant] = await Promise.all([
           admin.from('pastoral_offices').select('id').eq('id',officeId).eq('pastor_user_id',auth.user.id).maybeSingle(),
@@ -45,6 +45,20 @@ export async function handlePastoralRequests(req: any, res: any, injected?: { ad
         ]);
         if (owner.error || assistant.error) return res.status(503).json({ok:false,error:'Could not verify office access.'});
         if (!owner.data && !assistant.data) return res.status(403).json({ok:false,error:'Office access is not assigned.'});
+        if (scope === 'calendar') {
+          const start=String(req.query?.start || ''), end=String(req.query?.end || '');
+          const from=parseOfficeInstant(start), until=parseOfficeInstant(end);
+          const page=Number(req.query?.page ?? 0);
+          if (from===null || until===null || until<=from || until-from>32*86400000 || !Number.isSafeInteger(page) || page<0 || page>10000) return res.status(400).json({ok:false,error:'Invalid calendar period.'});
+          const size=100;
+          const {data,error}=await admin.from('pastoral_appointments')
+            .select('id,request_id,starts_at,ends_at,status,pastoral_requests!inner(category,requester:users!pastoral_requests_requester_user_id_fkey(name))')
+            .eq('office_id',officeId).in('status',['proposed','awaiting_approval','confirmed'])
+            .lt('starts_at',end).gt('ends_at',start).order('starts_at',{ascending:true}).order('id',{ascending:true}).range(page*size,page*size+size);
+          if(error) return res.status(503).json({ok:false,error:'Could not load calendar.'});
+          const items=Array.isArray(data)?data:[];
+          return res.status(200).json({ok:true,appointments:items.slice(0,size),hasMore:items.length>size});
+        }
         if (scope === 'blocks') {
           const {data,error}=await admin.from('pastoral_time_blocks').select('id,starts_at,ends_at').eq('office_id',officeId).order('starts_at',{ascending:true}).limit(500);
           if (error) return res.status(503).json({ok:false,error:'Could not load unavailable times.'});
