@@ -66,7 +66,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   const content = (
     <div className="flex items-center w-full min-w-0">
       {item.icon && (
-        <span className={`mr-2.5 lg:mr-2 shrink-0 ${isActive ? 'text-[#1d372c] lg:text-[#f5d987]' : 'text-gray-500 lg:text-[#e3dfd2]'}`}>
+        <span className={`mr-2.5 lg:mr-2 shrink-0 ${isActive ? 'text-[#1d372c] lg:text-[#f5d987]' : 'text-[#374151] lg:text-[#e5c574]'}`}>
           {item.icon}
         </span>
       )}
@@ -201,7 +201,7 @@ const NestedNavItem: React.FC<{
         aria-expanded={open}
       >
         {item.icon && (
-          <span className={`mr-2.5 lg:mr-2 shrink-0 ${childActive ? 'text-[#1d372c] lg:text-[#f5d987]' : 'text-gray-500 lg:text-[#e3dfd2]'}`}>
+          <span className={`mr-2.5 lg:mr-2 shrink-0 ${childActive ? 'text-[#1d372c] lg:text-[#f5d987]' : 'text-[#374151] lg:text-[#e5c574]'}`}>
             {item.icon}
           </span>
         )}
@@ -356,7 +356,7 @@ const Sidebar: React.FC = () => {
         </span>
         <button
           onClick={() => setIsSidebarOpen(false)}
-          className="inline-flex items-center p-1.5 text-gray-500 hover:text-burgundy hover:bg-gray-50 lg:text-[#efe9db] lg:hover:text-[#f5d987] lg:hover:bg-[#244632] rounded-xl transition-all"
+          className="inline-flex items-center p-1.5 text-[#374151] hover:text-burgundy hover:bg-gray-50 lg:text-[#efe9db] lg:hover:text-[#f5d987] lg:hover:bg-[#244632] rounded-xl transition-all"
           aria-label="Close menu"
         >
           <ChevronsLeft size={20} /><span className="lg:hidden ml-1">Close</span>
@@ -384,7 +384,7 @@ const Sidebar: React.FC = () => {
                     type="button"
                     onClick={() => toggleGroup(group.id)}
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 lg:py-1 mb-0.5 rounded-lg transition-colors ${
-                      activeInGroup ? 'text-[#1d372c] lg:text-[#f3d48b]' : 'text-gray-400 hover:text-gray-600 lg:text-[#d3dfd1] lg:hover:text-[#f5d987]'
+                      activeInGroup ? 'text-[#1d372c] lg:text-[#f5d987]' : 'text-[#4b5563] hover:text-gray-600 lg:text-[#e5c574] lg:hover:text-[#ffe2a0]'
                     }`}
                     aria-expanded={open}
                   >
@@ -397,7 +397,7 @@ const Sidebar: React.FC = () => {
                     />
                   </button>
                 ) : (
-                  <p className="px-2.5 py-1.5 lg:py-1 mb-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 lg:text-[#d3dfd1]">
+                  <p className="px-2.5 py-1.5 lg:py-1 mb-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#4b5563] lg:text-[#e5c574]">
                     {group.label}
                   </p>
                 )}
