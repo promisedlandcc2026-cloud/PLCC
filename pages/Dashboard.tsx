@@ -118,7 +118,8 @@ function pickNextService(events: HomeEventCard[]): HomeNextService | null {
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isBirthdayToday, userName, userId } = useNav();
+  const { isBirthdayToday, userName, userId, userRole } = useNav();
+  const canSeeCelebrations = ['SUPER_ADMIN', 'PASTOR'].includes(String(userRole || '').toUpperCase());
   const [dismissalRevision, setDismissalRevision] = useState(0);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -468,7 +469,7 @@ const DashboardPage: React.FC = () => {
   ]);
 
   return (
-    <div className="w-full pb-8 md:pb-12 animate-in fade-in duration-500 flex flex-col">
+    <div className="w-full pb-8 md:pb-12 animate-in fade-in duration-500 flex flex-col bg-[#f8f5ee]">
       {/* Full-bleed hero: sidebar edge → right edge of main */}
       <HomeHeroBanner
         greeting={greeting}
@@ -500,17 +501,18 @@ const DashboardPage: React.FC = () => {
         </div>
       )}
 
+      <div className={`grid grid-cols-1 gap-5 ${canSeeCelebrations ? 'lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]' : ''}`}>
+        <div id="canaan-home-news" className="min-w-0 scroll-mt-6"><VaultNewsCard /></div>
+        {canSeeCelebrations ? <div className="min-w-0"><CelebrationsCard /></div> : null}
+      </div>
+
+      <div id="canaan-home-alert" className="scroll-mt-6"><SendAlertCard /></div>
+
       <HomeQuickActions />
 
       <WhatsNewCard />
 
       <HomeLeaderboard />
-
-      <VaultNewsCard />
-
-      <CelebrationsCard />
-
-      <SendAlertCard />
 
       <div
         className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start"

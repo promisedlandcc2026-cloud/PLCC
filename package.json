@@ -8,7 +8,8 @@
     "dev:all": "node scripts/dev-local.mjs",
     "build": "vite build",
     "vercel-build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:canaan-home": "node scripts/canaan-home-smoke.mjs"
   },
   "dependencies": {
     "@daily-co/daily-js": "^0.93.0",

@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import AskAdminTitleLink from '../common/AskAdminTitleLink';
+import { CalendarDays, Megaphone, Newspaper, QrCode, Users } from 'lucide-react';
+import { useNav } from '../../lib/NavContext';
 import { eventsOverviewPath } from '../../lib/eventDate';
+import { hasPermission } from '../../lib/permissions';
+import { Role } from '../../types';
 import SeasonParticles from '../Season/SeasonParticles';
 import { usePublishedSeason } from '../Season/SeasonThemeProvider';
 
-export const HOME_HERO_IMAGE_SRC = '/images/home-hero.jpg';
-export const HOME_HERO_MOBILE_IMAGE_SRC = '/images/home-hero-mobile.jpg';
+/** Supplied by the church as the approved Canaan home-page artwork. */
+export const HOME_HERO_IMAGE_SRC = '/canaan-sunrise-road.png';
+export const HOME_HERO_MOBILE_IMAGE_SRC = HOME_HERO_IMAGE_SRC;
 
 export type HomeNextService = {
   id?: string;
@@ -24,181 +27,56 @@ type Props = {
   nextService: HomeNextService | null;
 };
 
-/**
- * Full-bleed home hero (sidebar → right edge of main).
- * Phones use a square composite; md+ uses the wide Exchange Hall crop.
- * Next Service overlays the photo — not a second column that can collide with the greeting.
- */
-const HomeHeroBanner: React.FC<Props> = ({
-  greeting,
-  userName,
-  verseText,
-  verseReference,
-  nextService,
-}) => {
+/** Home-only redesign; existing routes, role checks, and seasonal effects remain in place. */
+const HomeHeroBanner: React.FC<Props> = ({ greeting, userName, verseText, verseReference, nextService }) => {
   const navigate = useNavigate();
+  const { userRole } = useNav();
   const { theme, showEffects } = usePublishedSeason();
-  const [photoOk, setPhotoOk] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    let pending = 2;
-    let anyOk = false;
-
-    const done = () => {
-      pending -= 1;
-      if (!cancelled && pending === 0) setPhotoOk(anyOk);
-    };
-
-    const check = (src: string) => {
-      const img = new Image();
-      img.onload = () => {
-        anyOk = true;
-        done();
-      };
-      img.onerror = () => done();
-      img.src = src;
-    };
-
-    check(HOME_HERO_MOBILE_IMAGE_SRC);
-    check(HOME_HERO_IMAGE_SRC);
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const service = nextService || {
-    title: 'Sunday Worship',
-    whenLabel: '10:00 AM',
-  };
+  const role = String(userRole || '').toUpperCase() as Role;
+  const canCheckIn = hasPermission(role, undefined, '/events/check-someone-in');
+  const canSeeMembers = hasPermission(role, undefined, '/members');
+  const canPost = ['SUPER_ADMIN', 'PASTOR', 'MINISTRY_LEADER'].includes(role);
+  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const actions = [
+    ...(canCheckIn ? [{ label: 'Today’s check-ins', icon: QrCode, onClick: () => navigate('/events/check-someone-in') }] : []),
+    ...(canSeeMembers ? [{ label: 'Members & households', icon: Users, onClick: () => navigate('/members') }] : []),
+    ...(canPost ? [
+      { label: 'Post Canaan News', icon: Newspaper, onClick: () => scrollTo('canaan-home-news') },
+      { label: 'Send a Tribes alert', icon: Megaphone, onClick: () => scrollTo('canaan-home-alert') },
+    ] : []),
+  ];
 
   return (
-    <section className="relative w-full overflow-hidden min-h-[440px] sm:min-h-[360px] lg:min-h-[360px] shadow-[0_12px_40px_rgba(13, 26, 20,0.18)]">
-      {photoOk ? (
-        <picture>
-          <source media="(max-width: 767px)" srcSet={HOME_HERO_MOBILE_IMAGE_SRC} />
-          <img
-            src={HOME_HERO_IMAGE_SRC}
-            alt=""
-            className="absolute inset-0 z-0 w-full h-full object-cover object-[center_42%] md:object-[72%_center]"
-            onError={() => setPhotoOk(false)}
-          />
-        </picture>
-      ) : (
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-burgundy via-[#15271f] to-[#0c110f]" />
-      )}
-
-      {/* Mobile: lighter diagonal wash so square art shows; md+: strong left wash for greeting */}
-      <div
-        className="absolute inset-0 z-0 md:hidden"
-        style={{
-          background:
-            'linear-gradient(165deg, rgba(13, 26, 20,0.88) 0%, rgba(13, 26, 20,0.72) 42%, rgba(13, 26, 20,0.45) 68%, rgba(13, 26, 20,0.28) 100%)',
-        }}
-      />
-      <div
-        className="absolute inset-0 z-0 hidden md:block"
-        style={{
-          background:
-            'linear-gradient(100deg, rgba(13, 26, 20,0.97) 0%, rgba(13, 26, 20,0.92) 38%, rgba(13, 26, 20,0.55) 58%, rgba(13, 26, 20,0.22) 78%, rgba(13, 26, 20,0.12) 100%)',
-        }}
-      />
-
-      {/* Above photo + wash, below greeting/controls — otherwise leaves can sit under the burgundy film. */}
-      {showEffects ? <SeasonParticles effect={theme.effect} /> : null}
-
-      {/* Soft watermark — decorative only, behind copy */}
-      <p
-        aria-hidden
-        className="hidden md:block pointer-events-none absolute left-8 bottom-4 text-[clamp(2.5rem,6vw,4.5rem)] font-black leading-none text-white/[0.035] tracking-tight select-none max-w-[55%] truncate"
-      >
-        Welcome Home to PLCC
-      </p>
-
-      {/* Brand mark on the photo side */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center gap-2.5 max-w-[40%] sm:max-w-none">
-        <img
-          src="/images/awc-logo.png"
-          alt=""
-          className="h-12 w-12 sm:h-20 sm:w-20 lg:h-24 lg:w-24 rounded-full object-contain bg-white/90 shadow-lg ring-2 ring-gold/40 shrink-0"
-        />
-        <div className="hidden sm:block min-w-0">
-          <p className="text-[13px] font-black text-burgundy leading-tight tracking-tight drop-shadow-sm bg-white/80 px-2 py-0.5 rounded">
-            Promised Land Christian Center
-          </p>
-          <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-burgundy/80 mt-0.5 bg-white/70 px-2 py-0.5 rounded inline-block">
-            Changing Hearts. Transforming Lives.
-          </p>
+    <div className="w-full max-w-6xl mx-auto px-4 md:px-8 pt-6 md:pt-9">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6 md:mb-8">
+        <div className="min-w-0">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#49603a]">Promised Land Christian Center</p>
+          <h1 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#102b1b]">{greeting}, {userName}</h1>
+          {theme.greeting ? <p className="mt-2 text-sm font-semibold text-[#49603a]">{theme.greeting}</p> : null}
+          {verseText ? <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#43584a]">“{verseText}”{verseReference ? <span className="ml-2 font-semibold">{verseReference}</span> : null}</p> : null}
         </div>
+        {canCheckIn ? <button type="button" onClick={() => navigate('/events/check-someone-in')} className="inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#082e1b] px-5 py-3 text-sm font-bold text-white hover:bg-[#16472b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b88929] focus-visible:ring-offset-2"><QrCode size={20} aria-hidden /> Open check-in</button> : null}
       </div>
-
-      {/* Greeting — left column only; reserves space so it never sits under the card */}
-      <div className="relative z-10 flex flex-col justify-between min-h-[440px] sm:min-h-[360px] lg:min-h-[360px] p-5 sm:p-8 lg:p-10 pr-16 sm:pr-8 lg:pr-[320px] pb-8 lg:pb-10">
-        <div className="max-w-xl min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/30 text-white text-[10px] font-black uppercase tracking-[0.2em]"
-              style={{ backgroundColor: 'var(--season-accent)' }}
-            >
-              <Sparkles size={12} />
-              {theme.mark ? `${theme.mark} ` : ''}
-              Welcome home
-            </span>
-            <AskAdminTitleLink className="rounded-full bg-burgundy/40 border-gold/50 text-gold hover:bg-burgundy/60 hover:text-gold" />
+      <div className={`grid grid-cols-1 gap-4 ${actions.length ? 'lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)]' : ''}`}>
+        <section aria-labelledby="home-service-title" className="relative isolate flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl bg-[#082e1b] p-6 sm:min-h-[320px] sm:p-9 text-white">
+          <img src={HOME_HERO_IMAGE_SRC} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" />
+          <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-[#062819]/95 via-[#062819]/70 to-[#062819]/10" />
+          {showEffects ? <SeasonParticles effect={theme.effect} /> : null}
+          <div className="relative z-10 max-w-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#f1d284]">{nextService ? 'Next gathering' : 'Gather with us'}</p>
+            <h2 id="home-service-title" className="mt-2 font-serif text-4xl sm:text-5xl font-bold leading-[1.05] tracking-tight">{nextService?.title || 'Church gatherings'}</h2>
+            {nextService?.whenLabel ? <p className="mt-3 text-sm sm:text-base font-semibold text-white/95">{nextService.whenLabel}</p> : <p className="mt-3 text-sm text-white/90">See upcoming services and events.</p>}
+            <button type="button" onClick={() => navigate(eventsOverviewPath(nextService?.dateYmd))} className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[#e7bd57] bg-[#082e1b]/75 px-4 py-2 text-sm font-bold text-[#f8d77b] hover:bg-[#173e28] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"><CalendarDays size={18} className="mr-2" aria-hidden /> Service details</button>
           </div>
-          <h1 className="text-[clamp(1.15rem,3.6vw,2.35rem)] font-black text-white tracking-tight leading-[1.08] sm:whitespace-nowrap">
-            {greeting}, {userName} 👋
-          </h1>
-          {theme.greeting ? (
-            <p className="mt-2 text-sm font-black text-gold tracking-tight">{theme.greeting}</p>
-          ) : null}
-          {!theme.greeting && theme.weatherLabel ? (
-            <p className="mt-2 text-sm font-bold text-white/85">
-              {theme.mark ? `${theme.mark} ` : ''}{theme.weatherLabel}
-            </p>
-          ) : null}
-          <p className="mt-2 text-xs sm:text-sm font-black uppercase tracking-[0.22em] text-gold">
-            Changing Hearts. Transforming Lives.
-          </p>
-          {verseText ? (
-            <blockquote className="mt-4 sm:mt-5 text-sm sm:text-[15px] text-white/90 font-medium leading-relaxed border-l-2 border-gold/60 pl-4 max-w-md">
-              “{verseText}”
-              {verseReference ? (
-                <cite className="block mt-2 text-[10px] font-black uppercase tracking-widest text-gold not-italic">
-                  {verseReference}
-                </cite>
-              ) : null}
-            </blockquote>
-          ) : (
-            <p className="mt-4 sm:mt-5 text-sm text-white/70 font-medium">
-              A fresh word for today is coming soon.
-            </p>
-          )}
-        </div>
+        </section>
+        {actions.length ? <section aria-labelledby="home-actions-title" className="rounded-2xl border border-[#e0ded3] bg-[#fffcf6] p-5 sm:p-6">
+          <h2 id="home-actions-title" className="font-serif text-2xl font-bold text-[#102b1b]">Staff actions</h2>
+          <div className="mt-3 divide-y divide-[#e8e3d7]">
+            {actions.map(({ label, icon: Icon, onClick }) => <button key={label} type="button" onClick={onClick} className="flex min-h-[56px] w-full items-center gap-3 rounded-lg px-1 py-2 text-left text-sm sm:text-base font-semibold text-[#173527] hover:bg-[#f1f2e9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b88929]"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#e7ebdc] text-[#173527]"><Icon size={20} aria-hidden /></span><span>{label}</span></button>)}
+          </div>
+        </section> : null}
       </div>
-
-      {/* Next Service — desktop/tablet only; hidden on phones to keep the mobile hero clean */}
-      <div className="hidden md:block absolute z-20 right-6 bottom-6 w-[270px]">
-        <div className="rounded-2xl bg-[#0c110f]/90 backdrop-blur-md border border-gold/30 p-5 shadow-2xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gold mb-2">
-            Next service
-          </p>
-          <h2 className="text-lg font-black text-white tracking-tight leading-snug">
-            {service.title}
-          </h2>
-          <p className="text-xs text-white/75 font-medium mt-1">{service.whenLabel}</p>
-          <button
-            type="button"
-            onClick={() => navigate(eventsOverviewPath(nextService?.dateYmd))}
-            className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gold text-burgundy text-[10px] font-black uppercase tracking-widest hover:bg-white transition-colors"
-          >
-            View details
-            <ArrowRight size={14} />
-          </button>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 };
 
