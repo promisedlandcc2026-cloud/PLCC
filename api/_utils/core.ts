@@ -10620,6 +10620,10 @@ const handleSettings = async (req: any, res: any) => {
         }
 
         switch (resource) {
+            case 'pastors-office-requests': {
+                const { handlePastoralRequests } = await import('./pastorsOffice/requests.js');
+                return handlePastoralRequests(req, res);
+            }
             case 'pastors-office-mine': {
                 const { handleMyPastoralOffices } = await import('./pastorsOffice/offices.js');
                 return handleMyPastoralOffices(req, res);
