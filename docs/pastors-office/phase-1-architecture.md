@@ -19,7 +19,7 @@ Canaan desktop: a permission-filtered Pastor’s Office entry within the existin
 
 Tribes: members receive a low-detail appointment request and My Requests entry; only their own requests appear. Staff entry is displayed only after a server capability response; Faith and Grace see layouts appropriate to their assignments. Reuse existing navigation and session mechanisms. No automatic sharing of confidential data with Ka Link.
 
-Office visual theme: locally scoped navy, ivory and restrained gold; confirmed green, pending amber. Preserve the existing forest-green PLCC shell outside this module. Mockup staff names and photographs are illustrative, not identity sources.
+Office visual theme: use the user-supplied Pastor’s Office emblem at `public/pastors-office/emblem.png` within the module; retain the existing PLCC logo elsewhere. Use locally scoped navy, ivory and restrained gold; confirmed green, pending amber. Preserve the existing forest-green PLCC shell outside this module. Mockup staff names and photographs are illustrative, not identity sources.
 
 ## Proposed minimal data model (subject to database audit)
 
