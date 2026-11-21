@@ -34,11 +34,12 @@ const HomeHeroBanner: React.FC<Props> = ({ greeting, userName, verseText, verseR
   const { theme, showEffects } = usePublishedSeason();
   const role = String(userRole || '').toUpperCase() as Role;
   const canCheckIn = hasPermission(role, undefined, '/events/check-someone-in');
+  const canSeeToday = hasPermission(role, undefined, '/events/who-checked-in');
   const canSeeMembers = hasPermission(role, undefined, '/members');
   const canPost = ['SUPER_ADMIN', 'PASTOR', 'MINISTRY_LEADER'].includes(role);
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const actions = [
-    ...(canCheckIn ? [{ label: 'Today’s check-ins', icon: QrCode, onClick: () => navigate('/events/check-someone-in') }] : []),
+    ...(canSeeToday ? [{ label: 'Today’s check-ins', icon: QrCode, onClick: () => navigate('/events/who-checked-in') }] : []),
     ...(canSeeMembers ? [{ label: 'Members & households', icon: Users, onClick: () => navigate('/members') }] : []),
     ...(canPost ? [
       { label: 'Post Canaan News', icon: Newspaper, onClick: () => scrollTo('canaan-home-news') },
@@ -48,14 +49,14 @@ const HomeHeroBanner: React.FC<Props> = ({ greeting, userName, verseText, verseR
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 md:px-8 pt-6 md:pt-9">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6 md:mb-8">
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#49603a]">Promised Land Christian Center</p>
-          <h1 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#102b1b]">{greeting}, {userName}</h1>
-          {theme.greeting ? <p className="mt-2 text-sm font-semibold text-[#49603a]">{theme.greeting}</p> : null}
-          {verseText ? <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#43584a]">“{verseText}”{verseReference ? <span className="ml-2 font-semibold">{verseReference}</span> : null}</p> : null}
+      <div className="relative overflow-hidden rounded-xl bg-[#082e1b] px-5 py-8 text-white sm:bg-transparent sm:p-0 sm:text-inherit sm:overflow-visible flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6 md:mb-8">
+        <img src={HOME_HERO_MOBILE_IMAGE_SRC} alt="" className="absolute inset-0 h-full w-full object-cover opacity-50 sm:hidden" /><div className="relative min-w-0">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f4dda0] sm:text-[#49603a]">Promised Land Christian Center</p>
+          <h1 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white sm:text-[#102b1b]">{greeting}, {userName}</h1>
+          {theme.greeting ? <p className="mt-2 text-sm font-semibold text-[#f4dda0] sm:text-[#49603a]">{theme.greeting}</p> : null}
+          {verseText ? <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white sm:text-[#43584a]">“{verseText}”{verseReference ? <span className="ml-2 font-semibold">{verseReference}</span> : null}</p> : null}
         </div>
-        {canCheckIn ? <button type="button" onClick={() => navigate('/events/check-someone-in')} className="inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#082e1b] px-5 py-3 text-sm font-bold text-white hover:bg-[#16472b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b88929] focus-visible:ring-offset-2"><QrCode size={20} aria-hidden /> Open check-in</button> : null}
+        {canCheckIn ? <button type="button" onClick={() => navigate('/events/check-someone-in')} className="relative inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#082e1b] px-5 py-3 text-sm font-bold text-white hover:bg-[#16472b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b88929] focus-visible:ring-offset-2"><QrCode size={20} aria-hidden /> Open check-in</button> : null}
       </div>
       <div className={`grid grid-cols-1 gap-4 ${actions.length ? 'lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)]' : ''}`}>
         <section aria-labelledby="home-service-title" className="relative isolate flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl bg-[#082e1b] p-6 sm:min-h-[320px] sm:p-9 text-white">

@@ -89,6 +89,8 @@ const MembersPage: React.FC = () => {
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
   const canViewPending = ['SUPER_ADMIN', 'ADMIN', 'PASTOR'].includes(String(userRole || '').toUpperCase());
   const [members, setMembers] = useState<Member[]>([]);
+  const [mobileStatusFilter, setMobileStatusFilter] = useState('all');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -481,6 +483,7 @@ const MembersPage: React.FC = () => {
   const filteredMembers = members
     .filter((m) => {
       const query = searchQuery.toLowerCase();
+      if (mobileStatusFilter !== 'all' && m.status !== mobileStatusFilter) return false;
       return (
         (m.name || '').toLowerCase().includes(query) ||
         (m.email || '').toLowerCase().includes(query) ||
@@ -513,7 +516,7 @@ const MembersPage: React.FC = () => {
   }
 
   return (
-    <ResponsivePage>
+    <ResponsivePage className="bg-[#f8f4eb] md:bg-transparent">
 
       {/* Member Details Modal */}
       {selectedMember && (
@@ -829,13 +832,13 @@ const MembersPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-2">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-[#0d1a14] tracking-tight leading-none">Members</h1>
+            <h1 className="font-serif text-4xl md:text-4xl font-bold text-[#0d1a14] tracking-tight leading-none">Members</h1>
             <AskAdminTitleLink />
           </div>
           <p className="text-gray-400 font-medium text-sm md:text-base">Manage your congregation and track household connections.</p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white border border-gray-100 text-gray-500 font-bold text-sm shadow-sm min-h-[44px]">
+          <button type="button" onClick={() => setShowMobileFilters(!showMobileFilters)} aria-expanded={showMobileFilters} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white border border-gray-100 text-gray-500 font-bold text-sm shadow-sm min-h-[44px]">
             <Filter size={18} className="text-gold" />
             Filters
           </button>
@@ -849,8 +852,11 @@ const MembersPage: React.FC = () => {
         </div>
       </div>
 
+      <div className="flex rounded-xl border border-[#d8d0bc] overflow-hidden"><span className="flex-1 bg-[#526a45] text-white text-center py-3 font-semibold">Members</span><button type="button" onClick={() => navigate('/households')} className="flex-1 text-[#173527] font-semibold">Households</button></div>
+      {showMobileFilters && <label className="block text-sm font-semibold text-[#173527]">Status <select value={mobileStatusFilter} onChange={e => setMobileStatusFilter(e.target.value)} className="ml-3 rounded-lg border border-[#c6cbb8] bg-white p-2"><option value="all">All statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Visitor">Visitor</option></select></label>}
+      <div className="grid grid-cols-3 rounded-xl bg-[#e6eadb] p-4 text-center md:hidden"><div><strong className="block font-serif text-2xl">{isLoading ? '…' : activeCount}</strong>Active</div><div><strong className="block font-serif text-2xl">{isLoading ? '…' : `${linkedPercent}%`}</strong>Linked</div>{canViewPending && <div><strong className="block font-serif text-2xl">{isLoading ? '…' : pendingCount}</strong>Pending</div>}</div>
       {/* Stats Bar */}
-      <div className={`grid grid-cols-1 gap-4 md:gap-6 ${canViewPending ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+      <div className={`hidden md:grid grid-cols-1 gap-4 md:gap-6 ${canViewPending ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         <StatCard
           label="Total Active"
           value={isLoading ? '…' : activeCount.toLocaleString()}
@@ -1095,11 +1101,11 @@ const MembersPage: React.FC = () => {
             <div
               key={member.id}
               onClick={() => setSelectedMember(member)}
-              className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer"
+              className="bg-[#fffcf6] p-4 rounded-xl border border-[#dfd9c9] flex flex-col gap-3 active:scale-[0.98] transition-all cursor-pointer"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-burgundy text-gold flex items-center justify-center font-black text-sm shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-[#dce4ce] text-[#173527] flex items-center justify-center font-serif font-bold text-lg shrink-0">
                     {member.name.charAt(0)}
                   </div>
                   <div className="min-w-0">

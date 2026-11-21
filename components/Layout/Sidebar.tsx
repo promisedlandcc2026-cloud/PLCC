@@ -254,6 +254,23 @@ const Sidebar: React.FC = () => {
     [userRole, fundraiserAccess.allowed, prayerWatchAccess.allowed]
   );
 
+  // Regroup only already-authorized sidebar entries; role and per-user filters remain authoritative.
+  const mobileGroups = useMemo(() => {
+    const buckets: Record<string, SimpleNavLink[]> = { Overview: [], People: [], Gatherings: [], Communications: [], 'Ka Link': [], More: [] };
+    for (const group of visibleGroups) for (const item of group.items) {
+      const path = item.path || '';
+      if (path === '/family' || path === '/church-profile') continue; // account menu
+      let key = 'More';
+      if (path === '/dashboard') key = 'Overview';
+      else if (path === '/members' || path === '/households') key = 'People';
+      else if (group.id === 'attendance' || group.id === 'events') key = 'Gatherings';
+      else if (group.id === 'ka-link' || path === '/community/chat') key = 'Ka Link';
+      else if (path.startsWith('/communication/') || path === '/events/alerts' || path === '/community/daily-devotional') key = 'Communications';
+      buckets[key].push(item);
+    }
+    return Object.entries(buckets).filter(([, items]) => items.length);
+  }, [visibleGroups]);
+
   useEffect(() => {
     if (!isAuthenticated || !userId) {
       setUnreadCount(0);
@@ -332,22 +349,30 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-[#f8f4eb] lg:bg-white">
       <div className="flex items-center justify-between px-4 lg:px-4 py-4 lg:py-3 border-b border-gray-50">
         <span className="text-xs font-black text-[#0d1a14] uppercase tracking-[0.2em]">
           Menu
         </span>
         <button
           onClick={() => setIsSidebarOpen(false)}
-          className="p-1.5 text-gray-500 hover:text-burgundy hover:bg-gray-50 rounded-xl transition-all"
+          className="inline-flex items-center p-1.5 text-gray-500 hover:text-burgundy hover:bg-gray-50 rounded-xl transition-all"
           aria-label="Close menu"
         >
-          <ChevronsLeft size={20} />
+          <ChevronsLeft size={20} /><span className="lg:hidden ml-1">Close</span>
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <nav className="p-2.5 lg:p-2 space-y-3 lg:space-y-2.5">
+        <nav aria-label="Canaan mobile navigation" className="lg:hidden p-4 space-y-2">
+          {mobileGroups.map(([label, items]) => (
+            <details key={label} open={pathInItems(location.pathname, location.search, items) || undefined} className="border-b border-[#ded4be] pb-2">
+              <summary className="cursor-pointer min-h-[48px] flex items-center justify-between font-serif text-xl font-bold text-[#143722]">{label}<ChevronDown size={18} /></summary>
+              <div className="space-y-1 pl-2">{items.map(item => <NestedNavItem key={item.path || item.label} item={item} unreadCount={unreadCount} communityFeedUnread={communityFeedUnread} onNavigate={handleNavigate} />)}</div>
+            </details>
+          ))}
+        </nav>
+        <nav className="hidden lg:block p-2.5 lg:p-2 space-y-3 lg:space-y-2.5">
           {visibleGroups.map((group) => {
             const open = isGroupOpen(group.id, group.collapsible);
             const activeInGroup = pathInItems(location.pathname, location.search, group.items);

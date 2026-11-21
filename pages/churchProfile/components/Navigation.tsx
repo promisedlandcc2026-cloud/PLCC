@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Bell,
   Check,
@@ -121,17 +122,17 @@ export const Navigation: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-[110] w-full h-16 md:h-20 bg-white border-b border-gray-100 flex items-center px-4 md:px-8 shrink-0">
+      <header className="sticky top-0 z-[110] w-full h-16 md:h-20 bg-[#082c1b] md:bg-white border-b border-[#b9944e]/30 md:border-gray-100 flex items-center px-4 md:px-8 shrink-0">
         <div className="flex items-center">
           <button
             type="button"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-3 mr-3 text-gray-400 hover:bg-gray-50 hover:text-burgundy rounded-xl active:scale-90 transition-all min-h-[44px] min-w-[44px]"
+            className="inline-flex items-center p-2 mr-1 md:p-3 md:mr-3 text-[#f7f1e4] md:text-gray-400 hover:bg-gray-50 hover:text-burgundy rounded-xl active:scale-90 transition-all min-h-[44px] min-w-[44px]"
             aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
             aria-controls="app-sidebar"
             aria-expanded={isSidebarOpen}
           >
-            <Menu size={24} />
+            <Menu size={24} /><span className="ml-1 text-sm font-semibold md:hidden">Menu</span>
           </button>
 
           <button
@@ -146,8 +147,8 @@ export const Navigation: React.FC = () => {
               width={44}
               height={44}
             />
-            <span className="font-black text-lg md:text-xl tracking-tighter text-ink whitespace-nowrap">
-              PLCC <span className="text-burgundy">CANAAN</span>
+            <span className="font-serif font-bold text-xl md:text-xl tracking-tight text-[#f8f3e8] md:text-ink whitespace-nowrap">
+              <span className="md:hidden">Canaan</span><span className="hidden md:inline">PLCC <span className="text-burgundy">CANAAN</span></span>
             </span>
           </button>
         </div>
@@ -245,6 +246,10 @@ export const Navigation: React.FC = () => {
                       <p className="text-[10px] text-gray-400 font-medium">Open your member profile</p>
                     </div>
                   </button>
+                  <Link to="/family" onClick={() => setIsProfileOpen(false)} className="w-full flex items-center text-left gap-4 p-4 rounded-2xl hover:bg-gold-cream transition-all group">
+                    <div className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-500"><User size={20} /></div>
+                    <div><p className="text-[13px] font-black text-ink uppercase tracking-tight">My Family</p><p className="text-[10px] text-gray-400 font-medium">Open your household</p></div>
+                  </Link>
                   <button
                     type="button"
                     onClick={() => {
@@ -361,7 +366,7 @@ export const Navigation: React.FC = () => {
         id="app-sidebar"
         aria-hidden={!isSidebarOpen}
         className={`
-          fixed left-0 z-[100] w-72 lg:w-64 max-w-[85vw]
+          fixed left-0 z-[100] w-full lg:w-64 max-w-full lg:max-w-[85vw]
           top-16 md:top-20 bottom-0
           bg-white border-r border-gray-100
           will-change-transform

@@ -786,7 +786,7 @@ export const MemberProfileView: React.FC = () => {
       {/* Profile Header Card */}
       <div className="bg-white rounded-[1.75rem] border border-gray-100 shadow-sm overflow-hidden">
         {/* Cover Banner */}
-        <div className="relative h-48 md:h-60 w-full overflow-hidden bg-stone-900 group">
+        <div className="relative h-36 sm:h-48 md:h-60 w-full overflow-hidden bg-stone-900 group">
           <img
             src={selectedMember.coverUrl || SANCTUARY_BANNER}
             alt="Promised Land Christian Center Sanctuary"
@@ -1368,7 +1368,14 @@ export const MemberProfileView: React.FC = () => {
         aria-label="Profile sections"
         className="sticky top-0 z-20 -mx-4 sm:mx-0 px-4 sm:px-2 py-2 bg-[#fcfcfc]/90 backdrop-blur-md sm:rounded-2xl sm:border sm:border-stone-200/80"
       >
-        <ul className="flex gap-2 overflow-x-auto no-scrollbar">
+        <label className="block sm:hidden text-sm font-semibold text-[#173527]">
+          <span className="sr-only">Choose profile section</span>
+          <select aria-label="Choose profile section" className="w-full min-h-[44px] rounded-lg border border-[#a98c4a] bg-[#faf6ed] px-3 text-[#173527]" defaultValue="" onChange={(event) => { if (event.target.value) document.getElementById(event.target.value)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
+            <option value="">Profile sections</option>
+            {[["cp-about", "About"], ["cp-huddles", "Ka Links"], ["cp-journey", "Journey"], ["cp-badges", "Badges"], ["cp-updates", "Updates"], ["cp-household", "Household"], ...(ownProfile ? [["cp-points", "Points"]] : []), ["cp-checkins", "Check-ins"], ["cp-family", "Family"]].map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+          </select>
+        </label>
+        <ul className="hidden sm:flex gap-2 overflow-x-auto no-scrollbar">
           {[
             ['cp-about', 'About'],
             ['cp-huddles', 'Ka Links'],
