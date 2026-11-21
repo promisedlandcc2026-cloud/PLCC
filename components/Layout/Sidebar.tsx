@@ -59,14 +59,14 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   const linkClassName = `
     flex items-center ${compact ? 'px-2.5 py-2 text-[13px] lg:py-1.5 lg:text-[13px]' : 'px-3 py-2.5 text-[14px] lg:px-3 lg:py-2 lg:text-[14px]'} font-semibold transition-all mb-0.5 rounded-xl relative
     ${isActive
-      ? 'bg-[#1d372c]/5 text-[#1d372c] border-l-4 border-[#1d372c] font-bold shadow-sm'
-      : 'text-gray-600 hover:text-burgundy hover:bg-gray-50'}
+      ? 'bg-[#1d372c]/5 text-[#1d372c] border-l-4 border-[#1d372c] lg:bg-[#294b36] lg:text-[#f5d987] lg:border-[#e1b955] font-bold'
+      : 'text-gray-600 hover:text-burgundy hover:bg-gray-50 lg:text-[#f4f0e5] lg:hover:text-[#ffe2a0] lg:hover:bg-[#244632]'}
   `;
 
   const content = (
     <div className="flex items-center w-full min-w-0">
       {item.icon && (
-        <span className={`mr-2.5 lg:mr-2 shrink-0 ${isActive ? 'text-[#1d372c]' : 'text-gray-500'}`}>
+        <span className={`mr-2.5 lg:mr-2 shrink-0 ${isActive ? 'text-[#1d372c] lg:text-[#f5d987]' : 'text-gray-500 lg:text-[#e3dfd2]'}`}>
           {item.icon}
         </span>
       )}
@@ -195,13 +195,13 @@ const NestedNavItem: React.FC<{
           compact ? 'px-2.5 py-2 text-[13px] lg:py-1.5' : 'px-3 py-2.5 text-[14px] lg:px-3 lg:py-2'
         } font-semibold rounded-xl transition-all ${
           childActive
-            ? 'bg-[#1d372c]/5 text-[#1d372c] font-bold'
-            : 'text-gray-600 hover:text-burgundy hover:bg-gray-50'
+            ? 'bg-[#1d372c]/5 text-[#1d372c] lg:bg-[#294b36] lg:text-[#f5d987] font-bold'
+            : 'text-gray-600 hover:text-burgundy hover:bg-gray-50 lg:text-[#f4f0e5] lg:hover:text-[#ffe2a0] lg:hover:bg-[#244632]'
         }`}
         aria-expanded={open}
       >
         {item.icon && (
-          <span className={`mr-2.5 lg:mr-2 shrink-0 ${childActive ? 'text-[#1d372c]' : 'text-gray-500'}`}>
+          <span className={`mr-2.5 lg:mr-2 shrink-0 ${childActive ? 'text-[#1d372c] lg:text-[#f5d987]' : 'text-gray-500 lg:text-[#e3dfd2]'}`}>
             {item.icon}
           </span>
         )}
@@ -212,7 +212,7 @@ const NestedNavItem: React.FC<{
         />
       </button>
       {open && (
-        <div className="mt-0.5 ml-3 pl-2 border-l border-black/[0.06] space-y-0.5">
+        <div className="mt-0.5 ml-3 pl-2 border-l border-black/[0.06] lg:border-[#6e816e] space-y-0.5">
           {item.children.map((child) => (
             <SidebarItem
               key={child.path || child.label}
@@ -349,14 +349,14 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#f8f4eb] lg:bg-white">
-      <div className="flex items-center justify-between px-4 lg:px-4 py-4 lg:py-3 border-b border-gray-50">
-        <span className="text-xs font-black text-[#0d1a14] uppercase tracking-[0.2em]">
+    <div className="flex flex-col h-full bg-[#f8f4eb] lg:bg-[#092b1b]">
+      <div className="flex items-center justify-between px-4 lg:px-4 py-4 lg:py-3 border-b border-gray-50 lg:border-[#375843]">
+        <span className="text-xs font-black text-[#0d1a14] lg:text-[#f3e7c9] uppercase tracking-[0.2em]">
           Menu
         </span>
         <button
           onClick={() => setIsSidebarOpen(false)}
-          className="inline-flex items-center p-1.5 text-gray-500 hover:text-burgundy hover:bg-gray-50 rounded-xl transition-all"
+          className="inline-flex items-center p-1.5 text-gray-500 hover:text-burgundy hover:bg-gray-50 lg:text-[#efe9db] lg:hover:text-[#f5d987] lg:hover:bg-[#244632] rounded-xl transition-all"
           aria-label="Close menu"
         >
           <ChevronsLeft size={20} /><span className="lg:hidden ml-1">Close</span>
@@ -384,7 +384,7 @@ const Sidebar: React.FC = () => {
                     type="button"
                     onClick={() => toggleGroup(group.id)}
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 lg:py-1 mb-0.5 rounded-lg transition-colors ${
-                      activeInGroup ? 'text-[#1d372c]' : 'text-gray-400 hover:text-gray-600'
+                      activeInGroup ? 'text-[#1d372c] lg:text-[#f3d48b]' : 'text-gray-400 hover:text-gray-600 lg:text-[#d3dfd1] lg:hover:text-[#f5d987]'
                     }`}
                     aria-expanded={open}
                   >
@@ -397,7 +397,7 @@ const Sidebar: React.FC = () => {
                     />
                   </button>
                 ) : (
-                  <p className="px-2.5 py-1.5 lg:py-1 mb-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                  <p className="px-2.5 py-1.5 lg:py-1 mb-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 lg:text-[#d3dfd1]">
                     {group.label}
                   </p>
                 )}
@@ -422,22 +422,22 @@ const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      <div className="shrink-0 border-t border-[#e8e6dd] bg-[#faf9f4] px-4 py-3">
+      <div className="shrink-0 border-t border-[#e8e6dd] bg-[#faf9f4] lg:border-[#375843] lg:bg-[#092b1b] px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1d372c] text-xs font-bold text-[#e6c36f]" aria-hidden>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1d372c] lg:bg-[#375841] text-xs font-bold text-[#e6c36f]" aria-hidden>
             {userRole.charAt(0)}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold leading-tight text-[#1d372c]">Signed in</p>
-            <p className="truncate text-xs leading-tight text-gray-600">{String(userRole).replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())}</p>
+            <p className="text-xs font-semibold leading-tight text-[#1d372c] lg:text-[#f4f0e5]">Signed in</p>
+            <p className="truncate text-xs leading-tight text-gray-600 lg:text-[#d3dfd1]">{String(userRole).replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase())}</p>
           </div>
         </div>
         {isBirthdayToday ? (
-          <button type="button" onClick={() => navigate('/dashboard')} className="mt-2 flex min-h-[36px] w-full items-center gap-2 rounded-lg px-1 text-left text-xs font-semibold text-[#6d541b] hover:bg-[#eee9d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b9944e]">
+          <button type="button" onClick={() => navigate('/dashboard')} className="mt-2 flex min-h-[36px] w-full items-center gap-2 rounded-lg px-1 text-left text-xs font-semibold text-[#6d541b] hover:bg-[#eee9d9] lg:text-[#f5d987] lg:hover:bg-[#244632] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b9944e]">
             <PartyPopper size={15} className="shrink-0" aria-hidden /> Happy birthday!
           </button>
         ) : (
-          <Link to="/settings?tab=personal" onClick={() => { if (window.innerWidth < 1024) setIsSidebarOpen(false); }} className="mt-2 flex min-h-[36px] items-center gap-2 rounded-lg px-1 text-xs font-semibold text-[#31513d] hover:bg-[#eee9d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b9944e]">
+          <Link to="/settings?tab=personal" onClick={() => { if (window.innerWidth < 1024) setIsSidebarOpen(false); }} className="mt-2 flex min-h-[36px] items-center gap-2 rounded-lg px-1 text-xs font-semibold text-[#31513d] hover:bg-[#eee9d9] lg:text-[#f4f0e5] lg:hover:bg-[#244632] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b9944e]">
             <Cake size={15} className="shrink-0 text-[#a8802c]" aria-hidden /> Update profile &amp; anniversaries
           </Link>
         )}
