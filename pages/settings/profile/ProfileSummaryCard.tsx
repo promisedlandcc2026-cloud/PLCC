@@ -47,9 +47,10 @@ const ProfileSummaryCard: React.FC<Props> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
-      <div className="relative inline-block mb-4">
-        <div className="w-24 h-24 rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center text-burgundy">
+    <div className="bg-white rounded-2xl border border-[#e3e9e4] shadow-sm p-5 sm:p-6">
+      <div className="flex items-center gap-4 lg:flex-col lg:text-center lg:gap-3">
+      <div className="relative shrink-0">
+        <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-[#edf3ed] border-2 border-white shadow-sm overflow-hidden flex items-center justify-center text-[#1d4934]">
           {avatarUrl ? (
             <img src={avatarUrl} alt="Your profile photo" className="w-full h-full object-cover" />
           ) : (
@@ -57,7 +58,7 @@ const ProfileSummaryCard: React.FC<Props> = ({
           )}
         </div>
         <label
-          className="absolute -bottom-1 -right-1 bg-burgundy text-gold p-2 rounded-xl border-2 border-white shadow cursor-pointer hover:brightness-110 focus-within:ring-2 focus-within:ring-gold"
+          className="absolute -bottom-1 -right-1 bg-[#173b2a] text-[#f3d68a] p-2 rounded-full border-2 border-white shadow cursor-pointer hover:brightness-110 focus-within:ring-2 focus-within:ring-gold"
           title="Change photo"
         >
           {processing ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
@@ -72,11 +73,14 @@ const ProfileSummaryCard: React.FC<Props> = ({
           />
         </label>
       </div>
+      <div className="min-w-0 flex-1 lg:w-full">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8a6a2e] mb-1">Profile</p>
+        <h2 className="text-lg font-bold text-[#102d20] tracking-tight break-words">{fullName || 'Your name'}</h2>
+        {jobTitle ? <p className="text-sm text-slate-600 mt-1 break-words">{jobTitle}</p> : null}
+      </div>
+      </div>
 
-      <h2 className="text-lg font-black text-[#0d1a14] tracking-tight truncate">{fullName || 'Your name'}</h2>
-      <p className="text-xs font-bold text-[#8A6A2E] uppercase tracking-widest mt-1 truncate">{jobTitle || 'Title'}</p>
-
-      <dl className="mt-5 pt-5 border-t border-gray-100 space-y-3 text-left">
+      <dl className="mt-5 pt-4 border-t border-[#e8ede8] space-y-3 text-left">
         <div className="flex items-center justify-between gap-2">
           <dt className="text-xs font-bold text-gray-600 uppercase tracking-wide">Role</dt>
           <dd className="text-xs font-black text-burgundy bg-burgundy/5 px-2.5 py-1 rounded-lg border border-burgundy/10">
@@ -84,7 +88,7 @@ const ProfileSummaryCard: React.FC<Props> = ({
           </dd>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <dt className="text-xs font-bold text-gray-600 uppercase tracking-wide">2-Step</dt>
+          <dt className="text-xs font-bold text-gray-600 uppercase tracking-wide">2-step sign-in</dt>
           <dd>
             <StatusPill on={mfaOn}>{mfaOn ? 'On' : 'Off'}</StatusPill>
           </dd>

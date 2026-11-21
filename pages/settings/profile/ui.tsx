@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 /** Shared building blocks for the My Profile settings tab. */
 
 export const inputClass =
-  'w-full h-12 rounded-xl bg-gray-50 border border-gray-100 focus:bg-white focus:border-burgundy/30 outline-none font-semibold text-[#0d1a14] placeholder:text-gray-400 disabled:opacity-60';
+  'w-full h-12 rounded-xl bg-[#fafbf9] border border-[#dce5dd] focus:bg-white focus:border-[#638873] focus:ring-2 focus:ring-[#dbeade] outline-none font-medium text-[#0d1a14] placeholder:text-gray-400 disabled:opacity-60';
 
 type SectionCardProps = {
   icon: LucideIcon;
@@ -28,7 +28,7 @@ export const SectionCard: React.FC<SectionCardProps> = ({
   <section
     id={id}
     aria-labelledby={id ? `${id}-title` : undefined}
-    className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-7 space-y-5 scroll-mt-6"
+    className="bg-white rounded-2xl border border-[#e3e9e4] shadow-sm p-5 sm:p-7 space-y-5 scroll-mt-6"
   >
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
@@ -40,10 +40,10 @@ export const SectionCard: React.FC<SectionCardProps> = ({
           <Icon size={18} />
         </div>
         <div>
-          <h3 id={id ? `${id}-title` : undefined} className="text-base font-black text-[#0d1a14]">
+          <h3 id={id ? `${id}-title` : undefined} className="text-base font-bold text-[#102d20]">
             {title}
           </h3>
-          <p className="text-xs text-gray-600 font-medium">{subtitle}</p>
+          <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{subtitle}</p>
         </div>
       </div>
       {action}

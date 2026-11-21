@@ -68,17 +68,18 @@ const UserSettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="animate-in fade-in duration-500 pb-28 md:pb-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div className="animate-in fade-in duration-500 pb-32 md:pb-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-[#0d1a14] tracking-tight">My Profile</h1>
-          <p className="text-sm text-gray-600 font-medium mt-1">Your account details, family, and sign-in security.</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8a6a2e] mb-2">Your account</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#102d20] tracking-tight">My Profile</h1>
+          <p className="text-sm text-slate-600 mt-2 leading-relaxed">Manage your personal details, family, and sign-in security.</p>
         </div>
         <SaveBar {...saveBarProps} variant="header" />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        <aside className="w-full lg:w-[280px] lg:sticky lg:top-6 shrink-0 space-y-4">
+      <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 items-start">
+        <aside className="w-full lg:w-[300px] lg:sticky lg:top-6 shrink-0 space-y-4">
           <ProfileSummaryCard
             fullName={form.fields.fullName}
             jobTitle={form.fields.jobTitle}
@@ -106,7 +107,7 @@ const UserSettingsPage: React.FC = () => {
           <MyPointsCard />
         </aside>
 
-        <div className="flex-1 w-full min-w-0 space-y-8">
+        <div className="flex-1 w-full min-w-0 space-y-5">
           {bannerError ? (
             <div ref={errorRef}>
               <InlineError message={bannerError} />
