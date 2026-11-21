@@ -1,3 +1,4 @@
+import OfficeHome from './pages/pastorsOffice/OfficeHome';
 import React, { useState, useMemo, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { UpdateBanner } from './components/ui/UpdateBanner';
@@ -635,6 +636,7 @@ const App: React.FC = () => {
           <Route path="/" element={<ProtectedRoute><AwcOneLauncherPage /></ProtectedRoute>} />
           <Route path="/launcher" element={<ProtectedRoute><AwcOneLauncherPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><AppShell><DashboardPage /></AppShell></ProtectedRoute>} />
+          <Route path="/pastors-office" element={<ProtectedRoute><AppShell><OfficeHome /></AppShell></ProtectedRoute>} />
           {/* The old More page: everything moved into the menu (Admin, Ka Link tools, Settings tabs). */}
           <Route path="/more" element={<Navigate to="/dashboard" replace />} />
 

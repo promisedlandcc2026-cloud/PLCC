@@ -11,6 +11,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Daily cron also sends the 7 AM devotional reminder (sends once per day; see dailyHandler.ts).
   const task = String(Array.isArray(req.query?.task) ? req.query.task[0] : req.query?.task || '');
+  if (task === 'pastoral-reminders') {
+    const secret = process.env.CRON_SECRET;
+    if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ok:false,error:'Unauthorized'});
+    const admin=getSupabaseAdmin();
+    if (!admin) return res.status(503).json({ok:false,error:'Unavailable'});
+    const queued=await admin.rpc('pastoral_queue_reminders');
+    if (queued.error) return res.status(503).json({ok:false,error:'Reminder queue unavailable'});
+    const delivered=await admin.rpc('pastoral_deliver_inbox',{p_limit:100});
+    if (delivered.error) return res.status(503).json({ok:false,error:'Reminder delivery unavailable'});
+    return res.status(200).json({ok:true,queued:queued.data,delivered:delivered.data});
+  }
   if (task === 'daily-reminder') {
     const secret = process.env.CRON_SECRET;
     if (secret && req.headers.authorization !== `Bearer ${secret}`) {
