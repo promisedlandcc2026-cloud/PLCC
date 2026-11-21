@@ -131,16 +131,16 @@ const Topbar: React.FC = () => {
   }, [pollEnabled, triggerUnread]);
 
   return (
-    <header className="relative z-[110] w-full h-16 md:h-20 bg-white border-b border-gray-100 flex items-center px-3 sm:px-4 md:px-8 shrink-0">
+    <header className="relative z-[110] w-full h-16 md:h-20 bg-[#082c1b] md:bg-white border-b border-[#b9944e]/30 md:border-gray-100 flex items-center px-3 sm:px-4 md:px-8 shrink-0">
       <div className="flex items-center">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2.5 mr-1 sm:p-3 sm:mr-3 text-gray-400 hover:bg-gray-50 hover:text-burgundy rounded-xl active:scale-90 transition-all min-h-[44px] min-w-[44px]"
+          className="inline-flex items-center p-2.5 mr-1 sm:p-3 sm:mr-3 text-[#f7f1e4] md:text-gray-400 hover:bg-[#244b32] md:hover:bg-gray-50 md:hover:text-burgundy rounded-xl active:scale-90 transition-all min-h-[44px] min-w-[44px]"
           aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
           aria-controls="app-sidebar"
           aria-expanded={isSidebarOpen}
         >
-          <Menu size={24} />
+          <Menu size={24} /><span className="ml-1 text-sm font-semibold md:hidden">Menu</span>
         </button>
 
         <div className="flex items-center gap-2.5 md:gap-3 md:mr-4 lg:mr-10 cursor-pointer group active:scale-95 transition-all" onClick={() => navigate('/dashboard')}>
@@ -152,8 +152,8 @@ const Topbar: React.FC = () => {
             height={44}
             decoding="async"
           />
-          <span className="font-black text-lg md:text-xl tracking-tighter text-[#0d1a14] whitespace-nowrap">
-            PLCC <span className="text-burgundy max-[419px]:hidden">CANAAN</span>
+          <span className="font-serif font-bold text-xl md:text-xl tracking-tight text-[#f8f3e8] md:text-[#0d1a14] whitespace-nowrap">
+            <span className="md:hidden">Canaan</span><span className="hidden md:inline">PLCC <span className="text-burgundy">CANAAN</span></span>
           </span>
         </div>
       </div>
@@ -252,6 +252,7 @@ const Topbar: React.FC = () => {
                 <div className="p-2">
                   {[
                     { label: 'My profile', icon: User, to: '/church-profile' },
+                    { label: 'My family', icon: User, to: '/family' },
                     { label: 'Account & security', icon: Lock, to: '/settings/user' },
                   ].map(({ label, icon: Icon, to }) => (
                     <button

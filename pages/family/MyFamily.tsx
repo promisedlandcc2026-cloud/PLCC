@@ -355,7 +355,7 @@ export default function MyFamilyPage() {
   const memberCount = summary ? 1 + summary.adults.length + summary.dependents.length : 0;
 
   return (
-    <div className="px-4 pt-6 pb-24 sm:px-6 max-w-2xl mx-auto space-y-8">
+    <div className="px-4 pt-6 pb-24 sm:px-6 max-w-2xl mx-auto space-y-8 bg-[#f8f4eb]">
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-4xl sm:text-[2.75rem] leading-tight font-semibold text-[#0d1a14]" style={SERIF}>
@@ -518,9 +518,10 @@ export default function MyFamilyPage() {
                   })}
                 </ul>
               ) : (
-                <p className="text-[15px] text-gray-500 leading-relaxed py-2">
-                  No children on your family record yet. Add one below to give them their own Kids View.
-                </p>
+                <div className="text-[15px] text-gray-500 leading-relaxed py-2">
+                  <p>No children on your family record yet. Add one below to give them their own Kids View.</p>
+                  <button type="button" className="mt-2 font-semibold text-[#72551a] underline" onClick={() => { setAddMode('child'); document.getElementById('add-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>Add a child</button>
+                </div>
               )}
             </div>
           </div>

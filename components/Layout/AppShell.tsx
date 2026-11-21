@@ -140,7 +140,7 @@ const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           id="app-sidebar"
           aria-hidden={!isSidebarOpen}
           className={`
-            fixed left-0 z-[100] w-72 lg:w-64 max-w-[85vw]
+            fixed left-0 z-[100] w-full lg:w-64 max-w-full lg:max-w-[85vw]
             top-16 md:top-20 bottom-0
             bg-white border-r border-gray-100
             will-change-transform
