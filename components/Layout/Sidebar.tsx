@@ -231,6 +231,7 @@ const NestedNavItem: React.FC<{
 
 const Sidebar: React.FC = () => {
   const { setActiveSection, setIsSidebarOpen, userRole, isBirthdayToday, userId, isAuthenticated } = useNav();
+  const [hasPastoralOffice, setHasPastoralOffice] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [communityFeedUnread, setCommunityFeedUnread] = useState(0);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -270,6 +271,16 @@ const Sidebar: React.FC = () => {
     }
     return Object.entries(buckets).filter(([, items]) => items.length);
   }, [visibleGroups]);
+
+  useEffect(() => {
+    let alive = true;
+    setHasPastoralOffice(false);
+    if (isAuthenticated && userId) void fetchAuthorized('/api/vault?resource=pastors-office-mine')
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((data) => { if (alive) setHasPastoralOffice(Boolean(data?.ok && Array.isArray(data.offices) && data.offices.length)); })
+      .catch(() => { if (alive) setHasPastoralOffice(false); });
+    return () => { alive = false; };
+  }, [isAuthenticated, userId]);
 
   useEffect(() => {
     if (!isAuthenticated || !userId) {
@@ -363,6 +374,7 @@ const Sidebar: React.FC = () => {
         </button>
       </div>
 
+      {hasPastoralOffice && <Link to="/pastors-office" onClick={() => { if (window.innerWidth < 1024) setIsSidebarOpen(false); }} className="mx-3 mt-3 rounded-lg bg-[#e8dfc4] px-3 py-2 text-sm font-semibold text-[#173527] hover:bg-[#e0c875] lg:bg-[#294b36] lg:text-[#f5d987] lg:hover:bg-[#355a42]">Pastor’s Office</Link>}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <nav aria-label="Canaan mobile navigation" className="lg:hidden p-4 space-y-2">
           {mobileGroups.map(([label, items]) => (
