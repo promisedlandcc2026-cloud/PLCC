@@ -34,3 +34,13 @@ export function ugandaPeriod(day: string, view: 'day'|'week'|'month'): [number,n
   } else to=from+86400000;
   return [from,to];
 }
+
+/** Move by calendar days, weeks or months without depending on the device zone. */
+export function shiftUgandaDate(day: string, view: 'day'|'week'|'month', direction: -1|1): string {
+  if (!ugandaInstant(`${day}T00:00`)) return day;
+  const [year,month,date]=day.split('-').map(Number);
+  const target=view==='month'
+    ? new Date(Date.UTC(year,month-1+direction,Math.min(date,new Date(Date.UTC(year,month+direction,0)).getUTCDate())))
+    : new Date(Date.UTC(year,month-1,date+direction*(view==='week'?7:1)));
+  return `${target.getUTCFullYear()}-${String(target.getUTCMonth()+1).padStart(2,'0')}-${String(target.getUTCDate()).padStart(2,'0')}`;
+}
