@@ -190,20 +190,23 @@ export function renderHuddleSharePreviewHtml(card: {
 if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})();`
     : `location.replace(${appInviteJs});`;
   const bodyHtml = card.connectInviteUrl
-    ? `<main>
-    <img src="${imageUrl}" alt="" width="120" height="120" style="width:120px;height:120px;border-radius:24px;object-fit:cover" />
-    <p class="kicker">Live Ka Link</p>
-    <h1>${title.replace(/\s*·\s*Live Huddle$/, '')}</h1>
-    <p class="signin">Choose an app to open this huddle. If you need to sign in, the app will return you to this channel.</p>
-    <p class="q" style="margin-top:20px">Join the Ka Link on:</p>
-    ${kaLinkUrl ? `<a class="btn gold" href="${kaLinkUrl}">Join in Ka Link</a>` : ''}
-    <a class="btn ${kaLinkUrl ? 'plain' : 'gold'}" href="${connectUrl}">Tribes</a>
-    <a class="btn plain" href="${appInviteUrl}">PLCC Canaan<small>Church staff</small></a>
+    ? `<main class="invite">
+    <img class="artwork" src="${imageUrl}" alt="" width="72" height="72" />
+    <p class="kicker">Ka Link invitation</p>
+    <h1>${title.replace(/\s*·\s*Live (?:Huddle|Ka Link)$/, '')}</h1>
+    <a class="join" href="${kaLinkUrl || connectUrl}">${kaLinkUrl ? 'Join in Ka Link' : 'Join in Tribes'}</a>
+    <p class="signin">If prompted, sign in to continue to this huddle.</p>
+    <details>
+      <summary>Other ways to join</summary>
+      <div class="alternatives">
+        ${kaLinkUrl ? `<a href="${connectUrl}">Open in Tribes</a>` : ''}
+        <a href="${appInviteUrl}">Open in Canaan <small>Church staff</small></a>
+      </div>
+    </details>
   </main>`
-    : `<main>
+    : `<main class="invite">
     <p>Opening Live Ka Link…</p>
-    <p><a href="${appInviteUrl}">Continue to PLCC Canaan</a></p>
-    <p style="margin-top:16px"><img src="${imageUrl}" alt="" width="280" height="280" style="max-width:80vw;height:auto;border-radius:16px" /></p>
+    <a class="join" href="${appInviteUrl}">Continue to PLCC Canaan</a>
   </main>`;
 
   return `<!DOCTYPE html>
@@ -232,19 +235,36 @@ if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})(
   <meta name="twitter:image" content="${imageUrl}" />
 
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0d1a14; color: #f5e6c8; margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; text-align: center; }
-    main { width: 100%; max-width: 380px; }
-    a { color: #C9A35A; font-weight: 700; }
-    .kicker { margin: 16px 0 4px; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #C9A35A; }
-    h1 { margin: 0 0 20px; font-size: 22px; line-height: 1.25; color: #fff; }
-    .q { font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 14px; }
-    .btn { display: block; text-decoration: none; border-radius: 18px; margin: 0 0 12px; }
-    .btn small { display: block; font-size: 13px; font-weight: 600; margin-top: 2px; opacity: .8; }
-    .gold { background: #C9A35A; color: #0d1a14; font-size: 22px; font-weight: 800; padding: 18px 16px; }
-    .plain { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); color: #f5e6c8; font-size: 17px; font-weight: 700; padding: 12px 16px; }
-    .signin { font-size: 15px; line-height: 1.45; font-weight: 600; color: #fff; background: rgba(201, 163, 90,.15); border: 1px solid rgba(201, 163, 90,.45); border-radius: 14px; padding: 10px 12px; margin: 4px 0 0; }
-    .note { font-size: 14px; line-height: 1.5; opacity: .8; margin-top: 16px; }
-    [hidden] { display: none !important; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; min-height: 100svh; padding: 24px 16px;
+      display: grid; place-items: center; text-align: center;
+      font: 1rem/1.5 system-ui, -apple-system, sans-serif;
+      background: radial-gradient(ellipse at top, #19372a, #0d1a14 65%); color: #f9f2e3;
+    }
+    .invite {
+      width: min(100%, 420px); padding: clamp(24px, 7vw, 42px);
+      background: #15271e; border: 1px solid #405346; border-radius: 24px;
+      box-shadow: 0 22px 60px #060e0a66;
+    }
+    .artwork { display: block; margin: 0 auto 20px; border-radius: 16px; object-fit: cover; }
+    .kicker { margin: 0 0 6px; color: #dec18a; font-size: 0.875rem; font-weight: 650; }
+    h1 { margin: 0 0 24px; font-size: clamp(1.55rem, 6vw, 2rem); line-height: 1.2; overflow-wrap: anywhere; }
+    .join {
+      display: block; background: #dec18a; color: #14241b; padding: 13px 16px;
+      border-radius: 12px; font-weight: 750; text-decoration: none;
+    }
+    .join:hover { background: #efcf95; }
+    .signin { margin: 10px 0 20px; color: #c5d0c5; font-size: 0.875rem; }
+    details { border-top: 1px solid #405346; }
+    summary { padding: 12px 0 0; min-height: 44px; cursor: pointer; color: #dec18a; font-size: 0.875rem; }
+    .alternatives { display: grid; text-align: left; }
+    .alternatives a {
+      padding: 10px 0; min-height: 44px; color: #f9f2e3;
+      display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px;
+    }
+    .alternatives small { color: #c5d0c5; }
+    :focus-visible { outline: 2px solid #f4d397; outline-offset: 4px; }
   </style>
 </head>
 <body>
