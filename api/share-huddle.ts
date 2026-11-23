@@ -17,6 +17,8 @@ import { buildHuddleOgImageProxyUrl } from './_utils/whatsappOgImage.js';
 /** Member app — the same huddle opens there for anyone not signed in to the Vault. */
 const CONNECT_ORIGIN = String(process.env.CONNECT_PUBLIC_ORIGIN || 'https://plcc-connect.vercel.app').replace(/\/+$/, '');
 
+const KA_LINK_ORIGIN = 'https://plcc-chat.vercel.app';
+
 function requestOrigin(req: VercelRequest): string {
   const protoHeader = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
   const hostHeader = String(req.headers['x-forwarded-host'] || req.headers.host || '')
@@ -88,7 +90,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     imageUrl: ogImageUrl,
     previewShareUrl: card.previewShareUrl,
     appInviteUrl: card.appInviteUrl,
-    connectInviteUrl: `${CONNECT_ORIGIN}/community/chat/${encodeURIComponent(channelId)}?huddle=join`,
+    kaLinkInviteUrl: `${KA_LINK_ORIGIN}/community/chat/${encodeURIComponent(channelId)}?huddle=join&openHuddle=1`,
+    connectInviteUrl: `${CONNECT_ORIGIN}/community/chat/${encodeURIComponent(channelId)}?huddle=join&openHuddle=1`,
   });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
