@@ -105,7 +105,7 @@ export type VoiceTokenPlan = {
     room: string;
     /**
      * Members: microphone only (video is for Pr. Grace, the Ka Link team and moderators).
-     * Ka Link team: microphone + camera. Moderators and up: unrestricted (screen share,
+     * Moderators: unrestricted (camera, screen share,
      * and the waiting-music track, which is neither mic, camera nor screen).
      * A member whose mic is locked can publish nothing (canPublish false).
      */
@@ -132,7 +132,7 @@ export function planVoiceAccessToken(input: VoiceTokenClaimsInput): VoiceTokenPl
   const allowMicrophone = input.allowMicrophone !== false || canScreenShare;
   // Video only for moderators/hosts and the Ka Link team (Admins, Leaders such as Pr. Grace).
   // (Standing Bible readers are on the team list but get no video.)
-  const allowCamera = canScreenShare || input.kaLinkTeam === 'admin' || input.kaLinkTeam === 'leader';
+  const allowCamera = canScreenShare;
   const restrictSources = !canScreenShare || !allowMicrophone;
   const sources = huddlePublishSources(allowMicrophone, canScreenShare, allowCamera);
   return {
@@ -477,7 +477,7 @@ export function selectMicrophoneTrackSids(tracks: unknown): string[] {
     const name = String(track.name || '').trim();
     if (name === HUDDLE_MUSIC_TRACK_NAME) continue;
     const sourceText = String(track.source ?? '').toUpperCase();
-    if (sourceText.includes('SCREEN_SHARE')) continue;
+    if (sourceText.includes('SCREEN_SHARE') || Number(track.source) === TrackSource.SCREEN_SHARE_AUDIO) continue;
     const mime = String(track.mimeType || track.mime_type || '').toLowerCase();
     const typeText = String(track.type ?? '').toUpperCase();
     const isMic = isLiveKitMicrophoneTrackSource(track.source);
@@ -1123,6 +1123,39 @@ export async function applyHuddleMicLock(
     }
   }
   return { changed };
+}
+
+/** Mute published microphones, or invite muted participants to turn theirs on. */
+export async function moderateAllHuddleMicrophones(
+  config: LiveKitServerConfig,
+  channelId: string,
+  actorId: string,
+  mute: boolean
+): Promise<{ failed: number }> {
+  const roomName = voiceRoomNameForChannel(channelId);
+  const svc = roomServiceClient(config);
+  const participants = await svc.listParticipants(roomName);
+  let failed = 0;
+
+  for (const participant of participants) {
+    const identity = participant.identity;
+    if (!identity || identity === actorId || identity.startsWith('plcc-sanctum-bridge')) continue;
+    const activeTracks = selectMicrophoneTrackSids(participant.tracks.filter((track) => !track.muted));
+    if (!mute) {
+      if (!activeTracks.length && !await sendHuddleConductNotice(config, channelId, identity, { t: 'ask-unmute' })) {
+        failed += 1;
+      }
+      continue;
+    }
+    for (const sid of activeTracks) {
+      try {
+        await svc.mutePublishedTrack(roomName, identity, sid, true);
+      } catch (err) {
+        if (!isNotFoundError(err)) failed += 1;
+      }
+    }
+  }
+  return { failed };
 }
 
 /** Lower every raised hand in the room (#7). */

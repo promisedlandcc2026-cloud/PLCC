@@ -63,13 +63,14 @@ ok('Bible readers and moderators keep the mic when locked', () => {
   assert.equal(huddleMicAllowed({ stage: unlocked, userId: 'member', isModerator: false }), true);
 });
 
-ok('video only for the Ka Link team (Pr. Grace) and moderators', () => {
+ok('video requires effective room moderator access', () => {
   const member = planVoiceAccessToken({ userId: 'u', displayName: 'U', channelId: 'c', canModerate: false });
   assert.equal(member.grant.canPublishSources?.includes(TrackSource.CAMERA), false);
-  const leader = planVoiceAccessToken({ userId: 'g', displayName: 'Pr. Grace', channelId: 'c', canModerate: false, kaLinkTeam: 'leader' });
-  assert.deepEqual(leader.grant.canPublishSources, [TrackSource.MICROPHONE, TrackSource.CAMERA]);
+  const leader = planVoiceAccessToken({ userId: 'g', displayName: 'Team leader', channelId: 'c', canModerate: false, kaLinkTeam: 'leader' });
+  assert.deepEqual(leader.grant.canPublishSources, [TrackSource.MICROPHONE]);
   const lockedLeader = planVoiceAccessToken({ userId: 'g', displayName: 'G', channelId: 'c', canModerate: false, kaLinkTeam: 'leader', allowMicrophone: false });
-  assert.deepEqual(lockedLeader.grant.canPublishSources, [TrackSource.CAMERA]);
+  assert.equal(lockedLeader.grant.canPublish, false);
+  assert.deepEqual(lockedLeader.grant.canPublishSources, [TrackSource.MICROPHONE]);
   const mod = planVoiceAccessToken({ userId: 'm', displayName: 'M', channelId: 'c', canModerate: true });
   assert.equal(mod.grant.canPublishSources, undefined);
 });
