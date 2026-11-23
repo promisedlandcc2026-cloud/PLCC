@@ -653,7 +653,7 @@ const LoginPortal: React.FC = () => {
             <form onSubmit={handleIdentifierSubmit} className="space-y-4" noValidate>
               <div className="space-y-2">
                 <label htmlFor="awc-login-identifier" className="block text-sm font-bold text-[#16251f]">
-                  Email address
+                  Email address or phone number
                 </label>
                 <input
                   ref={identifierInputRef}
@@ -669,10 +669,11 @@ const LoginPortal: React.FC = () => {
                   defaultValue={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   onInput={(e) => setIdentifier((e.target as HTMLInputElement).value)}
-                  placeholder="you@example.com"
+                  aria-describedby="awc-login-identifier-help"
+                  placeholder="you@example.com or +256…"
                   className={PLCC_INPUT}
                 />
-                <p className="text-xs text-[#16251f]/55">We'll email you a 6-digit code. Signing in with a phone number? Enter it here instead (outside Uganda, start with + and your country code).</p>
+                <p id="awc-login-identifier-help" className="text-xs text-[#16251f]/55">For numbers outside Uganda, include + and your country code.</p>
               </div>
               {error && (
                 <p role="alert" className="text-red-700 text-sm font-semibold bg-red-50 border border-red-100 rounded-xl px-4 py-3">
