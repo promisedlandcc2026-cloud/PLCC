@@ -78,7 +78,7 @@ ok('standing Bible readers (Nov 19): unmute while locked, no video, cannot start
   assert.match(core, /\.\.\.stage\.readerIds, \.\.\.standingReaders, \.\.\.teamLeaders\]/);
   assert.match(core, /restoreIsReader && !huddleMicAllowed|!restoreIsReader && !huddleMicAllowed/);
   const lk = readFileSync(join(root, 'api/_utils/livekitVoice.ts'), 'utf8');
-  assert.match(lk, /allowCamera = canScreenShare \|\| input\.kaLinkTeam === 'admin' \|\| input\.kaLinkTeam === 'leader'/);
+  assert.match(lk, /allowCamera = canScreenShare;/);
   const sql = readFileSync(join(root, 'supabase/migrations/ka_link_team.sql'), 'utf8');
   assert.match(sql, /CHECK \(team_role IN \('admin', 'leader', 'reader'\)\)/);
   assert.match(readFileSync(join(root, 'pages/admin/KaLinkTeam.tsx'), 'utf8'), /reader: \{ label: 'Bible reader'/);

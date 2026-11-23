@@ -164,6 +164,7 @@ import {
     microphoneRestoreIsSelf,
     mintLiveKitAccessToken,
     muteParticipantMicrophoneTracks,
+    moderateAllHuddleMicrophones,
     resolveVoiceCanModerate,
     restoreOwnMicrophonePublish,
     readHuddleStage,
@@ -7566,14 +7567,14 @@ const handleCommunity = async (req: any, res: any) => {
                 const stageAction = String(req.body?.action || '').trim().toLowerCase();
                 const targetIdentity = String(req.body?.targetIdentity || '').trim();
                 const STAGE_ACTIONS = new Set([
-                    'mic-lock', 'mic-unlock', 'lower-all-hands', 'allow-mic', 'revoke-mic',
+                    'mic-lock', 'mic-unlock', 'lower-all-hands', 'mute-all', 'unmute-all', 'allow-mic', 'revoke-mic',
                     'reader-add', 'reader-remove', 'remove', 'block',
                 ]);
                 if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
                 if (!STAGE_ACTIONS.has(stageAction)) {
                     return res.status(400).json({ ok: false, error: 'Unknown moderator action' });
                 }
-                const needsTarget = !['mic-lock', 'mic-unlock', 'lower-all-hands'].includes(stageAction);
+                const needsTarget = !['mic-lock', 'mic-unlock', 'lower-all-hands', 'mute-all', 'unmute-all'].includes(stageAction);
                 if (needsTarget && !targetIdentity) {
                     return res.status(400).json({ ok: false, error: 'targetIdentity is required' });
                 }
@@ -7642,6 +7643,14 @@ const handleCommunity = async (req: any, res: any) => {
                         const teamLeaders = await fetchKaLinkTeamLeaderIds(supabaseAdmin);
                         const exempt = new Set<string>([...moderatorIds, ...stage.readerIds, ...standingReaders, ...teamLeaders]);
                         detail = await applyHuddleMicLock(lk, cid, stageAction === 'mic-lock', exempt);
+                    } else if (stageAction === 'mute-all' || stageAction === 'unmute-all') {
+                        if (stageAction === 'unmute-all' && stage.micLock) {
+                            return res.status(400).json({ ok: false, error: 'Unlock mics before asking everyone to unmute.' });
+                        }
+                        const result = await moderateAllHuddleMicrophones(lk, cid, authUserId, stageAction === 'mute-all');
+                        if (result.failed) {
+                            return res.status(503).json({ ok: false, error: 'Some microphones could not be reached. Please try again.' });
+                        }
                     } else if (stageAction === 'lower-all-hands') {
                         detail = await lowerAllHuddleHands(lk, cid);
                     } else if (stageAction === 'allow-mic' || stageAction === 'revoke-mic') {
