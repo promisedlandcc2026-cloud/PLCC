@@ -165,11 +165,8 @@ export function renderHuddleSharePreviewHtml(card: {
   imageUrl: string;
   previewShareUrl: string;
   appInviteUrl: string;
-  /**
-   * Same huddle in Tribes (member app). When set, browsers go to Connect
-   * unless this browser is signed in to the Vault (staff) — both apps join the
-   * same live call, this only picks which app opens.
-   */
+  /** Same channel and huddle in the standalone Ka Link app. */
+  kaLinkInviteUrl?: string;
   connectInviteUrl?: string;
   /** @deprecated Ignored — JS redirect is always used for browsers. */
   redirect?: boolean;
@@ -181,10 +178,11 @@ export function renderHuddleSharePreviewHtml(card: {
   const appInviteUrl = escapeHtml(card.appInviteUrl);
   const imageType = escapeHtml(imageMimeFromUrl(card.imageUrl));
   const appInviteJs = JSON.stringify(card.appInviteUrl);
+  const kaLinkUrl = card.kaLinkInviteUrl ? escapeHtml(card.kaLinkInviteUrl) : '';
   const connectUrl = card.connectInviteUrl ? escapeHtml(card.connectInviteUrl) : '';
   const connectJs = card.connectInviteUrl ? JSON.stringify(card.connectInviteUrl) : 'null';
   /*
-   * Browsers: show two buttons (Tribes / The Vault) and let people pick —
+   * Browsers: show app choices and let people pick —
    * both join the same call. ?app=connect|vault skips straight to that app.
    */
   const redirectJs = card.connectInviteUrl
@@ -196,11 +194,11 @@ if(q==='vault')location.replace(v);else if(q==='connect')location.replace(c);})(
     <img src="${imageUrl}" alt="" width="120" height="120" style="width:120px;height:120px;border-radius:24px;object-fit:cover" />
     <p class="kicker">Live Ka Link</p>
     <h1>${title.replace(/\s*·\s*Live Huddle$/, '')}</h1>
-    <p class="signin">Sign in to Tribes or PLCC Canaan, then tap the link. It opens right into the prayer call.</p>
+    <p class="signin">Choose an app to open this huddle. If you need to sign in, the app will return you to this channel.</p>
     <p class="q" style="margin-top:20px">Join the Ka Link on:</p>
-    <a class="btn gold" href="${connectUrl}">Tribes<small>Most members</small></a>
+    ${kaLinkUrl ? `<a class="btn gold" href="${kaLinkUrl}">Join in Ka Link</a>` : ''}
+    <a class="btn ${kaLinkUrl ? 'plain' : 'gold'}" href="${connectUrl}">Tribes</a>
     <a class="btn plain" href="${appInviteUrl}">PLCC Canaan<small>Church staff</small></a>
-    <p class="note">Either way, you're in the same prayer call.</p>
   </main>`
     : `<main>
     <p>Opening Live Ka Link…</p>

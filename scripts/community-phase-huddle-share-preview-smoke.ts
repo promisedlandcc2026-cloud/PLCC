@@ -70,6 +70,15 @@ assert(isSocialPreviewCrawler('WhatsApp/2.23'), 'detects WhatsApp UA');
 assert(isSocialPreviewCrawler('facebookexternalhit/1.1'), 'detects facebookexternalhit');
 assert(!isSocialPreviewCrawler('Mozilla/5.0 Chrome/120'), 'browsers are not crawlers');
 
+const memberInvite = `https://plcc-chat.vercel.app/community/chat/${CHANNEL}?huddle=join&openHuddle=1`;
+const memberHtml = renderHuddleSharePreviewHtml({
+  ...card,
+  kaLinkInviteUrl: memberInvite,
+  connectInviteUrl: memberInvite.replace('plcc-chat', 'plcc-connect'),
+});
+assert(memberHtml.includes(`href="${memberInvite.replace('&', '&amp;')}">Join in Ka Link`), 'primary action opens the invited channel in Ka Link');
+assert(memberHtml.includes('og:image'), 'member landing still supplies a share preview');
+
 console.log('\nHuddle share preview smoke — DB image priority');
 
 const withDb = resolveHuddleShareCard({
