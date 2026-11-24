@@ -29,7 +29,7 @@ import AccessDenied from '../../components/Layout/AccessDenied';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { fetchAuthorized } from '../../lib/api';
-import { Copy, Camera, QrCode } from 'lucide-react';
+import { Copy, Camera, QrCode, X } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { canPerform } from '../../lib/permissions';
 import { useNav } from '../../App';
@@ -1225,7 +1225,22 @@ const MemberDetailsModal = ({
   onEdit: () => void;
 }) => {
   const navigate = useNavigate();
-  const handleContentClick = (e: React.MouseEvent) => e.stopPropagation();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const backdropPressed = useRef(false);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const trigger = document.activeElement;
+    dialog.showModal();
+    closeRef.current?.focus({ preventScroll: true });
+    return () => {
+      dialog.close();
+      if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus({ preventScroll: true });
+    };
+  }, []);
   const [showQR, setShowQR] = useState(false);
   const [passPayload, setPassPayload] = useState('');
   const [passCode, setPassCode] = useState(member.accessCode || '');
@@ -1389,35 +1404,47 @@ const MemberDetailsModal = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 pt-24 md:p-4 animate-in fade-in duration-200"
-      onClick={onClose}
+    <dialog
+      ref={dialogRef}
+      aria-label={`Member details for ${member.name}`}
+      className="m-auto w-[calc(100%-1rem)] max-w-lg max-h-[calc(100dvh-1rem)] overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm sm:max-h-[calc(100dvh-3rem)] sm:rounded-3xl"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onPointerDown={(event) => { backdropPressed.current = event.target === event.currentTarget; }}
+      onClick={(event) => {
+        if (backdropPressed.current && event.target === event.currentTarget) onClose();
+        backdropPressed.current = false;
+      }}
     >
-      <div
-        className="bg-white rounded-3xl w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden flex flex-col max-h-[85vh]"
-        onClick={handleContentClick}
-      >
-        <div className="overflow-y-auto custom-scrollbar flex-1">
-          {/* Header / Cover */}
-          <div className="bg-burgundy h-24 relative shrink-0">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 p-2 bg-black/20 text-white rounded-full hover:bg-black/40 transition-colors z-10"
-            >
-              <UserX size={18} />
-            </button>
-            <button
-              onClick={() => setShowQR(!showQR)}
-              className={`absolute top-4 left-4 p-2 rounded-full transition-colors z-10 flex items-center gap-2 px-3 ${showQR ? 'bg-gold text-burgundy font-black' : 'bg-black/20 text-white hover:bg-black/40'}`}
-            >
-              <QrCode size={18} />
-              {showQR && <span className="text-[10px] uppercase tracking-widest">Hide Pass</span>}
-            </button>
-          </div>
+      <div className="flex max-h-[calc(100dvh-1rem)] min-h-0 flex-col sm:max-h-[calc(100dvh-3rem)]">
+        <header className="flex shrink-0 items-center justify-between gap-3 bg-burgundy px-4 py-2 text-white">
+          <button
+            type="button"
+            aria-pressed={showQR}
+            onClick={() => {
+              setShowQR(!showQR);
+              if (scrollRef.current) scrollRef.current.scrollTop = 0;
+            }}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-black/20 px-3 text-sm font-bold hover:bg-black/40"
+          >
+            <QrCode size={18} aria-hidden />
+            {showQR ? 'Hide pass' : 'Member pass'}
+          </button>
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Close member details"
+            className="inline-flex size-11 items-center justify-center rounded-full bg-black/20 hover:bg-black/40"
+          >
+            <X size={20} aria-hidden />
+          </button>
+        </header>
 
-          {/* Profile Info & Tabs */}
-          <div className="px-8 pb-8 -mt-12 relative flex flex-col items-center text-center">
-
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain custom-scrollbar">
+          <div className="flex flex-col items-center px-4 pb-6 pt-4 text-center sm:px-8 sm:pb-8">
             {!showQR && (
               <div className="w-24 h-24 rounded-3xl bg-white p-2 shadow-lg mb-4 cursor-pointer hover:scale-105 transition-transform" onClick={() => setActiveTab('profile')}>
                 {member.avatarUrl ? (
@@ -1455,7 +1482,7 @@ const MemberDetailsModal = ({
             ) : (
               <>
                 <h2 className="text-2xl font-black text-[#0d1a14] mb-1">{member.name}</h2>
-                <p className="text-gray-600 font-bold text-base mb-6">{member.email}</p>
+                <p className="mb-5 max-w-full break-all text-base font-bold text-gray-600">{member.email}</p>
 
                 {/* Tabs */}
                 <div className="flex flex-wrap p-1 bg-gray-100 rounded-xl w-full mb-6 gap-0.5">
@@ -1694,7 +1721,7 @@ const MemberDetailsModal = ({
                         <p className="text-gray-600 text-sm font-medium">No follow-ups recorded.</p>
                       </div>
                     ) : (
-                      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
+                      <div className="space-y-3">
                         {followUps.map(fu => (
                           <div key={fu.id} className="bg-gray-50 p-4 rounded-2xl border border-gray-100 hover:border-gold/20 transition-colors">
                             <div className="flex justify-between items-start mb-2">
@@ -1733,7 +1760,7 @@ const MemberDetailsModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
