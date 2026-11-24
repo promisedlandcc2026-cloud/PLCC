@@ -213,6 +213,7 @@ import {
     fetchKaLinkTeamReaderIds,
 } from './kaLinkTeam.js';
 import { handleVoiceTokenFallback, signHuddleFallbackPass } from './huddleFallbackPass.js';
+import { fetchPlccRights, listPlccRights, parsePlccRightChange, resolveKaLinkCanRecord, setPlccRight, type PlccRights } from './plccRights.js';
 import { DailyApiError, countDailyRoomParticipantsForChannels, getDailyApiKey, mintDailyMeetingToken } from './dailyVoice.js';
 import { claimHuddleProvider, mergeDailyIntoHuddleStatuses, resolveHuddleProvider } from './huddleProvider.js';
 import { waitUntil } from '@vercel/functions';
@@ -4295,6 +4296,10 @@ const handleCommunity = async (req: any, res: any) => {
     if (!auth?.user) return;
     const authUserId = auth.user.id;
     const authRole = String(auth.role || 'PENDING');
+    // PLCC ONE rights (Nov 24 2026): standing Ka Link "Mod" / recording rights, loaded once per request.
+    let plccRightsMemo: Promise<PlccRights> | null = null;
+    const myPlccRights = () => (plccRightsMemo ??= fetchPlccRights(supabaseAdmin, authUserId));
+    const isStandingKaLinkMod = async () => (await myPlccRights()).kaLinkModerator;
     const authDisplayName =
         String(auth.user.name || '').trim() ||
         String(auth.user.email || '').split('@')[0] ||
@@ -5179,7 +5184,7 @@ const handleCommunity = async (req: any, res: any) => {
                     visibility: normalizeVisibility(gate.channel),
                     isChannelModerator: isMod,
                     isChannelCreator: isCreator,
-                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                     allowDm: normalizeVisibility(gate.channel) === 'dm',
                 });
                 if (voiceDecision.ok === false) {
@@ -6205,7 +6210,7 @@ const handleCommunity = async (req: any, res: any) => {
                     visibility: normalizeVisibility(gate.channel),
                     isChannelModerator: isMod,
                     isChannelCreator: isCreator,
-                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                     allowDm: normalizeVisibility(gate.channel) === 'dm',
                 });
                 if (voiceDecision.ok === false) {
@@ -6361,6 +6366,7 @@ const handleCommunity = async (req: any, res: any) => {
                         roomName: minted.roomName,
                         expiresIn: minted.expiresIn,
                         canModerate,
+                        canRecord: await resolveKaLinkCanRecord(supabaseAdmin, { userId: authUserId, role: authRole, canModerate, rights: await myPlccRights() }),
                         canStart: startPerm.canStart,
                         channelCanModerate: voiceDecision.canModerate,
                         hostId: session.roles.hostId,
@@ -6829,7 +6835,7 @@ const handleCommunity = async (req: any, res: any) => {
                     visibility: normalizeVisibility(gate.channel),
                     isChannelModerator: isMod,
                     isChannelCreator: isCreator,
-                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                     allowDm: normalizeVisibility(gate.channel) === 'dm',
                 });
                 if (voiceDecision.ok === false) {
@@ -6909,7 +6915,7 @@ const handleCommunity = async (req: any, res: any) => {
                     visibility: normalizeVisibility(gate.channel),
                     isChannelModerator: isMod,
                     isChannelCreator: isCreator,
-                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                     allowDm: normalizeVisibility(gate.channel) === 'dm',
                 });
                 if (voiceDecision.ok === false) {
@@ -6990,7 +6996,7 @@ const handleCommunity = async (req: any, res: any) => {
                     visibility: normalizeVisibility(gate.channel),
                     isChannelModerator: isMod,
                     isChannelCreator: isCreator,
-                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                     allowDm: normalizeVisibility(gate.channel) === 'dm',
                 });
                 if (voiceDecision.ok === false) {
@@ -7063,7 +7069,7 @@ const handleCommunity = async (req: any, res: any) => {
                     visibility: normalizeVisibility(gate.channel),
                     isChannelModerator: isMod,
                     isChannelCreator: isCreator,
-                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                     allowDm: normalizeVisibility(gate.channel) === 'dm',
                 });
                 if (voiceDecision.ok === false) {
@@ -7198,7 +7204,7 @@ const handleCommunity = async (req: any, res: any) => {
                                 visibility: normalizeVisibility(gate.channel),
                                 isChannelModerator: String(m?.role || '').toLowerCase() === 'moderator',
                                 isChannelCreator: String(gate.channel.created_by || '') === String(authUserId),
-                                isBroadAdmin: isBroadChatAdmin(authRole),
+                                isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                                 allowDm: false,
                             });
                             const lkSongs = getLiveKitServerConfig();
@@ -7425,7 +7431,7 @@ const handleCommunity = async (req: any, res: any) => {
                     visibility: normalizeVisibility(gate.channel),
                     isChannelModerator: String(recMembership?.role || '').toLowerCase() === 'moderator',
                     isChannelCreator: String(gate.channel.created_by || '') === String(authUserId),
-                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                     allowDm: false,
                 });
                 if (recVoice.ok === false) return res.status(recVoice.status).json({ ok: false, error: recVoice.error });
@@ -7433,6 +7439,11 @@ const handleCommunity = async (req: any, res: any) => {
                 const recSession = await resolveVoiceCanModerate(lk, cid, authUserId, recVoice.canModerate);
                 if (!recSession.canModerate) {
                     return res.status(403).json({ ok: false, error: 'Only Ka Link moderators can manage recordings.' });
+                }
+                // PLCC ONE rights: once the "Recording button" right is handed out, only its holders
+                // (and Super Admins) start, stop or delete recordings.
+                if (!(await resolveKaLinkCanRecord(supabaseAdmin, { userId: authUserId, role: authRole, canModerate: recSession.canModerate, rights: await myPlccRights() }))) {
+                    return res.status(403).json({ ok: false, error: 'Only the recording team can start or stop Ka Link recordings.' });
                 }
 
                 if (recAction === 'delete') {
@@ -7519,6 +7530,31 @@ const handleCommunity = async (req: any, res: any) => {
                     return res.status(403).json({ ok: false, error: 'Only the Pastor, Admins and Super Admins can manage the Ka Link team.' });
                 }
                 const teamAction = String(req.body?.action || 'list').trim().toLowerCase();
+                // PLCC ONE rights (Nov 24 2026): Mod / Recording button / Admissions.
+                if (teamAction === 'rights-list' || teamAction === 'rights-set') {
+                    if (teamAction === 'rights-set') {
+                        const change = parsePlccRightChange(req.body);
+                        if (change.ok === false) return res.status(400).json({ ok: false, error: change.error });
+                        const { data: target } = await supabaseAdmin.from('users').select('id').eq('id', change.userId).maybeSingle();
+                        if (!target) return res.status(404).json({ ok: false, error: 'That person was not found.' });
+                        const saved = await setPlccRight(supabaseAdmin, { ...change, actorId: authUserId });
+                        if (saved.ok === false) return res.status(500).json({ ok: false, error: saved.error });
+                        const logAudit = await getAudit();
+                        await logAudit({
+                            userId: authUserId,
+                            action: 'PLCC ONE right changed',
+                            details: { targetUserId: change.userId, right: change.right, value: change.value },
+                            resourceType: 'plcc_rights',
+                            resourceId: change.userId,
+                            req,
+                        });
+                    }
+                    const rights = await listPlccRights(supabaseAdmin);
+                    if (rights.ok === false) {
+                        return res.status(rights.setupNeeded ? 503 : 500).json({ ok: false, setupNeeded: rights.setupNeeded, error: rights.error });
+                    }
+                    return res.status(200).json({ ok: true, members: rights.members });
+                }
                 if (teamAction === 'add' || teamAction === 'remove') {
                     const targetUserId = String(req.body?.userId || '').trim();
                     if (!/^[0-9a-f-]{36}$/i.test(targetUserId)) {
@@ -7592,7 +7628,7 @@ const handleCommunity = async (req: any, res: any) => {
                     visibility: normalizeVisibility(gate.channel),
                     isChannelModerator: String(membership?.role || '').toLowerCase() === 'moderator',
                     isChannelCreator: String(gate.channel.created_by || '') === String(authUserId),
-                    isBroadAdmin: isBroadChatAdmin(authRole),
+                    isBroadAdmin: isBroadChatAdmin(authRole) || (await isStandingKaLinkMod()),
                     allowDm: normalizeVisibility(gate.channel) === 'dm',
                 });
                 if (voiceDecision.ok === false) {

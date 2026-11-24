@@ -17,6 +17,7 @@
  * anyone who moderates a room. Leaders and moderators themselves can't be warned/blocked.
  * Who may unblock / see the list: Super Admin, Pastor, Admin, Ka Link team admins and leaders.
  */
+import { fetchPlccRights } from './plccRights.js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { isBroadChatAdmin } from './communityChatSecurity.js';
 
@@ -134,6 +135,11 @@ async function teamRole(supabase: SupabaseClient, userId: string): Promise<strin
   }
 }
 
+/** PLCC ONE "Mod" right: standing moderator in every Ka Link. */
+async function standingModerator(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  return (await fetchPlccRights(supabase, userId)).kaLinkModerator;
+}
+
 async function roomModerator(supabase: SupabaseClient, userId: string, channelId: string | null): Promise<boolean> {
   if (channelId) {
     const [{ data: m }, { data: ch }] = await Promise.all([
@@ -161,6 +167,7 @@ export async function canModerateConduct(
   if (ctx.sessionModerator) return true;
   const team = await teamRole(supabase, actor.id);
   if (team === 'admin' || team === 'leader') return true;
+  if (await standingModerator(supabase, actor.id)) return true;
   return roomModerator(supabase, actor.id, ctx.channelId ?? null);
 }
 
@@ -177,6 +184,7 @@ async function isProtected(supabase: SupabaseClient, userId: string, channelId: 
   if (isBroadChatAdmin((u as any)?.role)) return true;
   const team = await teamRole(supabase, userId);
   if (team === 'admin' || team === 'leader') return true;
+  if (await standingModerator(supabase, userId)) return true;
   return channelId ? roomModerator(supabase, userId, channelId) : false;
 }
 

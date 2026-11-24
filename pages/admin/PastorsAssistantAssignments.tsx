@@ -37,7 +37,7 @@ export default function PastorsAssistantAssignments({ users }: { users: User[] }
     <p className="text-sm text-gray-600">Add this office assignment without changing a person’s existing role. Calendar access will become available when the Pastor’s Office is complete.</p>
     {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     <div className="flex flex-wrap gap-2">
-      <label className="text-sm">Pastor <select className="ml-2 rounded-lg border p-2" value={pastorId} onChange={e => setPastorId(e.target.value)}><option value="">Choose pastor</option>{users.filter(u => u.role === 'PASTOR').map(u => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}</select></label>
+      <label className="text-sm">Pastor <select className="ml-2 rounded-lg border p-2" value={pastorId} onChange={e => setPastorId(e.target.value)}><option value="">Choose pastor</option>{users.filter(u => u.role === 'PASTOR' || u.role === 'SUPER_ADMIN').map(u => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}</select></label>
       <label className="text-sm">Assistant <select className="ml-2 rounded-lg border p-2" value={assistantId} onChange={e => setAssistantId(e.target.value)}><option value="">Choose assistant</option>{users.filter(u => !['PENDING', 'GUEST', 'KIOSK'].includes(u.role || '')).map(u => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}</select></label>
       <button type="button" disabled={busy || !pastorId || !assistantId} onClick={() => void change(pastorId, assistantId, 'grant')} className="rounded-lg bg-[#143b27] px-4 py-2 text-white disabled:opacity-50">Add assignment</button>
     </div>
