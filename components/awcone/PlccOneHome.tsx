@@ -72,7 +72,7 @@ export type HomeApp = { id: AwcOneAppId; name: string; tags: string; Icon: Lucid
 
 export const JORDAN: HomeApp = { id: 'chat', name: 'Ka Link', tags: 'Messages • Prayer • Calls', Icon: MessageCircle };
 export const TRIBES: HomeApp = { id: 'connect', name: 'Tribes', tags: 'Community • Events • Groups', Icon: Users };
-export const SANCTUM: HomeApp = { id: 'sanctum', name: 'PLCC Sanctum', tags: 'Prayer Rooms • Live Prayer', Icon: Flame };
+export const SANCTUM: HomeApp = { id: 'sanctum', name: 'PLCC Sanctum', tags: 'Moderators • Overflow Room', Icon: Flame };
 export const FIRSTFRUITS: HomeApp = { id: 'tithe', name: 'Firstfruits', tags: 'Tithe • Offerings', Icon: HandHeart, soon: true };
 export const CANAAN: HomeApp = { id: 'vault', name: 'Canaan', tags: 'Church Administration', Icon: Home };
 
@@ -556,19 +556,24 @@ export const CanaanFeature: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
   </Link>
 );
 
-/** Members' featured card: the prayer rooms (they don't use Canaan's admin tools). */
-export const SanctumFeature: React.FC<{ onOpen: () => void; busy: boolean }> = ({ onOpen, busy }) => (
+/** Members' featured card: live prayer in Ka Link (they don't use Canaan's admin tools). */
+export const SanctumFeature: React.FC<{ onOpen: () => void; busy: boolean; eyebrow?: string; ariaLabel?: string }> = ({
+  onOpen,
+  busy,
+  eyebrow = 'Ka Link',
+  ariaLabel = 'Join live prayer in Ka Link',
+}) => (
   <button
     type="button"
     onClick={onOpen}
     disabled={busy}
-    aria-label="Open PLCC Sanctum prayer rooms"
+    aria-label={ariaLabel}
     className={`group relative w-full overflow-hidden rounded-[22px] p-7 sm:p-9 text-left text-white min-h-[220px] flex flex-col justify-center cursor-pointer shadow-[0_10px_30px_rgba(22,37,31,0.18)] hover:shadow-[0_18px_44px_rgba(201,163,90,0.35)] disabled:opacity-80 ${LIFT} ${FOCUS}`}
     style={{ background: `linear-gradient(120deg, ${PLCC_GREEN_DEEP} 0%, ${PLCC_GREEN} 55%, #6b5a24 100%)` }}
   >
     <Flame size={130} className="absolute -right-4 -bottom-6 opacity-15" style={{ color: GOLD_SOFT }} aria-hidden />
     <span className="text-xs font-extrabold uppercase tracking-[0.22em]" style={{ color: GOLD_SOFT }}>
-      PLCC Sanctum
+      {eyebrow}
     </span>
     <span className="mt-2 text-[30px] sm:text-[38px] leading-tight font-semibold" style={serif}>
       Step into the Promised Land

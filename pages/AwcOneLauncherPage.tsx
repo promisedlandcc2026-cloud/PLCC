@@ -121,6 +121,18 @@ const AwcOneLauncherPage: React.FC = () => {
     };
   }, [isAuthenticated]);
 
+  // Sanctum (overflow Room Schedule) is for moderators only (Nov 25 2026).
+  const [isModerator, setIsModerator] = useState(false);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let alive = true;
+    authedFetch('/api/vault?resource=community&subResource=my-ka-link-rights')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive) setIsModerator(d?.moderator === true); })
+      .catch(() => undefined);
+    return () => { alive = false; };
+  }, [isAuthenticated]);
+
   // A tile tapped before signing in opens now.
   const pendingChecked = useRef(false);
   useEffect(() => {
@@ -144,9 +156,10 @@ const AwcOneLauncherPage: React.FC = () => {
     navigate(path);
   };
 
+  const sanctumTile = isModerator ? [SANCTUM] : [];
   const listApps = isStaff
-    ? [JORDAN, TRIBES, SANCTUM, FIRSTFRUITS]
-    : [JORDAN, TRIBES, FIRSTFRUITS, ...(canCanaan ? [{ ...CANAAN, tags: 'My church account' }] : [])];
+    ? [JORDAN, TRIBES, ...sanctumTile, FIRSTFRUITS]
+    : [JORDAN, TRIBES, ...sanctumTile, FIRSTFRUITS, ...(canCanaan ? [{ ...CANAAN, tags: 'My church account' }] : [])];
 
   const quick: QuickAction[] = [
     ...(can('/events/overview') ? [{ label: 'View Calendar', Icon: CalendarDays, run: () => go('/events/overview') }] : []),
@@ -156,7 +169,7 @@ const AwcOneLauncherPage: React.FC = () => {
   ];
 
   const searchItems: SearchItem[] = [
-    ...[JORDAN, TRIBES, SANCTUM, FIRSTFRUITS]
+    ...[JORDAN, TRIBES, ...sanctumTile, FIRSTFRUITS]
       .map((a) => ({ label: a.name, hint: a.soon ? `${a.tags} • Coming soon` : a.tags, run: () => void open(a.id) })),
     ...(canCanaan ? [{ label: 'Canaan', hint: 'Church administration', run: () => go('/dashboard') }] : []),
     ...quick.map((q) => ({ label: q.label, hint: 'Quick action', run: q.run })),
@@ -198,7 +211,8 @@ const AwcOneLauncherPage: React.FC = () => {
               {isStaff && canCanaan ? (
                 <CanaanFeature onOpen={() => setActiveSection(Section.Dashboard)} />
               ) : (
-                <SanctumFeature onOpen={() => void open('sanctum')} busy={busyId === 'sanctum'} />
+                // Members join live prayer in Ka Link; a full room moves them to the overflow automatically.
+                <SanctumFeature onOpen={() => void open('chat', '/live')} busy={busyId === 'chat'} />
               )}
               <NextGathering enabled={isAuthenticated} />
             </div>

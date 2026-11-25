@@ -29,8 +29,12 @@ export const CONNECT_ORIGIN = trimSlash(env.VITE_CONNECT_ORIGIN || 'https://plcc
 export const SITE_ORIGIN = trimSlash(env.VITE_SITE_ORIGIN || 'https://sanctum-live-nine.vercel.app');
 export const BIBLE_URL = `${SITE_ORIGIN}/bible`;
 export const CHAT_ORIGIN = trimSlash(env.VITE_CHAT_ORIGIN || 'https://plcc-chat.vercel.app');
-/** Sanctum Live — PLCC's corporate prayer rooms (its own sign-in for now). */
-export const SANCTUM_URL = env.VITE_SANCTUM_URL || 'https://plcc-sanctum.onrender.com/dashboard';
+/**
+ * PLCC Sanctum = the Ka Link overflow room. Members are moved there automatically from Ka Link,
+ * so only moderators get this tile: it opens the Room Schedule, where they open the overflow
+ * and watch the counter (Nov 25 2026). Sanctum has its own sign-in for now.
+ */
+export const SANCTUM_URL = env.VITE_SANCTUM_URL || 'https://plcc-sanctum.onrender.com/dashboard/prayer-rooms';
 export const TITHE_URL = env.VITE_TITHE_URL || 'https://plcc-tithe.vercel.app/';
 /** Set VITE_AWC_ONE_SSO=false to open the apps without the sign-on handoff. */
 const SSO_ENABLED = env.VITE_AWC_ONE_SSO !== 'false';
