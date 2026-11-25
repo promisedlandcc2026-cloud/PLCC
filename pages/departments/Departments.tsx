@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCheck, ChevronRight, Loader2, Plus, Search, ShieldCheck, SlidersHorizontal, Users, X } from 'lucide-react';
+import { CheckCheck, ChevronRight, Gauge, Loader2, Plus, Search, ShieldCheck, SlidersHorizontal, Users, X } from 'lucide-react';
 import { DEPT_ROLE_LABELS, departmentsApi, DepartmentsError, type ChurchAccess, type DepartmentSummary } from '../../lib/departments';
 import { DeptIcon } from './DeptIcon';
 
@@ -10,6 +10,7 @@ export default function DepartmentsPage() {
   const [items, setItems] = useState<DepartmentSummary[]>([]);
   const [me, setMe] = useState<ChurchAccess | null>(null);
   const [pending, setPending] = useState(0);
+  const [showApprovals, setShowApprovals] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ msg: string; setup: boolean } | null>(null);
   const [query, setQuery] = useState('');
@@ -26,6 +27,7 @@ export default function DepartmentsPage() {
       setItems(data.departments);
       setMe(data.me);
       setPending(data.pendingApprovals || 0);
+      setShowApprovals(Boolean(data.showApprovals));
       setError(null);
     } catch (e) {
       setError({ msg: (e as Error).message, setup: e instanceof DepartmentsError && e.setupNeeded });
@@ -66,9 +68,14 @@ export default function DepartmentsPage() {
           <h1 className="text-3xl font-black text-[#0d1a14] mt-1">Departments</h1>
           <p className="text-gray-500 mt-1 max-w-xl">Every ministry, its leaders, its responsibilities and who it reports to.</p>
         </div>
-        {me?.isStructureAdmin || me?.isOversight ? (
+        {me?.isStructureAdmin || me?.isOversight || showApprovals ? (
           <div className="flex flex-wrap gap-2">
-            {me?.isOversight ? (
+            {me?.isOversight || me?.isStructureAdmin ? (
+              <button type="button" onClick={() => navigate('/departments/performance')} className="min-h-[44px] px-4 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-700 flex items-center gap-2">
+                <Gauge size={16} aria-hidden /> Performance
+              </button>
+            ) : null}
+            {showApprovals ? (
               <button type="button" onClick={() => navigate('/departments/approvals')} className="min-h-[44px] px-4 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-700 flex items-center gap-2">
                 <CheckCheck size={16} aria-hidden /> Approvals
                 {pending ? <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-[#b8862f] text-white text-xs font-black flex items-center justify-center">{pending}</span> : null}

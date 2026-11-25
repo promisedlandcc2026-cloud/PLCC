@@ -11,7 +11,7 @@ export {
 } from '../api/_utils/departments/access';
 export type { DeptPermission, DeptRole };
 
-export type ChurchAccess = { isStructureAdmin: boolean; isOversight: boolean; isFinance: boolean };
+export type ChurchAccess = { isStructureAdmin: boolean; isOversight: boolean; isFinance: boolean; isFinanceOfficer?: boolean };
 
 export type DepartmentSummary = {
   id: string;
@@ -53,7 +53,37 @@ export type Activity = {
 };
 export type Announcement = { id: string; title: string; body: string; pinned: boolean; createdBy: string | null; createdByName: string; createdAt: string };
 
+export type AttStatus = 'PRESENT' | 'ABSENT' | 'EXCUSED';
+export type AttendanceSession = { id: string; activityId: string | null; title: string; heldOn: string; recordedByName: string; present: number; absent: number; excused: number; marks?: { userId: string; status: AttStatus }[] };
+export type MyAttendance = { rate: number | null; sessions: { id: string; title: string; heldOn: string; status: AttStatus }[] };
+export type ReportType = 'MONTHLY' | 'QUARTERLY' | 'SPECIAL';
+export type Report = {
+  id: string; departmentId: string; periodType: ReportType; periodStart: string; periodLabel: string; title: string;
+  summary: string; achievements: string; challenges: string; plans: string; supportNeeded: string;
+  status: 'SUBMITTED' | 'REVIEWED' | 'RETURNED'; submittedBy: string | null; submittedByName: string; submittedAt: string;
+  reviewedByName: string | null; reviewedAt: string | null; reviewNote: string | null;
+  department?: { id: string; name: string; color: string; icon: string };
+};
+export type ReqStatus = 'PENDING_HEAD' | 'PENDING_FINANCE' | 'PENDING_PASTOR' | 'APPROVED' | 'PAID' | 'REJECTED' | 'CANCELLED';
+export type Requisition = {
+  id: string; departmentId: string; activityId: string | null; title: string; purpose: string; amountUgx: number; neededBy: string | null;
+  status: ReqStatus; createdBy: string | null; createdByName: string | null; headBy: string | null; headByName: string | null; headAt: string | null;
+  financeBy: string | null; financeByName: string | null; financeAt: string | null; financeNote: string | null; pastorByName: string | null; pastorAt: string | null;
+  rejectedByName: string | null; rejectedStage: string | null; rejectNote: string | null; paidByName: string | null; paidAt: string | null; paidReference: string | null; createdAt: string;
+  department?: { id: string; name: string; color: string; icon: string };
+};
+export type Performance = {
+  attendanceRate: number | null; sessions: number; activitiesApproved: number; activitiesCompleted: number; completionRate: number | null;
+  reportsDue: number; reportsSubmitted: number; reportRate: number; openRequisitions: number; score: number | null;
+};
+
 export type DepartmentDetail = {
+  phase3Ready: boolean;
+  attendance: AttendanceSession[] | null;
+  myAttendance: MyAttendance | null;
+  reports: Report[] | null;
+  requisitions: Requisition[] | null;
+  performance: Performance | null;
   me: ChurchAccess;
   me_id: string;
   phase2Ready: boolean;
@@ -87,8 +117,9 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const departmentsApi = {
-  list: () => request<{ me: ChurchAccess; departments: DepartmentSummary[]; pendingApprovals: number }>(URL_BASE),
-  approvals: () => request<{ me: ChurchAccess; activities: Activity[] }>(`${URL_BASE}&view=approvals`),
+  list: () => request<{ me: ChurchAccess; departments: DepartmentSummary[]; pendingApprovals: number; showApprovals: boolean }>(URL_BASE),
+  approvals: () => request<{ me: ChurchAccess; roles: { oversight: boolean; finance: boolean; head: boolean }; phase3Ready: boolean; activities: Activity[]; requisitions: Requisition[]; reports: Report[] }>(`${URL_BASE}&view=approvals`),
+  performance: () => request<{ departments: { id: string; name: string; color: string; icon: string; headName: string | null; memberCount: number; performance: Performance }[] }>(`${URL_BASE}&view=performance`),
   get: (id: string) => request<DepartmentDetail>(`${URL_BASE}&id=${encodeURIComponent(id)}`),
   matrix: () => request<{ matrix: Record<DeptRole, DeptPermission[]> }>(`${URL_BASE}&view=matrix`),
   post: (body: Record<string, unknown>) => request<{ ok: true; id?: string }>(URL_BASE, { method: 'POST', body: JSON.stringify(body) }),
@@ -136,10 +167,29 @@ export function describeAudit(e: AuditEntry, nameOf: (userId: string) => string)
     case 'activity.rejected': return `sent back “${d.title}”${d.note ? `: ${d.note}` : ''}`;
     case 'activity.cancelled': return `cancelled “${d.title}”`;
     case 'activity.completed': return `marked “${d.title}” as done`;
+    case 'attendance.recorded': return `recorded attendance for “${d.title}” (${d.present}/${d.total} present)`;
+    case 'attendance.updated': return `updated attendance for “${d.title}”`;
+    case 'attendance.deleted': return `deleted attendance for “${d.title}”`;
+    case 'report.submitted': return `submitted “${d.title}”`;
+    case 'report.resubmitted': return `resubmitted “${d.title}”`;
+    case 'report.reviewed': return `reviewed “${d.title}”`;
+    case 'report.returned': return `returned “${d.title}”${d.note ? `: ${d.note}` : ''}`;
+    case 'requisition.raised': return `raised a requisition “${d.title}” (${fmtUgx(Number(d.amountUgx || 0))})`;
+    case 'requisition.head_approved': return `approved “${d.title}” as Head`;
+    case 'requisition.finance_approved': return `checked “${d.title}” for Finance`;
+    case 'requisition.pastor_approved': return `gave final approval to “${d.title}”`;
+    case 'requisition.rejected': return `sent back “${d.title}”${d.note ? `: ${d.note}` : ''}`;
+    case 'requisition.paid': return `recorded payment of “${d.title}” (ref ${d.reference})`;
+    case 'requisition.cancelled': return `cancelled “${d.title}”`;
+    case 'requisition.resubmitted': return `resubmitted “${d.title}”`;
     case 'announcement.posted': return `posted “${d.title}”`;
     case 'announcement.deleted': return `deleted the announcement “${d.title}”`;
     case 'announcement.pinned': return `pinned “${d.title}”`;
     case 'announcement.unpinned': return `unpinned “${d.title}”`;
     default: return e.action.replace(/[._]/g, ' ');
   }
+}
+
+export function pct(n: number | null | undefined): string {
+  return n == null ? '—' : `${Math.round(n * 100)}%`;
 }

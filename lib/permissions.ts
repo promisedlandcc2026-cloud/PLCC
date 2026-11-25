@@ -302,8 +302,9 @@ export const PATH_PERMISSIONS: Record<string, Role[]> = {
   '/admin/ka-link-team': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
   // Department permission matrix: admins (the server also checks).
   '/departments/permissions': [Role.ADMIN, Role.SUPER_ADMIN],
-  // Approvals queue: Pastors and the Apostle (PASTOR/SUPER_ADMIN pass by role; the server also checks).
-  '/departments/approvals': [Role.PASTOR, Role.SUPER_ADMIN],
+  // Church-wide performance: Pastors, the Apostle and admins. (Approvals is open to Heads and Finance too;
+  // the server decides what each person sees.)
+  '/departments/performance': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
   '/admin/ka-link-music': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
   '/admin/blocked-members': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
   '/admin/sign-in-problems': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],

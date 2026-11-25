@@ -10,7 +10,6 @@ import { getSupabaseAdmin, verifyAuth } from '../auth.js';
 import {
   DEPT_PERMISSIONS,
   DEPT_ROLES,
-  buildMatrix,
   canAssignRole,
   churchAccess,
   cleanList,
@@ -20,7 +19,6 @@ import {
   isDeptRole,
   slugify,
   type DeptRole,
-  type Matrix,
 } from './access.js';
 import {
   canCancelActivity,
@@ -33,16 +31,12 @@ import {
   visibleActivityStatuses,
   type ActivityRow,
 } from './workflow.js';
+import { handlePhase3Action, isFinanceOfficer, loadPerformanceOverview, loadPhase3, loadQueues } from './phase3.js';
+import { ACT_COLS, PHASE2_MSG, UUID, audit, deptMemberIds, isMissingTable, loadMatrix, namesFor, notifyMany, oversightIds, shapeActivity } from './common.js';
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const COLOR = /^#[0-9a-f]{6}$/i;
 const SETUP_MSG = 'Departments are not set up yet. Run supabase/migrations/plcc_departments.sql in Supabase first.';
 const DEPT_COLS = 'id, slug, name, mission, core_values, responsibilities, accountability, color, icon, sort_order, is_active, updated_at';
-
-function isMissingTable(error: any): boolean {
-  const msg = String(error?.message || error?.code || '').toLowerCase();
-  return msg.includes('42p01') || msg.includes('pgrst205') || msg.includes('does not exist') || msg.includes('could not find the table');
-}
 
 function shapeDept(d: any) {
   return {
@@ -60,83 +54,6 @@ function shapeDept(d: any) {
   };
 }
 
-async function loadMatrix(admin: any): Promise<Matrix> {
-  const { data } = await admin.from('department_role_permissions').select('dept_role, permission, allowed');
-  return buildMatrix(data || []);
-}
-
-async function audit(admin: any, departmentId: string | null, actorId: string, action: string, details: Record<string, unknown>) {
-  try {
-    await admin.from('department_audit').insert({ department_id: departmentId, actor_id: actorId, action, details });
-  } catch {
-    /* audit must never block the change itself */
-  }
-}
-
-async function namesFor(admin: any, ids: string[]): Promise<Map<string, { name: string; role: string | null }>> {
-  const map = new Map<string, { name: string; role: string | null }>();
-  const unique = [...new Set(ids.filter(Boolean))];
-  if (!unique.length) return map;
-  const { data } = await admin.from('users').select('id, name, role').in('id', unique);
-  for (const u of data || []) map.set(u.id, { name: u.name || 'Member', role: u.role || null });
-  return map;
-}
-
-const PHASE2_MSG = 'Activities are not set up yet. Run supabase/migrations/plcc_departments_phase2.sql in Supabase first.';
-const ACT_COLS = 'id, department_id, title, description, location, starts_at, ends_at, budget_ugx, status, created_by, decided_by, decided_at, decision_note, completion_note, created_at, updated_at';
-
-/** Bell notifications (type 'department'), one batch insert. Never blocks the change. */
-async function notifyMany(admin: any, userIds: string[], actorId: string, n: { title: string; body?: string; link: string; sourceId?: string }) {
-  const ids = [...new Set(userIds.filter((id) => id && id !== actorId && UUID.test(id)))];
-  if (!ids.length) return;
-  try {
-    const rows = ids.map((user_id) => ({
-      user_id,
-      type: 'department',
-      title: n.title.slice(0, 200),
-      body: n.body ? n.body.slice(0, 500) : null,
-      link: n.link,
-      source_id: n.sourceId && UUID.test(n.sourceId) ? n.sourceId : null,
-    }));
-    for (let i = 0; i < rows.length; i += 500) {
-      const { error } = await admin.from('user_notifications').insert(rows.slice(i, i + 500));
-      if (error) { console.error('[departments] notify failed:', error.message); return; }
-    }
-  } catch (e: any) {
-    console.error('[departments] notify error:', e?.message || e);
-  }
-}
-
-async function oversightIds(admin: any): Promise<string[]> {
-  const { data } = await admin.from('users').select('id, role').in('role', ['SUPER_ADMIN', 'PASTOR']);
-  return (data || []).map((u: any) => u.id);
-}
-
-async function deptMemberIds(admin: any, departmentId: string, roles?: string[]): Promise<string[]> {
-  const { data } = await admin.from('department_members').select('user_id, dept_role').eq('department_id', departmentId);
-  return (data || []).filter((m: any) => !roles || roles.includes(m.dept_role)).map((m: any) => m.user_id);
-}
-
-function shapeActivity(a: any, names: Map<string, { name: string }>, showMoney: boolean) {
-  return {
-    id: a.id,
-    departmentId: a.department_id,
-    title: a.title,
-    description: a.description || '',
-    location: a.location || '',
-    startsAt: a.starts_at,
-    endsAt: a.ends_at || null,
-    budgetUgx: showMoney ? (a.budget_ugx ?? null) : null,
-    status: a.status,
-    createdBy: a.created_by,
-    createdByName: names.get(a.created_by)?.name || 'Someone',
-    decidedByName: a.decided_by ? names.get(a.decided_by)?.name || 'A Pastor' : null,
-    decidedAt: a.decided_at || null,
-    decisionNote: a.decision_note || null,
-    completionNote: a.completion_note || null,
-  };
-}
-
 export async function handleDepartments(req: any, res: any, injected?: { admin: any; verify: typeof verifyAuth }) {
   res.setHeader('Cache-Control', 'private, no-store');
   const admin = injected?.admin || getSupabaseAdmin();
@@ -150,8 +67,8 @@ export async function handleDepartments(req: any, res: any, injected?: { admin: 
   const church = churchAccess(auth.role);
 
   try {
-    if (req.method === 'GET') return await handleGet(req, res, admin, me, church);
-    if (req.method === 'POST') return await handlePost(req, res, admin, me, church);
+    if (req.method === 'GET') return await handleGet(req, res, admin, me, church, auth.role);
+    if (req.method === 'POST') return await handlePost(req, res, admin, me, church, auth.role);
     return res.status(405).json({ ok: false, error: 'Method not allowed.' });
   } catch (e: any) {
     if (isMissingTable(e)) return res.status(503).json({ ok: false, setupNeeded: true, error: SETUP_MSG });
@@ -160,7 +77,7 @@ export async function handleDepartments(req: any, res: any, injected?: { admin: 
   }
 }
 
-async function handleGet(req: any, res: any, admin: any, me: string, church: ReturnType<typeof churchAccess>) {
+async function handleGet(req: any, res: any, admin: any, me: string, church: ReturnType<typeof churchAccess>, role: string | null) {
   const q = req.query || {};
   const view = String(Array.isArray(q.view) ? q.view[0] : q.view || '');
   const id = String(Array.isArray(q.id) ? q.id[0] : q.id || '');
@@ -173,24 +90,44 @@ async function handleGet(req: any, res: any, admin: any, me: string, church: Ret
     return res.status(200).json({ ok: true, matrix: out });
   }
 
-  if (view === 'approvals') {
-    if (!church.isOversight) return res.status(403).json({ ok: false, error: 'Only Pastors and the Apostle approve activities.' });
-    const { data: acts, error } = await admin.from('department_activities').select(ACT_COLS).eq('status', 'PENDING').order('starts_at').limit(200);
-    if (error) {
-      if (isMissingTable(error)) return res.status(503).json({ ok: false, setupNeeded: true, error: PHASE2_MSG });
-      throw error;
+  if (view === 'performance') {
+    if (!church.isOversight && !church.isStructureAdmin) return res.status(403).json({ ok: false, error: 'Only Pastors, the Apostle and admins see church-wide performance.' });
+    try {
+      return res.status(200).json({ ok: true, departments: await loadPerformanceOverview(admin) });
+    } catch (e) {
+      if (isMissingTable(e)) return res.status(503).json({ ok: false, setupNeeded: true, error: 'Performance needs Phase 3. Run supabase/migrations/plcc_departments_phase3.sql in Supabase first.' });
+      throw e;
     }
-    const deptIds = [...new Set((acts || []).map((a: any) => a.department_id))];
-    const { data: depts } = deptIds.length ? await admin.from('departments').select('id, name, color, icon').in('id', deptIds) : { data: [] };
-    const dmap = new Map((depts || []).map((d: any) => [d.id, d]));
-    const names = await namesFor(admin, (acts || []).map((a: any) => a.created_by));
+  }
+
+  if (view === 'approvals') {
+    const financeOfficer = await isFinanceOfficer(admin, me, role);
+    const queues = await loadQueues(admin, { me, church, financeOfficer });
+    if (!church.isOversight && !financeOfficer && !queues.isHead) return res.status(403).json({ ok: false, error: 'Approvals are for Pastors, the Apostle, Finance and department Heads.' });
+    let activities: any[] = [];
+    if (church.isOversight) {
+      const { data: acts, error } = await admin.from('department_activities').select(ACT_COLS).eq('status', 'PENDING').order('starts_at').limit(200);
+      if (error) {
+        if (isMissingTable(error)) return res.status(503).json({ ok: false, setupNeeded: true, error: PHASE2_MSG });
+        throw error;
+      }
+      const deptIds = [...new Set((acts || []).map((a: any) => a.department_id))];
+      const { data: depts } = deptIds.length ? await admin.from('departments').select('id, name, color, icon').in('id', deptIds) : { data: [] };
+      const dmap = new Map((depts || []).map((d: any) => [d.id, d]));
+      const names = await namesFor(admin, (acts || []).map((a: any) => a.created_by));
+      activities = (acts || []).filter((a: any) => a.created_by !== me || String(role).toUpperCase() === 'SUPER_ADMIN').map((a: any) => ({
+        ...shapeActivity(a, names, true),
+        department: { id: a.department_id, name: (dmap.get(a.department_id) as any)?.name || 'Department', color: (dmap.get(a.department_id) as any)?.color || '#0f3d2c', icon: (dmap.get(a.department_id) as any)?.icon || 'Users' },
+      }));
+    }
     return res.status(200).json({
       ok: true,
       me: church,
-      activities: (acts || []).map((a: any) => ({
-        ...shapeActivity(a, names, true),
-        department: { id: a.department_id, name: (dmap.get(a.department_id) as any)?.name || 'Department', color: (dmap.get(a.department_id) as any)?.color || '#0f3d2c', icon: (dmap.get(a.department_id) as any)?.icon || 'Users' },
-      })),
+      roles: { oversight: church.isOversight, finance: financeOfficer, head: queues.isHead },
+      phase3Ready: queues.phase3Ready,
+      activities,
+      requisitions: queues.requisitions,
+      reports: queues.reports,
     });
   }
 
@@ -221,7 +158,11 @@ async function handleGet(req: any, res: any, admin: any, me: string, church: Ret
       const { count } = await admin.from('department_activities').select('id', { count: 'exact', head: true }).eq('status', 'PENDING');
       pendingApprovals = count || 0;
     }
-    return res.status(200).json({ ok: true, me: church, departments: list, pendingApprovals });
+    const financeOfficer = await isFinanceOfficer(admin, me, role);
+    const queues = await loadQueues(admin, { me, church, financeOfficer });
+    pendingApprovals += queues.requisitions.length + queues.reports.length;
+    const showApprovals = church.isOversight || financeOfficer || queues.isHead;
+    return res.status(200).json({ ok: true, me: { ...church, isFinanceOfficer: financeOfficer }, departments: list, pendingApprovals, showApprovals });
   }
 
   if (!UUID.test(id)) return res.status(400).json({ ok: false, error: 'Unknown department.' });
@@ -289,9 +230,14 @@ async function handleGet(req: any, res: any, admin: any, me: string, church: Ret
     }
   }
 
+  const financeOfficer = await isFinanceOfficer(admin, me, role);
+  const phase3 = await loadPhase3(admin, { departmentId: id, me, perms, church, myRole, financeOfficer });
+  if (financeOfficer) perms['finance.view'] = true;
+
   return res.status(200).json({
     ok: true,
-    me: church,
+    ...phase3,
+    me: { ...church, isFinanceOfficer: financeOfficer },
     me_id: me,
     phase2Ready,
     activities,
@@ -307,7 +253,7 @@ async function handleGet(req: any, res: any, admin: any, me: string, church: Ret
   });
 }
 
-async function handlePost(req: any, res: any, admin: any, me: string, church: ReturnType<typeof churchAccess>) {
+async function handlePost(req: any, res: any, admin: any, me: string, church: ReturnType<typeof churchAccess>, role: string | null) {
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const action = String(body.action || '');
 
@@ -591,6 +537,10 @@ async function handlePost(req: any, res: any, admin: any, me: string, church: Re
     await audit(admin, id, me, 'announcement.deleted', { announcementId: annId, title: ann.title });
     return res.status(200).json({ ok: true });
   }
+
+  // ---- Phase 3: attendance, reports, requisitions ----
+  const p3 = await handlePhase3Action(action, { admin, me, id, dept, perms, church, myRole, body, role });
+  if (p3) return res.status(p3[0]).json(p3[1]);
 
   return res.status(400).json({ ok: false, error: 'Unknown action.' });
 }

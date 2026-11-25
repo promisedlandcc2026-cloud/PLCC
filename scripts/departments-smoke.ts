@@ -10,6 +10,7 @@ import {
 } from '../api/_utils/departments/access.js';
 import { handleDepartments } from '../api/_utils/departments/handler.js';
 import { canDecide, kampalaToIso, parseActivityInput, visibleActivityStatuses } from '../api/_utils/departments/workflow.js';
+import { attendanceRate, canActOnReq, computePerformance, initialReqStatus, lastMonths, normalisePeriod, parseMarks } from '../api/_utils/departments/workflow3.js';
 
 // ---------- pure rules ----------
 const m = buildMatrix([]);
@@ -76,6 +77,25 @@ assert.equal(canDecide({ church: churchAccess('ADMIN'), role: 'ADMIN', actorId: 
 assert.deepEqual(visibleActivityStatuses(departmentPermissions(none, 'MEMBER', m), none, true), ['APPROVED', 'COMPLETED']);
 assert.equal(visibleActivityStatuses(departmentPermissions(none, null, m), none, false), null, 'outsiders see no activities');
 
+// ---------- Phase 3 pure rules ----------
+assert.equal(attendanceRate([{ status: 'PRESENT' }, { status: 'ABSENT' }, { status: 'EXCUSED' }]), 0.5, 'excused does not count');
+assert.equal(attendanceRate([]), null);
+assert.equal(parseMarks([{ userId: 'x', status: 'PRESENT' }], new Set(['y'])).ok, false, 'only members');
+assert.equal(normalisePeriod('QUARTERLY', '2026-11-25'), '2026-10-01');
+assert.equal(normalisePeriod('MONTHLY', '2026-11-25'), '2026-11-01');
+assert.deepEqual(lastMonths(new Date('2026-01-15T00:00:00Z'), 3), ['2025-12-01', '2025-11-01', '2025-10-01']);
+assert.equal(initialReqStatus('HEAD', true), 'PENDING_FINANCE');
+assert.equal(initialReqStatus('TREASURER', true), 'PENDING_HEAD');
+assert.equal(initialReqStatus('TREASURER', false), 'PENDING_FINANCE', 'no head → finance');
+const rq = { id: 'r', department_id: 'd', title: 't', amount_ugx: 10, status: 'PENDING_PASTOR' as const, created_by: 'c', head_by: 'h', finance_by: 'f', pastor_by: null };
+assert.equal(canActOnReq({ req: rq, actorId: 'f', actorDeptRole: null, church: churchAccess('PASTOR'), isFinanceOfficer: true }).ok, false, 'same person cannot do two stages');
+assert.equal(canActOnReq({ req: rq, actorId: 'p', actorDeptRole: null, church: churchAccess('PASTOR'), isFinanceOfficer: false }).ok, true);
+assert.equal(canActOnReq({ req: { ...rq, created_by: 'p' }, actorId: 'p', actorDeptRole: null, church: churchAccess('SUPER_ADMIN'), isFinanceOfficer: false }).ok, false, 'never your own');
+const perf = computePerformance({ marks: [{ status: 'PRESENT' }, { status: 'PRESENT' }, { status: 'ABSENT' }, { status: 'ABSENT' }], sessions: 1, pastApprovedOrDone: [], monthlyReportPeriods: ['2026-10-01'], today: new Date('2026-11-25T00:00:00Z'), openRequisitions: 0 });
+assert.equal(perf.completionRate, null);
+assert.equal(perf.score, Math.round(((0.5 * 0.4 + (1 / 3) * 0.3) / 0.7) * 100), 'missing parts are left out, not zero');
+assert.equal(computePerformance({ marks: [], sessions: 0, pastApprovedOrDone: [], monthlyReportPeriods: [], today: new Date(), openRequisitions: 0 }).score, null, 'nothing to judge yet');
+
 // ---------- API with an in-memory database ----------
 type Row = Record<string, any>;
 function fakeDb(tables: Record<string, Row[]>) {
@@ -92,6 +112,8 @@ function fakeDb(tables: Record<string, Row[]>) {
       eq: (c: string, v: any) => (filters.push((r) => r[c] === v), q),
       neq: (c: string, v: any) => (filters.push((r) => r[c] !== v), q),
       in: (c: string, v: any[]) => (filters.push((r) => v.includes(r[c])), q),
+      gte: (c: string, v: any) => (filters.push((r) => r[c] >= v), q),
+      lte: (c: string, v: any) => (filters.push((r) => r[c] <= v), q),
       order: () => q,
       limit: () => q,
       insert: (row: Row | Row[]) => {
@@ -120,7 +142,7 @@ function fakeDb(tables: Record<string, Row[]>) {
         if (op === 'update') { apply().forEach((r) => Object.assign(r, patch)); return resolve({ error: null }); }
         if (op === 'delete') { const keep = rows().filter((r) => !filters.every((f) => f(r))); tables[t] = keep; return resolve({ error: null }); }
         if (inserted) return resolve({ data: inserted, error: null });
-        return resolve({ data: apply().map((r) => ({ ...r })), error: null });
+        return resolve({ data: apply().map((r) => ({ ...r })), count: apply().length, error: null });
       },
     };
     return q;
@@ -334,6 +356,119 @@ const run = async () => {
   r = await call(users.head, 'POST', { action: 'announcement_delete', id: DEPT, announcementId: tables.department_announcements[0].id });
   assert.equal(r.status, 200);
   assert.ok(tables.department_audit.some((x) => x.action === 'activity.approved') && tables.department_audit.some((x) => x.action === 'announcement.deleted'));
+
+  // ---------- Phase 3: attendance, reports, requisitions ----------
+  tables.department_attendance_sessions = [];
+  tables.department_attendance = [];
+  tables.department_reports = [];
+  tables.department_requisitions = [];
+  const finUser = U(20);
+  tables.users.push({ id: finUser, name: 'Finance F', role: 'FINANCE' });
+  const today = new Date(Date.now() + 3 * 36e5).toISOString().slice(0, 10);
+  const deptMembers = () => tables.department_members.filter((x) => x.department_id === DEPT).map((x) => x.user_id);
+
+  // Attendance (pastor is SECRETARY of DEPT from Phase 2 tests; members cannot record)
+  r = await call(users.member, 'POST', { action: 'attendance_save', id: DEPT, title: 'Rehearsal', heldOn: today, marks: [{ userId: users.member, status: 'PRESENT' }] });
+  assert.equal(r.status, 403);
+  r = await call(users.head, 'POST', { action: 'attendance_save', id: DEPT, title: 'Rehearsal', heldOn: today, marks: [{ userId: users.outsider, status: 'PRESENT' }] });
+  assert.equal(r.status, 400, 'outsiders cannot be marked');
+  r = await call(users.head, 'POST', { action: 'attendance_save', id: DEPT, title: 'Rehearsal', heldOn: today, marks: deptMembers().map((u, i) => ({ userId: u, status: i % 2 ? 'ABSENT' : 'PRESENT' })) });
+  assert.equal(r.status, 200);
+  const sess = r.body.id;
+  r = await call(users.member, 'GET', { id: DEPT });
+  // An admin let Members see the member list earlier, so they see session totals but never anyone's marks.
+  assert.ok(r.body.attendance.every((x: any) => x.marks === undefined), 'members never see other people’s marks');
+  assert.ok(r.body.myAttendance && r.body.myAttendance.sessions.length === 1, 'members see their own');
+  r = await call(users.head, 'GET', { id: DEPT });
+  assert.equal(r.body.attendance[0].present + r.body.attendance[0].absent, deptMembers().length);
+  r = await call(users.head, 'POST', { action: 'attendance_save', id: DEPT, sessionId: sess, title: 'Rehearsal', heldOn: today, marks: deptMembers().map((u) => ({ userId: u, status: 'PRESENT' })) });
+  assert.equal(r.status, 200);
+  assert.equal(tables.department_attendance.filter((x) => x.session_id === sess && x.status === 'PRESENT').length, deptMembers().length, 'edit replaces marks');
+
+  // Reports
+  r = await call(users.member, 'POST', { action: 'report_submit', id: DEPT, periodType: 'MONTHLY', periodStart: today, summary: 'A good month of worship.' });
+  assert.equal(r.status, 403);
+  r = await call(users.head, 'POST', { action: 'report_submit', id: DEPT, periodType: 'MONTHLY', periodStart: today, summary: 'Short' });
+  assert.equal(r.status, 400, 'summary too short');
+  r = await call(users.head, 'POST', { action: 'report_submit', id: DEPT, periodType: 'MONTHLY', periodStart: today, summary: 'A good month of worship.', challenges: 'Sound system' });
+  assert.equal(r.status, 200);
+  const repId = r.body.id;
+  assert.ok(tables.user_notifications.some((n) => n.user_id === users.apostle && n.title.startsWith('Report to review')));
+  r = await call(users.member, 'GET', { id: DEPT });
+  assert.equal(r.body.reports, null, 'members do not see reports');
+  r = await call(users.head, 'POST', { action: 'report_review', id: DEPT, reportId: repId, decision: 'REVIEWED' });
+  assert.equal(r.status, 403, 'heads do not review');
+  r = await call(users.apostle, 'POST', { action: 'report_review', id: DEPT, reportId: repId, decision: 'RETURNED' });
+  assert.equal(r.status, 400, 'returning needs a note');
+  r = await call(users.apostle, 'POST', { action: 'report_review', id: DEPT, reportId: repId, decision: 'RETURNED', note: 'Add attendance numbers' });
+  assert.equal(r.status, 200);
+  r = await call(users.head, 'POST', { action: 'report_submit', id: DEPT, reportId: repId, periodType: 'MONTHLY', periodStart: today, summary: 'A good month of worship. 18 of 22 attended.' });
+  assert.equal(r.status, 200);
+  assert.equal(tables.department_reports[0].status, 'SUBMITTED', 'resubmitted');
+  r = await call(users.apostle, 'POST', { action: 'report_review', id: DEPT, reportId: repId, decision: 'REVIEWED' });
+  assert.equal(r.status, 200);
+
+  // Requisitions: Treasurer → Head → Finance → Pastor → Paid
+  r = await call(users.member, 'POST', { action: 'req_create', id: DEPT, title: 'Strings', amountUgx: '50000' });
+  assert.equal(r.status, 403, 'members cannot raise');
+  r = await call(users.treasurer, 'POST', { action: 'req_create', id: DEPT, title: 'New microphones', amountUgx: '1,200,000', purpose: 'Two wireless mics' });
+  assert.equal(r.status, 200);
+  const reqId = r.body.id;
+  const reqRow = () => tables.department_requisitions.find((x) => x.id === reqId)!;
+  assert.equal(reqRow().status, 'PENDING_HEAD');
+  r = await call(users.member, 'GET', { id: DEPT });
+  assert.equal(r.body.requisitions, null, 'members do not see money');
+  r = await call(users.treasurer, 'POST', { action: 'req_decide', id: DEPT, requisitionId: reqId, decision: 'APPROVE' });
+  assert.equal(r.status, 403, 'not your own');
+  r = await call(finUser, 'POST', { action: 'req_decide', id: DEPT, requisitionId: reqId, decision: 'APPROVE' });
+  assert.equal(r.status, 403, 'finance waits for the head');
+  r = await call(users.newbie, 'POST', { action: 'req_decide', id: DEPT, requisitionId: reqId, decision: 'APPROVE' });
+  assert.equal(r.status, 200);
+  assert.equal(reqRow().status, 'PENDING_FINANCE');
+  r = await call(users.newbie, 'GET', { view: 'approvals' });
+  assert.ok(!r.body.requisitions.some((x: any) => x.id === reqId), 'head no longer sees it');
+  r = await call(finUser, 'GET', { view: 'approvals' });
+  assert.ok(r.body.requisitions.some((x: any) => x.id === reqId), 'finance sees it');
+  r = await call(finUser, 'POST', { action: 'req_decide', id: DEPT, requisitionId: reqId, decision: 'APPROVE', note: 'Within budget' });
+  assert.equal(r.status, 200);
+  assert.equal(reqRow().status, 'PENDING_PASTOR');
+  r = await call(users.newbie, 'POST', { action: 'req_decide', id: DEPT, requisitionId: reqId, decision: 'APPROVE' });
+  assert.equal(r.status, 403, 'head cannot give final approval');
+  r = await call(users.pastor, 'POST', { action: 'req_decide', id: DEPT, requisitionId: reqId, decision: 'APPROVE' });
+  assert.equal(r.status, 200);
+  assert.equal(reqRow().status, 'APPROVED');
+  r = await call(users.treasurer, 'POST', { action: 'req_paid', id: DEPT, requisitionId: reqId, reference: 'MM123' });
+  assert.equal(r.status, 403, 'only finance pays');
+  r = await call(finUser, 'POST', { action: 'req_paid', id: DEPT, requisitionId: reqId });
+  assert.equal(r.status, 400, 'reference needed');
+  r = await call(finUser, 'POST', { action: 'req_paid', id: DEPT, requisitionId: reqId, reference: 'MTN-88231' });
+  assert.equal(r.status, 200);
+  assert.equal(reqRow().status, 'PAID');
+  assert.ok(tables.user_notifications.some((n) => n.user_id === users.treasurer && n.title.startsWith('Paid:')));
+
+  // Head raises → skips head stage; finance sends back; resubmit
+  r = await call(users.newbie, 'POST', { action: 'req_create', id: DEPT, title: 'Choir robes', amountUgx: 3000000 });
+  const r2 = r.body.id;
+  assert.equal(tables.department_requisitions.find((x) => x.id === r2)!.status, 'PENDING_FINANCE');
+  r = await call(finUser, 'POST', { action: 'req_decide', id: DEPT, requisitionId: r2, decision: 'REJECT', note: 'Over budget, please get two quotes' });
+  assert.equal(r.status, 200);
+  r = await call(users.treasurer, 'POST', { action: 'req_resubmit', id: DEPT, requisitionId: r2, title: 'Choir robes', amountUgx: 2500000 });
+  assert.equal(r.status, 403, 'only the person who raised it resubmits');
+  r = await call(users.newbie, 'POST', { action: 'req_resubmit', id: DEPT, requisitionId: r2, title: 'Choir robes', amountUgx: 2500000 });
+  assert.equal(r.status, 200);
+  assert.equal(tables.department_requisitions.find((x) => x.id === r2)!.amount_ugx, 2500000);
+
+  // Approvals & performance access
+  r = await call(users.member, 'GET', { view: 'approvals' });
+  assert.equal(r.status, 403);
+  r = await call(users.member, 'GET', { view: 'performance' });
+  assert.equal(r.status, 403);
+  r = await call(users.pastor, 'GET', { view: 'performance' });
+  assert.equal(r.status, 200);
+  assert.ok(r.body.departments.length >= 1);
+  r = await call(users.head, 'GET', { id: DEPT });
+  assert.ok(r.body.performance && r.body.performance.sessions >= 1);
+  assert.ok(tables.department_audit.some((x) => x.action === 'requisition.paid') && tables.department_audit.some((x) => x.action === 'report.reviewed') && tables.department_audit.some((x) => x.action === 'attendance.recorded'));
 
   console.log('departments smoke: ok');
 };

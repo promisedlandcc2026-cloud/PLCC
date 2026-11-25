@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Activities, { ActivityMeta, DateBlock } from './Activities';
 import Announcements from './Announcements';
+import Attendance from './Attendance';
+import Reports from './Reports';
+import Requisitions from './Requisitions';
 import {
   ArrowLeft,
   BarChart3,
@@ -38,11 +41,6 @@ import { DeptIcon } from './DeptIcon';
 
 type Tab = 'overview' | 'members' | 'activities' | 'attendance' | 'reports' | 'requisitions' | 'communication' | 'audit' | 'settings';
 
-const SOON: Record<string, { title: string; text: string; phase: number }> = {
-  attendance: { title: 'Attendance', text: 'Record who attended each meeting, rehearsal or activity, and see attendance trends.', phase: 3 },
-  reports: { title: 'Reports & performance', text: 'Submit monthly and quarterly reports to leadership and track how the department is doing against its responsibilities.', phase: 3 },
-  requisitions: { title: 'Requisitions', text: 'Raise money requests in UGX. Each goes Head → Finance → Pastor, with every step recorded.', phase: 3 },
-};
 
 const ROLE_STYLE: Record<DeptRole, string> = {
   HEAD: 'bg-[#b8862f]/15 text-[#7a5c1e]',
@@ -100,12 +98,12 @@ export default function DepartmentDashboard() {
     { key: 'overview', label: 'Overview', icon: <FileText size={16} />, show: true },
     { key: 'members', label: 'Members', icon: <Users size={16} />, show: can['members.view'] },
     { key: 'activities', label: 'Activities', icon: <CalendarDays size={16} />, show: Boolean(data.activities) || !data.phase2Ready && (data.amIMember || me.isOversight) },
+    { key: 'attendance', label: 'Attendance', icon: <CalendarCheck size={16} />, show: Boolean(data.attendance || data.myAttendance) || (!data.phase3Ready && (data.amIMember || me.isOversight)) },
+    { key: 'reports', label: 'Reports', icon: <BarChart3 size={16} />, show: Boolean(data.reports) || (!data.phase3Ready && (can['reports.submit'] || me.isOversight)) },
+    { key: 'requisitions', label: 'Requisitions', icon: <Wallet size={16} />, show: Boolean(data.requisitions) || (!data.phase3Ready && can['finance.view']) },
     { key: 'communication', label: 'Announcements', icon: <Megaphone size={16} />, show: Boolean(data.announcements) || !data.phase2Ready && (data.amIMember || me.isOversight || me.isStructureAdmin) },
     { key: 'audit', label: 'Audit trail', icon: <History size={16} />, show: can['audit.view'] },
     { key: 'settings', label: 'Settings', icon: <Settings2 size={16} />, show: me.isStructureAdmin },
-    { key: 'attendance', label: 'Attendance', icon: <CalendarCheck size={16} />, show: data.amIMember || me.isOversight, soon: true },
-    { key: 'reports', label: 'Reports', icon: <BarChart3 size={16} />, show: can['reports.submit'] || me.isOversight, soon: true },
-    { key: 'requisitions', label: 'Requisitions', icon: <Wallet size={16} />, show: can['finance.view'], soon: true },
   ];
   const visible = tabs.filter((t) => t.show);
   const head = data.leadership.find((l) => l.deptRole === 'HEAD');
@@ -159,7 +157,9 @@ export default function DepartmentDashboard() {
         {tab === 'members' ? <Members data={data} onSave={save} /> : null}
         {tab === 'audit' ? <Audit data={data} /> : null}
         {tab === 'settings' ? <SettingsTab data={data} onSave={save} /> : null}
-        {SOON[tab] ? <ComingSoon {...SOON[tab]} financial={tab === 'requisitions'} /> : null}
+        {tab === 'attendance' ? <Attendance data={data} onSave={save} /> : null}
+        {tab === 'reports' ? <Reports data={data} onSave={save} /> : null}
+        {tab === 'requisitions' ? <Requisitions data={data} onSave={save} /> : null}
       </div>
 
       {toast ? (
@@ -546,17 +546,6 @@ function SettingsTab({ data, onSave }: { data: DepartmentDetail; onSave: (b: Rec
           {d.isActive ? 'Archive' : 'Restore'}
         </button>
       </Card>
-    </div>
-  );
-}
-
-function ComingSoon({ title, text, phase, financial }: { title: string; text: string; phase: number; financial?: boolean }) {
-  return (
-    <div className="rounded-3xl border border-dashed border-gray-200 bg-white p-8 text-center max-w-xl mx-auto">
-      <span className="mx-auto h-14 w-14 rounded-2xl bg-[#b8862f]/10 text-[#b8862f] flex items-center justify-center">{financial ? <Wallet size={26} /> : <CalendarDays size={26} />}</span>
-      <h2 className="mt-4 text-xl font-black text-[#0d1a14]">{title}</h2>
-      <p className="mt-2 text-sm text-gray-500">{text}</p>
-      <p className="mt-4 inline-block rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-500">Coming in Phase {phase}</p>
     </div>
   );
 }
