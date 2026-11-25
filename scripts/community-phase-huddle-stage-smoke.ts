@@ -27,7 +27,7 @@ const ok = (name: string, fn: () => void) => {
   console.log(`✓ ${name}`);
 };
 
-ok('empty / broken metadata = default stage (mics locked)', () => {
+ok('empty / broken metadata = default stage (mics open)', () => {
   assert.deepEqual(parseHuddleStage(''), emptyHuddleStage());
   assert.deepEqual(parseHuddleStage('{bad'), emptyHuddleStage());
   assert.deepEqual(parseHuddleStage(JSON.stringify({ stage: [] })), emptyHuddleStage());
@@ -104,12 +104,14 @@ ok('server wires the stage endpoint, block check and lock-aware mic restore', ()
   assert.match(core, /allowMicrophone,/);
 });
 
-ok('PLCC: every Ka Link starts with mics locked; only an explicit unlock opens them', () => {
-  assert.equal(parseHuddleStage(null).micLock, true);
-  assert.equal(parseHuddleStage(JSON.stringify({ hostId: 'h' })).micLock, true);
-  assert.equal(parseHuddleStage(JSON.stringify({ stage: { readerIds: [] } })).micLock, true);
-  assert.equal(parseHuddleStage(JSON.stringify({ stage: { micLock: false } })).micLock, false);
+ok('PLCC (Nov 25 2026): every Ka Link starts with mics open; only an explicit lock closes them', () => {
+  assert.equal(parseHuddleStage(null).micLock, false);
+  assert.equal(parseHuddleStage(JSON.stringify({ hostId: 'h' })).micLock, false);
+  assert.equal(parseHuddleStage(JSON.stringify({ stage: { readerIds: [] } })).micLock, false);
+  assert.equal(parseHuddleStage(JSON.stringify({ stage: { micLock: true } })).micLock, true);
   const core = readFileSync(join(root, 'api/_utils/core.ts'), 'utf8');
+  assert.match(core, /'ask-mute', 'remind-mute-all'/);
+  assert.match(core, /Only the moderator who opened this Ka Link can send mute reminders\./);
   assert.match(core, /restoreTeamRole === 'admin' \|\| restoreTeamRole === 'leader'/);
 });
 

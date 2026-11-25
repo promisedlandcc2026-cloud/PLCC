@@ -25,9 +25,9 @@ export type HuddleStageAction =
 export const MAX_HUDDLE_READERS = 12;
 export const MAX_HUDDLE_BLOCKED = 200;
 
-/** PLCC (Nov 19 2026): every Ka Link starts with mics locked; mods and up unlock. */
+/** PLCC (Nov 25 2026): every Ka Link starts with mics OPEN; moderators can still lock them. */
 export function emptyHuddleStage(): HuddleStage {
-  return { micLock: true, readerIds: [], blockedIds: [] };
+  return { micLock: false, readerIds: [], blockedIds: [] };
 }
 
 function idList(raw: unknown, max: number): string[] {
@@ -57,8 +57,8 @@ export function parseHuddleStage(raw: string | null | undefined): HuddleStage {
   if (!stage || typeof stage !== 'object' || Array.isArray(stage)) return emptyHuddleStage();
   const s = stage as Record<string, unknown>;
   return {
-    // Locked unless a moderator unlocked it (micLock: false written explicitly).
-    micLock: s.micLock !== false,
+    // Open unless a moderator locked it (micLock: true written explicitly). Nov 25 2026.
+    micLock: s.micLock === true,
     readerIds: idList(s.readerIds, MAX_HUDDLE_READERS),
     blockedIds: idList(s.blockedIds, MAX_HUDDLE_BLOCKED),
   };

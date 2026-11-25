@@ -165,6 +165,7 @@ import {
     mintLiveKitAccessToken,
     muteParticipantMicrophoneTracks,
     moderateAllHuddleMicrophones,
+    remindHuddleToMute,
     resolveVoiceCanModerate,
     restoreOwnMicrophonePublish,
     readHuddleStage,
@@ -7605,12 +7606,14 @@ const handleCommunity = async (req: any, res: any) => {
                 const STAGE_ACTIONS = new Set([
                     'mic-lock', 'mic-unlock', 'lower-all-hands', 'mute-all', 'unmute-all', 'allow-mic', 'revoke-mic',
                     'reader-add', 'reader-remove', 'remove', 'block',
+                    // Nov 25 2026: host-only friendly reminders (nothing is forced).
+                    'ask-mute', 'remind-mute-all',
                 ]);
                 if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
                 if (!STAGE_ACTIONS.has(stageAction)) {
                     return res.status(400).json({ ok: false, error: 'Unknown moderator action' });
                 }
-                const needsTarget = !['mic-lock', 'mic-unlock', 'lower-all-hands', 'mute-all', 'unmute-all'].includes(stageAction);
+                const needsTarget = !['mic-lock', 'mic-unlock', 'lower-all-hands', 'mute-all', 'unmute-all', 'remind-mute-all'].includes(stageAction);
                 if (needsTarget && !targetIdentity) {
                     return res.status(400).json({ ok: false, error: 'targetIdentity is required' });
                 }
@@ -7661,6 +7664,27 @@ const handleCommunity = async (req: any, res: any) => {
                     const targetIsModerator = Boolean(targetIdentity) && moderatorIds.has(targetIdentity);
                     if (targetIsModerator && ['revoke-mic', 'remove', 'block'].includes(stageAction)) {
                         return res.status(400).json({ ok: false, error: 'You can’t do that to a Ka Link moderator.' });
+                    }
+
+                    // Reminders to mute come only from the moderator who opened this Ka Link (the host).
+                    if (stageAction === 'ask-mute' || stageAction === 'remind-mute-all') {
+                        if (current.roles.hostId && current.roles.hostId !== String(authUserId)) {
+                            return res.status(403).json({ ok: false, error: 'Only the moderator who opened this Ka Link can send mute reminders.' });
+                        }
+                        const { data: hostRow } = await supabaseAdmin.from('users').select('name').eq('id', authUserId).maybeSingle();
+                        const by = String(hostRow?.name || '').trim().slice(0, 80) || null;
+                        if (stageAction === 'ask-mute') {
+                            if (targetIdentity === String(authUserId)) {
+                                return res.status(400).json({ ok: false, error: 'Choose someone else.' });
+                            }
+                            const sent = await sendHuddleConductNotice(lk, cid, targetIdentity, { t: 'ask-mute', by });
+                            if (!sent) return res.status(404).json({ ok: false, error: 'That person is not in the Ka Link' });
+                            return res.status(200).json({ ok: true, action: stageAction, reminded: 1 });
+                        }
+                        const standingReaders = await fetchKaLinkTeamReaderIds(supabaseAdmin);
+                        const skip = new Set<string>([...moderatorIds, ...current.stage.readerIds, ...standingReaders]);
+                        const result = await remindHuddleToMute(lk, cid, skip, by);
+                        return res.status(200).json({ ok: true, action: stageAction, reminded: result.reminded, failed: result.failed });
                     }
 
                     let stage = current.stage;

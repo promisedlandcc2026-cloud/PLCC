@@ -1211,7 +1211,7 @@ export async function sendHuddleConductNotice(
   config: LiveKitServerConfig,
   channelId: string,
   identity: string,
-  notice: { t: 'warn' | 'block' | 'ask-unmute'; reason?: string | null; by?: string | null }
+  notice: { t: 'warn' | 'block' | 'ask-unmute' | 'ask-mute'; reason?: string | null; by?: string | null }
 ): Promise<boolean> {
   try {
     const data = new TextEncoder().encode(JSON.stringify({ v: 1, ...notice }));
@@ -1224,6 +1224,32 @@ export async function sendHuddleConductNotice(
     if (!isNotFoundError(err)) console.warn('[conduct notice]', err?.message || err);
     return false;
   }
+}
+
+/**
+ * Nov 25 2026: the host's "please mute your mic" reminder. Sends a friendly pop-up (nothing is
+ * forced) to everyone whose microphone is live, except the people listed in `skip`
+ * (moderators, Bible readers, the host). Returns how many were reminded.
+ */
+export async function remindHuddleToMute(
+  config: LiveKitServerConfig,
+  channelId: string,
+  skip: Set<string>,
+  by: string | null
+): Promise<{ reminded: number; failed: number }> {
+  const roomName = voiceRoomNameForChannel(channelId);
+  const participants = await roomServiceClient(config).listParticipants(roomName);
+  let reminded = 0;
+  let failed = 0;
+  for (const participant of participants) {
+    const identity = participant.identity;
+    if (!identity || skip.has(identity) || identity.startsWith('plcc-sanctum-bridge')) continue;
+    const liveMic = selectMicrophoneTrackSids(participant.tracks.filter((track) => !track.muted));
+    if (!liveMic.length) continue;
+    if (await sendHuddleConductNotice(config, channelId, identity, { t: 'ask-mute', by })) reminded += 1;
+    else failed += 1;
+  }
+  return { reminded, failed };
 }
 
 /** Take a blocked member out of every live Ka Link (they may be in more than one). */
