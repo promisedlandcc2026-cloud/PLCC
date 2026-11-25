@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, BookOpen, Crown, HandHeart, Loader2, Plus, Radio, Search, ShieldAlert, Trash2 } from 'lucide-react';
+import { ArrowLeft, BookOpen, Crown, ExternalLink, HandHeart, Loader2, Plus, Radio, Search, ShieldAlert, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../../App';
+import { SANCTUM_URL } from '../../lib/awcOne';
 import { getAuthHeaders, parseApiJson } from '../../lib/api';
 
 /**
@@ -173,6 +174,20 @@ const KaLinkTeamPage: React.FC = () => {
           Who starts the prayer-room Ka Links, and who always gets a seat. Super Admins can always start.
         </p>
       </header>
+      <a
+        href={SANCTUM_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-4 rounded-3xl bg-[#0f3d2c] text-white p-5 shadow-sm active:opacity-90"
+      >
+        <span className="flex-1 min-w-0">
+          <span className="block text-lg font-black">Moderator Control Room</span>
+          <span className="block text-sm text-white/80 mt-0.5">
+            When a prayer room reaches 50, open the overflow here and watch the room count. Members are moved in automatically and only ever see Ka Link.
+          </span>
+        </span>
+        <ExternalLink size={20} aria-hidden className="shrink-0" />
+      </a>
 
       {setupNeeded ? (
         <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900">

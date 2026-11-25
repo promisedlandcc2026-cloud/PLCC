@@ -72,7 +72,8 @@ export type HomeApp = { id: AwcOneAppId; name: string; tags: string; Icon: Lucid
 
 export const JORDAN: HomeApp = { id: 'chat', name: 'Ka Link', tags: 'Messages • Prayer • Calls', Icon: MessageCircle };
 export const TRIBES: HomeApp = { id: 'connect', name: 'Tribes', tags: 'Community • Events • Groups', Icon: Users };
-export const SANCTUM: HomeApp = { id: 'sanctum', name: 'PLCC Sanctum', tags: 'Moderators • Overflow Room', Icon: Flame };
+// Moderators only. Opens the overflow control room (served by PLCC Sanctum behind the scenes).
+export const SANCTUM: HomeApp = { id: 'sanctum', name: 'Moderator Control Room', tags: 'Open overflow • Watch room count', Icon: Flame };
 export const FIRSTFRUITS: HomeApp = { id: 'tithe', name: 'Firstfruits', tags: 'Tithe • Offerings', Icon: HandHeart, soon: true };
 export const CANAAN: HomeApp = { id: 'vault', name: 'Canaan', tags: 'Church Administration', Icon: Home };
 

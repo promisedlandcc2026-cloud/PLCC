@@ -65,7 +65,7 @@ const AwcOneLauncherPage: React.FC = () => {
       return;
     }
     if (id === 'sanctum') {
-      // PLCC Sanctum (prayer rooms + moderators) opens in its own tab so PLCC ONE stays open.
+      // Moderator Control Room (served by PLCC Sanctum) opens in its own tab so PLCC ONE stays open.
       // Sanctum has its own sign-in, so there's no handoff to wait for (and no popup blocker).
       // (No 'noopener' flag: with it, window.open always returns null and we couldn't tell a block.)
       const tab = window.open(SANCTUM_URL, '_blank');

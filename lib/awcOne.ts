@@ -43,7 +43,7 @@ export const AWC_ONE_APPS: AwcOneApp[] = [
   { id: 'chat', name: 'Ka Link', blurb: 'Messages, Prayer & Calls', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
   { id: 'vault', name: 'PLCC Canaan', blurb: 'Church Administration', icon: '/images/awc-one/icon-vault.webp', iconH: 54 },
   { id: 'connect', name: 'Tribes', blurb: 'Community, Events & Groups', icon: '/images/awc-one/icon-connect.webp', iconH: 46 },
-  { id: 'sanctum', name: 'PLCC Sanctum', blurb: 'Corporate Prayer Rooms', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
+  { id: 'sanctum', name: 'Moderator Control Room', blurb: 'Open overflow · watch room count', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
   { id: 'tithe', name: 'Firstfruits', blurb: 'Tithe & Offerings', icon: '/images/awc-one/icon-tithe.webp', iconH: 52 },
 ];
 

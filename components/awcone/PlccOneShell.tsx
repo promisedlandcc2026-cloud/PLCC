@@ -195,7 +195,7 @@ const APP_CARDS: { id: AwcOneAppId; name: string; blurb: string; Icon: LucideIco
   { id: 'chat', name: 'Ka Link', blurb: 'Messages and live calls', Icon: MessageCircle },
   { id: 'vault', name: 'PLCC Canaan', blurb: 'Church administration', Icon: Landmark },
   { id: 'connect', name: 'Tribes', blurb: 'Members and community', Icon: Users },
-  { id: 'sanctum', name: 'PLCC Sanctum', blurb: 'Corporate prayer rooms', Icon: Flame },
+  { id: 'sanctum', name: 'Moderator Control Room', blurb: 'Open overflow · watch room count', Icon: Flame },
   { id: 'tithe', name: 'Firstfruits', blurb: 'Giving and contributions', Icon: HandHeart },
 ];
 
