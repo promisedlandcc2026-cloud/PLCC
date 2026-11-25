@@ -300,6 +300,8 @@ export const PATH_PERMISSIONS: Record<string, Role[]> = {
   // Admin (advanced — not everyday Settings)
   // Ka Link leaders' tools (Pastor / Admin / Super Admin; also allowed above by role)
   '/admin/ka-link-team': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
+  // Department permission matrix: admins (the server also checks).
+  '/departments/permissions': [Role.ADMIN, Role.SUPER_ADMIN],
   '/admin/ka-link-music': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
   '/admin/blocked-members': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],
   '/admin/sign-in-problems': [Role.ADMIN, Role.SUPER_ADMIN, Role.PASTOR],

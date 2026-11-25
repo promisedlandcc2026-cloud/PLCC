@@ -102,6 +102,9 @@ import CommunityVoicesPage from './pages/community/CommunityVoices';
 import AdminUsersPage from './pages/admin/AdminUsers';
 import VaultRepairPage from './pages/admin/VaultRepair';
 import KaLinkTeamPage from './pages/admin/KaLinkTeam';
+import DepartmentsPage from './pages/departments/Departments';
+import DepartmentDashboard from './pages/departments/DepartmentDashboard';
+import DepartmentPermissions from './pages/departments/DepartmentPermissions';
 import BlockedMembersPage from './pages/admin/BlockedMembers';
 import SignInProblemsPage from './pages/admin/SignInProblems';
 import KaLinkMusicPage from './pages/admin/KaLinkMusic';
@@ -771,6 +774,9 @@ const App: React.FC = () => {
           <Route path="/admin/users" element={<ProtectedRoute><AppShell><AdminUsersPage /></AppShell></ProtectedRoute>} />
           <Route path="/admin/vault-repair" element={<ProtectedRoute><AppShell><VaultRepairPage /></AppShell></ProtectedRoute>} />
           <Route path="/admin/ka-link-team" element={<ProtectedRoute><AppShell><KaLinkTeamPage /></AppShell></ProtectedRoute>} />
+          <Route path="/departments" element={<ProtectedRoute><AppShell><DepartmentsPage /></AppShell></ProtectedRoute>} />
+          <Route path="/departments/permissions" element={<ProtectedRoute><AppShell><DepartmentPermissions /></AppShell></ProtectedRoute>} />
+          <Route path="/departments/:id" element={<ProtectedRoute><AppShell><DepartmentDashboard /></AppShell></ProtectedRoute>} />
           <Route path="/admin/blocked-members" element={<ProtectedRoute><AppShell><BlockedMembersPage /></AppShell></ProtectedRoute>} />
           <Route path="/admin/sign-in-problems" element={<ProtectedRoute><AppShell><SignInProblemsPage /></AppShell></ProtectedRoute>} />
           <Route path="/admin/ka-link-music" element={<ProtectedRoute><AppShell><KaLinkMusicPage /></AppShell></ProtectedRoute>} />

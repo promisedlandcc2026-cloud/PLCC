@@ -10703,6 +10703,10 @@ const handleSettings = async (req: any, res: any) => {
                 const { handleMyPastoralOffices } = await import('./pastorsOffice/offices.js');
                 return handleMyPastoralOffices(req, res);
             }
+            case 'departments': {
+                const { handleDepartments } = await import('./departments/handler.js');
+                return handleDepartments(req, res);
+            }
             case 'pastors-office-assignments': {
                 const { handleOfficeAssignments } = await import('./pastorsOffice/assignments.js');
                 return handleOfficeAssignments(req, res);

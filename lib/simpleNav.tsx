@@ -1,4 +1,5 @@
 import {
+  Building2,
   LayoutDashboard,
   User,
   Users,
@@ -53,6 +54,8 @@ export const SIMPLE_NAV_GROUPS: SimpleNavGroup[] = [
     items: [
       { label: 'Home', path: '/dashboard', icon: <LayoutDashboard size={18} />, section: Section.Dashboard },
       { label: 'Members', path: '/members', icon: <Users size={18} />, section: Section.People },
+      // Core departments (Nov 25 2026): every member sees their departments; access is checked per department on the server.
+      { label: 'Departments', path: '/departments', icon: <Building2 size={18} />, section: Section.Community },
       { label: 'My Family', path: '/family', icon: <Heart size={18} />, section: Section.People },
       { label: 'My Profile', path: '/church-profile', icon: <User size={18} />, section: Section.People },
       { label: 'Households', path: '/households', icon: <Home size={18} />, section: Section.People },
