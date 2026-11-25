@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+    Building2,
     X,
     Bell,
     Megaphone,
@@ -38,7 +39,8 @@ type InboxType =
     | 'community_feed_mention_post'
     | 'community_feed_mention_comment'
     | 'event_approval'
-    | 'celebration';
+    | 'celebration'
+    | 'department';
 
 interface InboxItem {
     id: string;
@@ -192,6 +194,8 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose
                 return <Mic size={16} className="text-burgundy" />;
             case 'event_approval':
                 return <CalendarDays size={16} className="text-burgundy" />;
+            case 'department':
+                return <Building2 size={16} className="text-[#0f3d2c]" />;
             default:
                 return <Megaphone size={16} className="text-amber-500" />;
         }
@@ -220,6 +224,8 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose
                 return 'Event Approval';
             case 'celebration':
                 return 'Celebration';
+            case 'department':
+                return 'Department';
             default:
                 return 'Announcement';
         }
@@ -236,7 +242,8 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose
             type === 'community_feed_comment' ||
             type === 'community_feed_mention_post' ||
             type === 'community_feed_mention_comment' ||
-            type === 'event_approval'
+            type === 'event_approval' ||
+            type === 'department'
         ) {
             return 'text-burgundy';
         }

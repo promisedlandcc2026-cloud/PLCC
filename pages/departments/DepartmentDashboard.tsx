@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import Activities, { ActivityMeta, DateBlock } from './Activities';
+import Announcements from './Announcements';
 import {
   ArrowLeft,
   BarChart3,
@@ -37,8 +39,6 @@ import { DeptIcon } from './DeptIcon';
 type Tab = 'overview' | 'members' | 'activities' | 'attendance' | 'reports' | 'requisitions' | 'communication' | 'audit' | 'settings';
 
 const SOON: Record<string, { title: string; text: string; phase: number }> = {
-  activities: { title: 'Activity planning', text: 'Plan activities, send them to a Pastor for approval and notify the department when they are approved.', phase: 2 },
-  communication: { title: 'Department announcements', text: 'Post announcements and reminders to everyone in the department.', phase: 2 },
   attendance: { title: 'Attendance', text: 'Record who attended each meeting, rehearsal or activity, and see attendance trends.', phase: 3 },
   reports: { title: 'Reports & performance', text: 'Submit monthly and quarterly reports to leadership and track how the department is doing against its responsibilities.', phase: 3 },
   requisitions: { title: 'Requisitions', text: 'Raise money requests in UGX. Each goes Head → Finance → Pastor, with every step recorded.', phase: 3 },
@@ -59,7 +59,9 @@ export default function DepartmentDashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState<DepartmentDetail | null>(null);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState<Tab>('overview');
+  const [params, setParams] = useSearchParams();
+  const tab = (params.get('tab') as Tab) || 'overview';
+  const setTab = (t: Tab) => setParams(t === 'overview' ? {} : { tab: t }, { replace: true });
   const [toast, setToast] = useState('');
 
   const load = useCallback(async () => {
@@ -97,13 +99,13 @@ export default function DepartmentDashboard() {
   const tabs: { key: Tab; label: string; icon: React.ReactNode; show: boolean; soon?: boolean }[] = [
     { key: 'overview', label: 'Overview', icon: <FileText size={16} />, show: true },
     { key: 'members', label: 'Members', icon: <Users size={16} />, show: can['members.view'] },
-    { key: 'activities', label: 'Activities', icon: <CalendarDays size={16} />, show: data.amIMember || me.isOversight, soon: true },
+    { key: 'activities', label: 'Activities', icon: <CalendarDays size={16} />, show: Boolean(data.activities) || !data.phase2Ready && (data.amIMember || me.isOversight) },
+    { key: 'communication', label: 'Announcements', icon: <Megaphone size={16} />, show: Boolean(data.announcements) || !data.phase2Ready && (data.amIMember || me.isOversight || me.isStructureAdmin) },
+    { key: 'audit', label: 'Audit trail', icon: <History size={16} />, show: can['audit.view'] },
+    { key: 'settings', label: 'Settings', icon: <Settings2 size={16} />, show: me.isStructureAdmin },
     { key: 'attendance', label: 'Attendance', icon: <CalendarCheck size={16} />, show: data.amIMember || me.isOversight, soon: true },
     { key: 'reports', label: 'Reports', icon: <BarChart3 size={16} />, show: can['reports.submit'] || me.isOversight, soon: true },
     { key: 'requisitions', label: 'Requisitions', icon: <Wallet size={16} />, show: can['finance.view'], soon: true },
-    { key: 'communication', label: 'Announcements', icon: <Megaphone size={16} />, show: data.amIMember || me.isOversight, soon: true },
-    { key: 'audit', label: 'Audit trail', icon: <History size={16} />, show: can['audit.view'] },
-    { key: 'settings', label: 'Settings', icon: <Settings2 size={16} />, show: me.isStructureAdmin },
   ];
   const visible = tabs.filter((t) => t.show);
   const head = data.leadership.find((l) => l.deptRole === 'HEAD');
@@ -151,7 +153,9 @@ export default function DepartmentDashboard() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 pt-6">
-        {tab === 'overview' ? <Overview data={data} onSave={save} /> : null}
+        {tab === 'overview' ? <Overview data={data} onSave={save} onOpen={setTab} /> : null}
+        {tab === 'activities' ? <Activities data={data} onSave={save} /> : null}
+        {tab === 'communication' ? <Announcements data={data} onSave={save} /> : null}
         {tab === 'members' ? <Members data={data} onSave={save} /> : null}
         {tab === 'audit' ? <Audit data={data} /> : null}
         {tab === 'settings' ? <SettingsTab data={data} onSave={save} /> : null}
@@ -224,7 +228,7 @@ function ListEditor({ initial, placeholder, onCancel, onSave }: { initial: strin
   );
 }
 
-function Overview({ data, onSave }: { data: DepartmentDetail; onSave: (b: Record<string, unknown>, done?: string) => Promise<void> }) {
+function Overview({ data, onSave, onOpen }: { data: DepartmentDetail; onSave: (b: Record<string, unknown>, done?: string) => Promise<void>; onOpen: (t: Tab) => void }) {
   const { department: d, can } = data;
   const [editing, setEditing] = useState<'' | 'mission' | 'coreValues' | 'responsibilities' | 'accountability'>('');
   const [mission, setMission] = useState(d.mission);
@@ -280,6 +284,8 @@ function Overview({ data, onSave }: { data: DepartmentDetail; onSave: (b: Record
       </div>
 
       <div className="space-y-5 min-w-0">
+        <ComingUp data={data} onOpen={onOpen} />
+
         <Card title="Core values" icon={<Crown size={18} className="text-[#b8862f]" />} action={editing !== 'coreValues' ? edit('coreValues') : null}>
           {editing === 'coreValues' ? (
             <ListEditor initial={d.coreValues} placeholder="e.g. Faithfulness" onCancel={() => setEditing('')} onSave={async (v) => { await onSave({ action: 'update', coreValues: v }); setEditing(''); }} />
@@ -316,6 +322,40 @@ function Overview({ data, onSave }: { data: DepartmentDetail; onSave: (b: Record
         ) : null}
       </div>
     </div>
+  );
+}
+
+/** Next approved activity and the latest announcement, on the Overview. */
+function ComingUp({ data, onOpen }: { data: DepartmentDetail; onOpen: (t: Tab) => void }) {
+  const d = data.department;
+  const next = (data.activities || [])
+    .filter((a) => a.status === 'APPROVED' && +new Date(a.endsAt || a.startsAt) >= Date.now())
+    .sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt))[0];
+  const pending = (data.activities || []).filter((a) => a.status === 'PENDING' || a.status === 'REJECTED').length;
+  const latest = [...(data.announcements || [])].sort((a, b) => Number(b.pinned) - Number(a.pinned) || +new Date(b.createdAt) - +new Date(a.createdAt))[0];
+  if (!data.activities && !data.announcements) return null;
+  return (
+    <Card title="Coming up" icon={<CalendarDays size={18} className="text-[#b8862f]" />}>
+      {next ? (
+        <button type="button" onClick={() => onOpen('activities')} className="w-full text-left flex gap-3">
+          <DateBlock iso={next.startsAt} color={d.color} />
+          <span className="min-w-0">
+            <span className="block font-black text-[#0d1a14] truncate">{next.title}</span>
+            <ActivityMeta a={next} />
+          </span>
+        </button>
+      ) : <p className="text-sm text-gray-400">No approved activities coming up.</p>}
+      {pending && (data.can['activities.plan'] || data.me.isOversight) ? (
+        <button type="button" onClick={() => onOpen('activities')} className="mt-3 w-full rounded-xl bg-amber-50 px-3 py-2 text-left text-xs font-bold text-amber-800">{pending} waiting for approval or changes →</button>
+      ) : null}
+      {latest ? (
+        <button type="button" onClick={() => onOpen('communication')} className="mt-4 w-full text-left border-t border-gray-50 pt-3">
+          <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-gray-400"><Megaphone size={12} aria-hidden /> Latest announcement</span>
+          <span className="mt-1 block font-bold text-sm text-[#0d1a14] truncate">{latest.title}</span>
+          {latest.body ? <span className="block text-xs text-gray-500 line-clamp-2">{latest.body}</span> : null}
+        </button>
+      ) : null}
+    </Card>
   );
 }
 

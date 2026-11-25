@@ -14,7 +14,8 @@ export type NotifyType =
   | 'community_feed_mention_comment'
   | 'event_approval'
   | 'kids_bucks_award'
-  | 'celebration';
+  | 'celebration'
+  | 'department';
 
 /** Community Feed inbox types (sidebar badge — excludes huddle/chat/system). */
 export const COMMUNITY_FEED_INBOX_TYPES: NotifyType[] = [

@@ -9,6 +9,7 @@ import {
   slugify,
 } from '../api/_utils/departments/access.js';
 import { handleDepartments } from '../api/_utils/departments/handler.js';
+import { canDecide, kampalaToIso, parseActivityInput, visibleActivityStatuses } from '../api/_utils/departments/workflow.js';
 
 // ---------- pure rules ----------
 const m = buildMatrix([]);
@@ -58,6 +59,23 @@ assert.equal(cleanList('x'), null);
 assert.equal(cleanList(new Array(16).fill('x')), null);
 assert.equal(slugify('Ushering & Protocol'), 'ushering-and-protocol');
 
+// ---------- Phase 2 pure rules ----------
+assert.equal(kampalaToIso('2026-12-05', '18:30'), '2026-12-05T15:30:00.000Z', 'Uganda is UTC+3');
+assert.equal(kampalaToIso('2026-12-05', '25:00'), null);
+const NOW = new Date('2026-12-01T00:00:00Z');
+assert.equal(parseActivityInput({ title: 'Choir retreat', date: '2026-12-05', startTime: '09:00', endTime: '08:00' }, { mayBudget: false, now: NOW }).ok, false, 'end before start');
+assert.equal(parseActivityInput({ title: 'Old', date: '2026-11-01', startTime: '09:00' }, { mayBudget: false, now: NOW }).ok, false, 'past date');
+const withBudget = parseActivityInput({ title: 'Retreat', date: '2026-12-05', startTime: '09:00', budgetUgx: '1,500,000' }, { mayBudget: true, now: NOW });
+assert.ok(withBudget.ok && withBudget.value.budgetUgx === 1500000);
+const noBudget = parseActivityInput({ title: 'Retreat', date: '2026-12-05', startTime: '09:00', budgetUgx: '900' }, { mayBudget: false, now: NOW });
+assert.ok(noBudget.ok && noBudget.value.budgetUgx === null, 'budget dropped for people who cannot handle money');
+const act = { id: 'a', department_id: 'd', title: 'x', status: 'PENDING' as const, created_by: 'p', starts_at: '2026-12-05T06:00:00Z' };
+assert.equal(canDecide({ church: churchAccess('PASTOR'), role: 'PASTOR', actorId: 'p', activity: act }).ok, false, 'no self-approval');
+assert.equal(canDecide({ church: churchAccess('SUPER_ADMIN'), role: 'SUPER_ADMIN', actorId: 'p', activity: act }).ok, true, 'apostle may');
+assert.equal(canDecide({ church: churchAccess('ADMIN'), role: 'ADMIN', actorId: 'z', activity: act }).ok, false, 'admins do not approve');
+assert.deepEqual(visibleActivityStatuses(departmentPermissions(none, 'MEMBER', m), none, true), ['APPROVED', 'COMPLETED']);
+assert.equal(visibleActivityStatuses(departmentPermissions(none, null, m), none, false), null, 'outsiders see no activities');
+
 // ---------- API with an in-memory database ----------
 type Row = Record<string, any>;
 function fakeDb(tables: Record<string, Row[]>) {
@@ -76,7 +94,8 @@ function fakeDb(tables: Record<string, Row[]>) {
       in: (c: string, v: any[]) => (filters.push((r) => v.includes(r[c])), q),
       order: () => q,
       limit: () => q,
-      insert: (row: Row) => {
+      insert: (row: Row | Row[]) => {
+        if (Array.isArray(row)) { row.forEach((x) => tables[t].push({ ...x })); inserted = row; return q; }
         if (t === 'departments' && tables[t].some((r) => r.slug === row.slug)) {
           inserted = null;
           q._err = { code: '23505', message: 'duplicate' };
@@ -96,12 +115,12 @@ function fakeDb(tables: Record<string, Row[]>) {
       update: (p: Row) => ((op = 'update'), (patch = p), q),
       delete: () => ((op = 'delete'), q),
       single: () => Promise.resolve(q._err ? { data: null, error: q._err } : { data: inserted?.[0], error: null }),
-      maybeSingle: () => Promise.resolve({ data: apply()[0] || null, error: null }),
+      maybeSingle: () => Promise.resolve({ data: apply()[0] ? { ...apply()[0] } : null, error: null }),
       then: (resolve: any) => {
         if (op === 'update') { apply().forEach((r) => Object.assign(r, patch)); return resolve({ error: null }); }
         if (op === 'delete') { const keep = rows().filter((r) => !filters.every((f) => f(r))); tables[t] = keep; return resolve({ error: null }); }
         if (inserted) return resolve({ data: inserted, error: null });
-        return resolve({ data: apply(), error: null });
+        return resolve({ data: apply().map((r) => ({ ...r })), error: null });
       },
     };
     return q;
@@ -241,6 +260,80 @@ const run = async () => {
   tables.users.push({ id: U(99), name: 'Pending', role: 'PENDING' });
   r = await call(U(99), 'GET');
   assert.equal(r.status, 403);
+
+  // ---------- Phase 2: activities, approvals, announcements ----------
+  tables.department_activities = [];
+  tables.department_announcements = [];
+  tables.user_notifications = [];
+  const kampalaDate = new Date(Date.now() + 3 * 864e5 + 3 * 36e5).toISOString().slice(0, 10);
+  // Head of DEPT is now 'newbie'; 'head' is Assistant Head.
+  r = await call(users.member, 'POST', { action: 'activity_create', id: DEPT, title: 'Rogue plan', date: kampalaDate, startTime: '10:00' });
+  assert.equal(r.status, 403, 'members cannot plan');
+  r = await call(users.head, 'POST', { action: 'activity_create', id: DEPT, title: 'Worship night', date: kampalaDate, startTime: '18:00', endTime: '21:00', location: 'Main hall', budgetUgx: '500000' });
+  assert.equal(r.status, 200);
+  const actId = r.body.id;
+  assert.equal(tables.department_activities[0].status, 'PENDING');
+  assert.equal(tables.department_activities[0].budget_ugx, null, 'assistant head cannot set a budget by default');
+  assert.ok(tables.user_notifications.some((n) => n.user_id === users.pastor && n.link === '/departments/approvals'), 'pastor notified');
+
+  r = await call(users.member, 'GET', { id: DEPT });
+  assert.equal(r.body.activities.length, 0, 'members do not see pending activities');
+  r = await call(users.pastor, 'GET', { view: 'approvals' });
+  assert.equal(r.body.activities.length, 1);
+  r = await call(users.head, 'GET', { view: 'approvals' });
+  assert.equal(r.status, 403);
+
+  r = await call(users.admin, 'POST', { action: 'activity_decide', id: DEPT, activityId: actId, decision: 'APPROVED' });
+  assert.equal(r.status, 403, 'admins do not approve');
+  r = await call(users.pastor, 'POST', { action: 'activity_decide', id: DEPT, activityId: actId, decision: 'REJECTED' });
+  assert.equal(r.status, 400, 'sending back needs a note');
+  r = await call(users.pastor, 'POST', { action: 'activity_decide', id: DEPT, activityId: actId, decision: 'REJECTED', note: 'Please move to Saturday' });
+  assert.equal(r.status, 200);
+  assert.ok(tables.user_notifications.some((n) => n.user_id === users.head && n.title.startsWith('Changes needed')));
+
+  r = await call(users.head, 'POST', { action: 'activity_update', id: DEPT, activityId: actId, title: 'Worship night (Sat)', date: kampalaDate, startTime: '17:00' });
+  assert.equal(r.status, 200);
+  assert.equal(tables.department_activities[0].status, 'PENDING', 'resubmitted');
+  r = await call(users.pastor, 'POST', { action: 'activity_decide', id: DEPT, activityId: actId, decision: 'APPROVED' });
+  assert.equal(r.status, 200);
+  assert.ok(tables.user_notifications.some((n) => n.user_id === users.member && n.title.includes('Worship night')), 'members told about approved activity');
+  r = await call(users.member, 'GET', { id: DEPT });
+  assert.equal(r.body.activities.length, 1, 'members see approved');
+  r = await call(users.head, 'POST', { action: 'activity_update', id: DEPT, activityId: actId, title: 'Sneaky change', date: kampalaDate, startTime: '17:00' });
+  assert.equal(r.status, 403, 'approved activities cannot be edited');
+  r = await call(users.head, 'POST', { action: 'activity_complete', id: DEPT, activityId: actId });
+  assert.equal(r.status, 403, 'cannot complete before it starts');
+  r = await call(users.member, 'POST', { action: 'activity_cancel', id: DEPT, activityId: actId });
+  assert.equal(r.status, 403);
+  r = await call(users.head, 'POST', { action: 'activity_cancel', id: DEPT, activityId: actId, note: 'Venue unavailable' });
+  assert.equal(r.status, 200);
+  assert.ok(tables.user_notifications.some((n) => n.title.startsWith('Cancelled')));
+
+  // Pastor cannot approve their own (pastor joins as head of DEPT2? use apostle instead): apostle can.
+  tables.department_members.push({ department_id: DEPT, user_id: users.pastor, dept_role: 'SECRETARY' });
+  r = await call(users.pastor, 'POST', { action: 'activity_create', id: DEPT, title: 'Pastor plan', date: kampalaDate, startTime: '08:00' });
+  const own = r.body.id;
+  r = await call(users.pastor, 'POST', { action: 'activity_decide', id: DEPT, activityId: own, decision: 'APPROVED' });
+  assert.equal(r.status, 403, 'no self-approval');
+  r = await call(users.apostle, 'POST', { action: 'activity_decide', id: DEPT, activityId: own, decision: 'APPROVED' });
+  assert.equal(r.status, 200);
+
+  // Announcements
+  r = await call(users.member, 'POST', { action: 'announcement_post', id: DEPT, title: 'Hi all' });
+  assert.equal(r.status, 403, 'members cannot post by default');
+  const before = tables.user_notifications.length;
+  r = await call(users.head, 'POST', { action: 'announcement_post', id: DEPT, title: 'Rehearsal moved', body: 'Now at 5pm', pinned: true });
+  assert.equal(r.status, 200);
+  assert.ok(tables.user_notifications.length > before, 'members notified');
+  r = await call(users.member, 'GET', { id: DEPT });
+  assert.equal(r.body.announcements[0].title, 'Rehearsal moved');
+  r = await call(users.outsider, 'GET', { id: DEPT });
+  assert.equal(r.body.announcements, null, 'outsiders do not see announcements');
+  r = await call(users.member, 'POST', { action: 'announcement_delete', id: DEPT, announcementId: tables.department_announcements[0].id });
+  assert.equal(r.status, 403);
+  r = await call(users.head, 'POST', { action: 'announcement_delete', id: DEPT, announcementId: tables.department_announcements[0].id });
+  assert.equal(r.status, 200);
+  assert.ok(tables.department_audit.some((x) => x.action === 'activity.approved') && tables.department_audit.some((x) => x.action === 'announcement.deleted'));
 
   console.log('departments smoke: ok');
 };
