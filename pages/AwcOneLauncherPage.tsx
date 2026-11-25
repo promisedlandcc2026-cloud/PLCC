@@ -33,6 +33,9 @@ import {
   type SearchItem,
 } from '../components/awcone/PlccOneHome';
 
+/** Roles that moderate every Ka Link (mirrors BROAD_CHAT_ADMIN_ROLES on the server). */
+const LEADER_ROLES = new Set<string>(['SUPER_ADMIN', 'PASTOR', 'ADMIN', 'ADMIN_STAFF', 'FIRST_LADY', 'SECRETARY', 'ASST_SECRETARY']);
+
 /** Member-side roles: they get the prayer rooms as the featured card instead of Canaan. */
 const MEMBER_ROLES = new Set<string>([
   Role.GUEST, Role.MEMBER, Role.PARENT, Role.TEACHER, Role.YOUTH, Role.PENDING, Role.USER,
@@ -122,13 +125,13 @@ const AwcOneLauncherPage: React.FC = () => {
   }, [isAuthenticated]);
 
   // Sanctum (overflow Room Schedule) is for moderators only (Nov 25 2026).
-  const [isModerator, setIsModerator] = useState(false);
+  const [modRight, setModRight] = useState(false);
   useEffect(() => {
     if (!isAuthenticated) return;
     let alive = true;
     authedFetch('/api/vault?resource=community&subResource=my-ka-link-rights')
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (alive) setIsModerator(d?.moderator === true); })
+      .then((d) => { if (alive) setModRight(d?.moderator === true); })
       .catch(() => undefined);
     return () => { alive = false; };
   }, [isAuthenticated]);
@@ -156,6 +159,8 @@ const AwcOneLauncherPage: React.FC = () => {
     navigate(path);
   };
 
+  // Church leaders always moderate (same list Ka Link uses); others need the Ka Link "Mod" right.
+  const isModerator = modRight || LEADER_ROLES.has(String(userRole || '').toUpperCase());
   const sanctumTile = isModerator ? [SANCTUM] : [];
   const listApps = isStaff
     ? [JORDAN, TRIBES, ...sanctumTile, FIRSTFRUITS]

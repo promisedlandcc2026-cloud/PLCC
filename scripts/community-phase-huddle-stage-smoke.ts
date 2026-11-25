@@ -112,6 +112,9 @@ ok('PLCC (Nov 25 2026): every Ka Link starts with mics open; only an explicit lo
   const core = readFileSync(join(root, 'api/_utils/core.ts'), 'utf8');
   assert.match(core, /'ask-mute', 'remind-mute-all'/);
   assert.match(core, /Only the moderator who opened this Ka Link can send mute reminders\./);
+  // PLCC ONE Sanctum tile check must not be renamed to 'chat' by the community normalizer.
+  assert.match(core, /subResource === 'my-ka-link-rights' && req\.method === 'GET'/);
+  assert.doesNotMatch(core, /subResource === 'unread-count' \|\| subResource === 'my-ka-link-rights'/);
   assert.match(core, /restoreTeamRole === 'admin' \|\| restoreTeamRole === 'leader'/);
 });
 
