@@ -10810,6 +10810,10 @@ const handleSettings = async (req: any, res: any) => {
                 const { handleSsoHandoff } = await import('./ssoHandoffHandler.js');
                 return handleSsoHandoff(req, res);
             }
+            case 'shepherd-notify': {
+                const { handleShepherdNotify } = await import('./shepherdNotify.js');
+                return handleShepherdNotify(req, res);
+            }
             case 'kids-bucks': {
                 const { handleKidsBucks } = await import('./kidsBucksHandler.js');
                 return handleKidsBucks(req, res);
