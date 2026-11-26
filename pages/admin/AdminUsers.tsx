@@ -26,7 +26,7 @@ const ROLE_OPTIONS: { group: string; roles: { value: string; label: string }[] }
       { value: 'SUPER_ADMIN', label: 'Super Admin (Full rights)' },
       { value: 'PASTOR', label: 'Pastor' },
       { value: 'FIRST_LADY', label: 'First Lady' },
-      { value: 'ADMIN', label: 'Admin' },
+      { value: 'ADMIN', label: 'Admin (Canaan back end)' },
       { value: 'ADMIN_STAFF', label: 'Admin Staff' },
       { value: 'SECRETARY', label: 'Secretary' },
       { value: 'ASST_SECRETARY', label: 'Asst. Secretary' },

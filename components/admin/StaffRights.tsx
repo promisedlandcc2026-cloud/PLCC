@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { BookOpen, Circle, CheckCircle2, Loader2, Mic, Radio, UserPlus } from 'lucide-react';
+import { BookOpen, Circle, CheckCircle2, Crown, Loader2, Mic, Radio, UserPlus } from 'lucide-react';
 import { getAuthHeaders, parseApiJson } from '../../lib/api';
 
 /**
@@ -13,10 +13,13 @@ export type RightKey = 'ka_link_moderator' | 'ka_link_recording' | 'admissions';
 type Rights = { kaLinkModerator: boolean; kaLinkRecording: boolean; admissions: boolean };
 type TeamRole = 'admin' | 'leader' | 'reader';
 
-export const RIGHT_CHIPS: { key: RightKey | 'reader'; field?: keyof Rights; label: string; blurb: string; Icon: React.ElementType }[] = [
+type ChipKey = RightKey | 'admin' | 'reader';
+
+export const RIGHT_CHIPS: { key: ChipKey; field?: keyof Rights; label: string; blurb: string; Icon: React.ElementType }[] = [
   { key: 'ka_link_moderator', field: 'kaLinkModerator', label: 'Mod', blurb: 'Mute/unmute, hands, mic lock, remove in every Ka Link', Icon: Mic },
   { key: 'ka_link_recording', field: 'kaLinkRecording', label: 'Recording', blurb: 'Shows the Record button', Icon: Radio },
   { key: 'admissions', field: 'admissions', label: 'Admit new members', blurb: 'Lets new sign-ups in as Members. Nothing else', Icon: UserPlus },
+  { key: 'admin', label: 'Ka Link Admin', blurb: 'The moderators who start the prayer-room Ka Links (give Mod too)', Icon: Crown },
   { key: 'reader', label: 'Bible Reader', blurb: 'Unmute and mute to read, even when mics are locked; Bible in Ka Link', Icon: BookOpen },
 ];
 
@@ -59,14 +62,15 @@ export function useStaffRights(enabled: boolean) {
     return () => { alive = false; };
   }, [enabled, post]);
 
-  const toggle = useCallback(async (userId: string, key: RightKey | 'reader') => {
+  const toggle = useCallback(async (userId: string, key: ChipKey) => {
     const k = `${userId}:${key}`;
     setBusyKey(k);
     setError(null);
     try {
-      if (key === 'reader') {
-        const on = team[userId] === 'reader';
-        const data = on ? await post({ action: 'remove', userId }) : await post({ action: 'add', userId, teamRole: 'reader' });
+      if (key === 'reader' || key === 'admin') {
+        // One Ka Link team seat per person: Ka Link Admin and Bible Reader replace each other.
+        const on = team[userId] === key;
+        const data = on ? await post({ action: 'remove', userId }) : await post({ action: 'add', userId, teamRole: key });
         applyTeam(data.members);
       } else {
         const field = RIGHT_CHIPS.find((c) => c.key === key)!.field!;
@@ -93,9 +97,10 @@ export const StaffRightsChips: React.FC<{
   return (
     <div className="mt-2 flex flex-wrap gap-1.5" data-testid="staff-rights">
       {RIGHT_CHIPS.map(({ key, field, label, blurb, Icon }) => {
-        // A Ka Link Admin/Leader seat can't be turned into a reader here (change it in Ka Link team).
-        const locked = key === 'reader' && (teamRole === 'admin' || teamRole === 'leader');
-        const on = key === 'reader' ? teamRole === 'reader' : state.rights[userId]?.[field as keyof Rights] === true;
+        // A Leader seat (Ps Grace, Apostle) is changed on the Ka Link team page, not here.
+        const isTeam = key === 'reader' || key === 'admin';
+        const locked = isTeam && teamRole === 'leader';
+        const on = isTeam ? teamRole === key : state.rights[userId]?.[field as keyof Rights] === true;
         const busy = state.busyKey === `${userId}:${key}`;
         return (
           <button
@@ -115,9 +120,9 @@ export const StaffRightsChips: React.FC<{
           </button>
         );
       })}
-      {teamRole === 'leader' || teamRole === 'admin' ? (
+      {teamRole === 'leader' ? (
         <span className="min-h-[32px] px-2.5 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-bold text-amber-800 inline-flex items-center">
-          Ka Link {teamRole === 'leader' ? 'Leader' : 'Admin'}
+          Ka Link Leader
         </span>
       ) : null}
     </div>
@@ -130,7 +135,7 @@ export const StaffRightsGuide: React.FC = () => (
     <summary className="cursor-pointer font-semibold text-[#0d1a14]">PLCC ONE rights: what each one means</summary>
     <ul className="mt-3 space-y-1.5 text-sm text-gray-600">
       <li><b>Full rights</b>: choose <b>Super Admin</b> in the role list. Everything, including Staff &amp; Roles.</li>
-      <li><b>Admin</b>: choose <b>Admin</b> in the role list. Canaan back end; can delete chat messages and moderate Ka Links. No Staff &amp; Roles.</li>
+      <li><b>Canaan Admin</b> (back end): choose <b>Admin</b> in the role list. Church admin tools; can delete chat messages. No Staff &amp; Roles. Not the same as Ka Link Admin.</li>
       {RIGHT_CHIPS.map((c) => (
         <li key={c.key}><b>{c.label}</b>: {c.blurb}. Tap the chip under a person to turn it on or off.</li>
       ))}
