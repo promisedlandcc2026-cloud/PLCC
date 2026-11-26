@@ -125,7 +125,7 @@ export type OfficeAlert = { source: 'website' | 'member'; requestId?: string | n
 export function alertCopy(alert: OfficeAlert): { title: string; body: string } {
   return alert.source === 'website'
     ? { title: 'New Pastor’s Office request', body: 'A request came in from the church website. Open Pastor’s Office in Canaan to view it.' }
-    : { title: 'New Pastor’s Office request', body: 'A member sent a request through Tribes. Open Pastor’s Office in Canaan to view it.' };
+    : { title: 'New Pastor’s Office request', body: 'A member sent a request. Open Pastor’s Office in Canaan to view it.' };
 }
 
 /** Pastor + active assistants of one office (or of every office when officeId is null). */
