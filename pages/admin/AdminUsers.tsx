@@ -17,12 +17,13 @@ import { Role } from '../../types';
 import { getAuthHeaders, parseApiJson } from '../../lib/api';
 import { formatAccountContact, isPhonePlaceholderEmail } from '../../api/_utils/authPhone';
 import PastorsAssistantAssignments from './PastorsAssistantAssignments';
+import { StaffRightsChips, StaffRightsGuide, useStaffRights } from '../../components/admin/StaffRights';
 
 const ROLE_OPTIONS: { group: string; roles: { value: string; label: string }[] }[] = [
   {
     group: 'Admin / Staff',
     roles: [
-      { value: 'SUPER_ADMIN', label: 'Super Admin' },
+      { value: 'SUPER_ADMIN', label: 'Super Admin (Full rights)' },
       { value: 'PASTOR', label: 'Pastor' },
       { value: 'FIRST_LADY', label: 'First Lady' },
       { value: 'ADMIN', label: 'Admin' },
@@ -93,6 +94,7 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
   const isSuperAdmin = userRole === Role.SUPER_ADMIN || userRole === 'SUPER_ADMIN';
 
   const [users, setUsers] = useState<any[]>([]);
+  const staffRights = useStaffRights(isSuperAdmin);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -497,6 +499,10 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
 
       <PastorsAssistantAssignments users={users} />
 
+      <StaffRightsGuide />
+      {staffRights.error ? (
+        <p role="alert" className="text-sm font-medium text-red-800 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">{staffRights.error}</p>
+      ) : null}
       <div className="bg-white border border-black/[0.06] rounded-2xl overflow-hidden shadow-sm">
         <div className="p-4 sm:p-5 border-b border-black/[0.04]">
           <div className="relative">
@@ -542,6 +548,7 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
                     </p>
                   ) : null}
                   {u.title ? <p className="text-xs text-gray-400 mt-0.5">{u.title}</p> : null}
+                  {u.role !== 'PENDING' ? <StaffRightsChips userId={u.id} name={u.name || 'this person'} state={staffRights} /> : null}
                   {u.role === 'PENDING' ? (() => {
                     const meta = getOnboardingMeta(u);
                     if (!meta.path) return null;
