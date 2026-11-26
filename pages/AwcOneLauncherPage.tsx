@@ -4,7 +4,7 @@ import { useNav } from '../lib/NavContext';
 import { Section } from '../types';
 import { BIBLE_URL, SANCTUM_URL, firstNameOf, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
 import { authedFetch } from '../lib/authedFetch';
-import { BookOpen, CalendarDays, Flag, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, ShieldAlert, Users } from 'lucide-react';
+import { BookOpen, CalendarDays, Flag, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, ShieldAlert, UserPlus, Users } from 'lucide-react';
 import { Role } from '../types';
 import { openReport } from '../lib/report';
 import { ReportHost } from '../components/common/ReportModal';
@@ -126,12 +126,17 @@ const AwcOneLauncherPage: React.FC = () => {
 
   // Sanctum (overflow Room Schedule) is for moderators only (Nov 25 2026).
   const [modRight, setModRight] = useState(false);
+  const [canAdmit, setCanAdmit] = useState(false);
   useEffect(() => {
     if (!isAuthenticated) return;
     let alive = true;
     authedFetch('/api/vault?resource=community&subResource=my-ka-link-rights')
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (alive) setModRight(d?.moderator === true); })
+      .then((d) => {
+        if (!alive) return;
+        setModRight(d?.moderator === true);
+        setCanAdmit(d?.admissions === true);
+      })
       .catch(() => undefined);
     return () => { alive = false; };
   }, [isAuthenticated]);
@@ -169,6 +174,7 @@ const AwcOneLauncherPage: React.FC = () => {
   const quick: QuickAction[] = [
     ...(can('/events/overview') ? [{ label: 'View Calendar', Icon: CalendarDays, run: () => go('/events/overview') }] : []),
     ...(can('/community/prayer-wall') ? [{ label: 'Prayer Wall', Icon: Heart, run: () => go('/community/prayer-wall') }] : []),
+    ...(canAdmit || role === Role.SUPER_ADMIN ? [{ label: 'Admit new members', Icon: UserPlus, run: () => navigate('/admit-members') }] : []),
     { label: 'Find a Group', Icon: Users, run: () => void open('connect') },
     { label: 'Get Support', Icon: Headphones, run: () => openReport({ kind: 'problem' }) },
   ];

@@ -4311,7 +4311,63 @@ const handleCommunity = async (req: any, res: any) => {
     if (subResource === 'my-ka-link-rights' && req.method === 'GET') {
         // PLCC ONE (Nov 25 2026): the Sanctum tile (overflow Room Schedule) is for moderators only.
         const moderator = isBroadChatAdmin(authRole) || (await isStandingKaLinkMod());
-        return res.status(200).json({ ok: true, moderator });
+        const admissions = authRole === 'SUPER_ADMIN' || (await myPlccRights()).admissions;
+        return res.status(200).json({ ok: true, moderator, admissions });
+    }
+
+    if (subResource === 'admissions') {
+        // PLCC ONE "Admit new members" (Nov 26 2026): Super Admins and the Admissions team can move
+        // a PENDING sign-up to MEMBER. Nothing else: no other roles, no rights, no deleting.
+        const allowed = authRole === 'SUPER_ADMIN' || (await myPlccRights()).admissions;
+        if (!allowed) return res.status(403).json({ ok: false, error: 'Only the Admissions team can admit new members.' });
+        if (req.method === 'GET') {
+            const { data, error } = await supabaseAdmin
+                .from('users')
+                .select('id, name, email, phone, created_at, notification_prefs')
+                .eq('role', 'PENDING')
+                .order('created_at', { ascending: false })
+                .limit(300);
+            if (error) return res.status(500).json({ ok: false, error: 'Could not load new sign-ups.' });
+            const people = (data || [])
+                .filter((u: any) => {
+                    const email = String(u.email || '').toLowerCase();
+                    const name = String(u.name || '');
+                    if (/@awc-vault\.local$/i.test(email) || /^TEST\s*[—-]/.test(name) || /Phase 2\.\d/i.test(name)) return false;
+                    return true;
+                })
+                .map((u: any) => {
+                    const onboard = u.notification_prefs?.onboarding;
+                    const path = onboard && (onboard.path === 'new' || onboard.path === 'current') ? onboard.path : null;
+                    const phoneEmail = /@phone\.awcvault\.invalid$/i.test(String(u.email || ''));
+                    return {
+                        id: u.id,
+                        name: String(u.name || '').trim() || 'New member',
+                        contact: phoneEmail ? (u.phone ? String(u.phone) : String(u.email).split('@')[0]) : (u.email || u.phone || ''),
+                        signedUpAt: u.created_at || null,
+                        path,
+                    };
+                });
+            return res.status(200).json({ ok: true, people });
+        }
+        if (req.method === 'POST') {
+            const targetId = String(req.body?.userId || '').trim();
+            if (!/^[0-9a-f-]{36}$/i.test(targetId)) return res.status(400).json({ ok: false, error: 'Pick a person to admit.' });
+            const { data: updated, error } = await supabaseAdmin
+                .from('users')
+                .update({ role: 'MEMBER' })
+                .eq('id', targetId)
+                .eq('role', 'PENDING')
+                .select('id, name')
+                .maybeSingle();
+            if (error) return res.status(500).json({ ok: false, error: 'Could not admit this person. Please try again.' });
+            if (!updated) return res.status(409).json({ ok: false, error: 'This person was already admitted or is no longer waiting.' });
+            try {
+                const logAudit = await getAudit();
+                await logAudit({ action: 'New Member Admitted', details: { name: updated.name, by: authDisplayName }, resourceType: 'user', resourceId: targetId, severity: 'info', req });
+            } catch { /* audit is best-effort */ }
+            return res.status(200).json({ ok: true, admitted: { id: updated.id, name: updated.name } });
+        }
+        return res.status(405).json({ ok: false, error: 'Method not allowed' });
     }
 
     if (subResource === 'intercessors') {

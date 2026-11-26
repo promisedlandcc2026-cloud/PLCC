@@ -102,6 +102,7 @@ import CommunityVoicesPage from './pages/community/CommunityVoices';
 import AdminUsersPage from './pages/admin/AdminUsers';
 import VaultRepairPage from './pages/admin/VaultRepair';
 import KaLinkTeamPage from './pages/admin/KaLinkTeam';
+import AdmitMembersPage from './pages/AdmitMembersPage';
 import DepartmentsPage from './pages/departments/Departments';
 import DepartmentDashboard from './pages/departments/DepartmentDashboard';
 import DepartmentPermissions from './pages/departments/DepartmentPermissions';
@@ -775,6 +776,7 @@ const App: React.FC = () => {
           {/* Administrative Settings */}
           <Route path="/admin/users" element={<ProtectedRoute><AppShell><AdminUsersPage /></AppShell></ProtectedRoute>} />
           <Route path="/admin/vault-repair" element={<ProtectedRoute><AppShell><VaultRepairPage /></AppShell></ProtectedRoute>} />
+          <Route path="/admit-members" element={<ProtectedRoute><AdmitMembersPage /></ProtectedRoute>} />
           <Route path="/admin/ka-link-team" element={<ProtectedRoute><AppShell><KaLinkTeamPage /></AppShell></ProtectedRoute>} />
           <Route path="/departments" element={<ProtectedRoute><AppShell><DepartmentsPage /></AppShell></ProtectedRoute>} />
           <Route path="/departments/performance" element={<ProtectedRoute><AppShell><DepartmentPerformance /></AppShell></ProtectedRoute>} />

@@ -286,7 +286,7 @@ type RightsMember = { userId: string; name: string; role: string | null; rights:
 const RIGHTS: { key: RightKey; field: keyof Rights; label: string; blurb: string }[] = [
   { key: 'ka_link_moderator', field: 'kaLinkModerator', label: 'Mod', blurb: 'Moderates every Ka Link: mute/unmute, hands, mic lock, remove' },
   { key: 'ka_link_recording', field: 'kaLinkRecording', label: 'Recording', blurb: 'Shows the Record button. Once anyone has it, only these people (and Super Admins) can record' },
-  { key: 'admissions', field: 'admissions', label: 'Admissions', blurb: 'Admissions team' },
+  { key: 'admissions', field: 'admissions', label: 'Admit new members', blurb: 'Admits new sign-ups as members (PLCC ONE → Admit new members). Nothing else' },
 ];
 
 const PlccRightsPanel: React.FC = () => {
@@ -354,7 +354,7 @@ const PlccRightsPanel: React.FC = () => {
         <ShieldAlert size={20} className="text-burgundy" aria-hidden /> PLCC ONE rights
       </h2>
       <p className="text-sm text-gray-500 mt-1">
-        Full rights = Super Admin, Back end = Admin (set in Staff &amp; Roles). Mod, Recording and Admissions are set here.
+        Full rights = Super Admin, Back end = Admin (set in Staff &amp; Roles). Mod, Recording and Admit new members are set here.
       </p>
       {setupNeeded ? (
         <div className="mt-3 rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900">
