@@ -240,7 +240,7 @@ export async function handleWebsitePastoralRequests(req: any, res: any, injected
   const admin = injected?.admin || getSupabaseAdmin();
   if (!admin) return res.status(503).json({ ok: false, error: 'Pastor’s Office is unavailable.' });
   const scope = String(req.query?.scope || '');
-  const staffCall = scope === 'office' || (req.method === 'POST' && req.body?.action === 'set_status');
+  const staffCall = scope === 'office' || (req.method === 'POST' && ['set_status', 'delete'].includes(req.body?.action));
 
   try {
     if (staffCall) {
@@ -267,8 +267,9 @@ export async function handleWebsitePastoralRequests(req: any, res: any, injected
       }
 
       const id = String(req.body?.id || '');
+      const deleting = req.body?.action === 'delete';
       const status = String(req.body?.status || '');
-      if (!UUID.test(id) || !STATUSES.has(status)) return res.status(400).json({ ok: false, error: 'Invalid update.' });
+      if (!UUID.test(id) || (!deleting && !STATUSES.has(status))) return res.status(400).json({ ok: false, error: 'Invalid update.' });
       const { data: row, error: rowErr } = await admin.from('pastoral_website_requests').select('id,office_id').eq('id', id).maybeSingle();
       if (rowErr) return res.status(503).json({ ok: false, error: 'Could not update the request.' });
       if (!row) return res.status(404).json({ ok: false, error: 'Request not found.' });
@@ -276,6 +277,12 @@ export async function handleWebsitePastoralRequests(req: any, res: any, injected
         ? await staffOfficeRole(admin, auth.user.id, row.office_id)
         : (await officeStaffIds(admin, null)).includes(auth.user.id);
       if (!allowed) return res.status(403).json({ ok: false, error: 'Office access is not assigned.' });
+      if (deleting) {
+        const { error: delErr } = await admin.from('pastoral_website_requests').delete().eq('id', id);
+        if (delErr) return res.status(503).json({ ok: false, error: 'Could not delete the request. Run pastors_office_delete.sql if this is new.' });
+        await admin.from('user_notifications').delete().eq('source_id', id).eq('link', '/pastors-office');
+        return res.status(200).json({ ok: true });
+      }
       const { error } = await admin
         .from('pastoral_website_requests')
         .update({ status, handled_by: auth.user.id, updated_at: new Date().toISOString() })

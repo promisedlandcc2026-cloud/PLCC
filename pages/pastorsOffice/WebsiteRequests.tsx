@@ -68,6 +68,19 @@ export default function WebsiteRequests({ officeId, api }: { officeId: string; a
     }
   }
 
+  async function remove(r: WebsiteRequest) {
+    if (!window.confirm(`Delete the request from ${r.full_name} for good? This can’t be undone.`)) return;
+    setBusy(r.id);
+    try {
+      await api('pastors-office-website', { action: 'delete', id: r.id });
+      setRows((list) => list.filter((x) => x.id !== r.id));
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setBusy('');
+    }
+  }
+
   const visible = rows.filter((r) => showClosed || r.status !== 'closed');
   const newCount = rows.filter((r) => r.status === 'new').length;
 
@@ -104,6 +117,7 @@ export default function WebsiteRequests({ officeId, api }: { officeId: string; a
                   {r.status !== 'contacted' && <button type="button" disabled={busy === r.id} onClick={() => void setStatus(r, 'contacted')} className="rounded border px-3 py-2 text-sm">Mark contacted</button>}
                   {r.status !== 'closed' && <button type="button" disabled={busy === r.id} onClick={() => void setStatus(r, 'closed')} className="rounded border px-3 py-2 text-sm">Close</button>}
                   {r.status === 'closed' && <button type="button" disabled={busy === r.id} onClick={() => void setStatus(r, 'new')} className="rounded border px-3 py-2 text-sm">Reopen</button>}
+                  <button type="button" disabled={busy === r.id} onClick={() => void remove(r)} className="rounded border border-red-200 px-3 py-2 text-sm text-red-700 hover:bg-red-50">Delete</button>
                 </div>
               </li>
             );

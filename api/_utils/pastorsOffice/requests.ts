@@ -102,6 +102,18 @@ export async function handlePastoralRequests(req: any, res: any, injected?: { ad
       if (block.error) return res.status(block.error.code === '42501' ? 403 : block.error.code === '23P01' ? 409 : 400).json({ok:false,error:'Could not update unavailable time. Check for conflicts.'});
       return res.status(200).json({ok:true});
     }
+    if (body.action === 'delete') {
+      if (!UUID.test(String(body.requestId || ''))) return res.status(400).json({ok:false,error:'Invalid request.'});
+      const del = await admin.rpc('pastoral_delete_request',{p_actor:auth.user.id,p_request:body.requestId});
+      if (del.error) {
+        const code = String(del.error.code || '');
+        if (code === '42501') return res.status(403).json({ok:false,error:'You cannot delete this request.'});
+        if (code === '40001') return res.status(409).json({ok:false,error:'Cancel the request before deleting it.'});
+        if (code === '22023') return res.status(404).json({ok:false,error:'Request not found.'});
+        return res.status(503).json({ok:false,error:'Could not delete the request. Run pastors_office_delete.sql if this is new.'});
+      }
+      return res.status(200).json({ok:true});
+    }
     if (body.action === 'save_private_note') {
       if (!UUID.test(String(body.requestId || '')) || typeof body.note !== 'string' || body.note.length > 10000) return res.status(400).json({ok:false,error:'Invalid note.'});
       const note = await admin.rpc('pastoral_private_note',{p_actor:auth.user.id,p_request:body.requestId,p_body:body.note,p_write:true});

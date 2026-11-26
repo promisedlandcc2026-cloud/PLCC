@@ -22,3 +22,13 @@ describe('assistant request privacy',()=>{
   assert.equal(r.statusCode,200);assert.equal(r.body.requests[0].service_label,'Wedding');assert.equal(r.body.requests[0].brief_message,undefined);assert.equal(r.body.requests[1].brief_message,undefined);assert.equal(r.body.requests[1].service_label,undefined);
  });
 });
+
+describe('deleting member requests', () => {
+  it('goes through the checked database function with the signed-in actor', async () => {
+    const d = setup(), r = res();
+    await handlePastoralRequests({ method: 'POST', body: { action: 'delete', requestId: request } }, r, d);
+    assert.equal(r.statusCode, 200);
+    assert.equal(d.calls[0].name, 'pastoral_delete_request');
+    assert.equal(d.calls[0].args.p_actor, actor);
+  });
+});

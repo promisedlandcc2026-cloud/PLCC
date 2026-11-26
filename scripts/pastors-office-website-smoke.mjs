@@ -120,3 +120,27 @@ describe('alert text', () => {
     assert.match(alertCopy({ source: 'member' }).body, /member/);
   });
 });
+
+describe('deleting requests', () => {
+  it('the office pastor can delete a website request; strangers cannot', async () => {
+    const id = '66666666-6666-4666-8666-666666666666';
+    const deleted = [];
+    const base = fakeAdmin();
+    const admin = { from(table) {
+      const q = base.admin.from(table);
+      if (table === 'pastoral_website_requests') {
+        q.maybeSingle = async () => ({ data: { id, office_id: office }, error: null });
+        q.delete = () => ({ eq: async (_k, v) => { deleted.push(v); return { error: null }; } });
+      }
+      if (table === 'user_notifications') q.delete = () => ({ eq: () => ({ eq: async () => ({ error: null }) }) });
+      return q;
+    } };
+    const ok = res();
+    await handleWebsitePastoralRequests({ method: 'POST', query: {}, headers: {}, body: { action: 'delete', id } }, ok, { admin, verify: async () => ({ user: { id: pastor }, role: 'PASTOR' }) });
+    assert.equal(ok.statusCode, 200);
+    assert.deepEqual(deleted, [id]);
+    const anon = res();
+    await handleWebsitePastoralRequests({ method: 'POST', query: {}, headers: {}, body: { action: 'delete', id } }, anon, { admin, verify: async () => ({ user: null }) });
+    assert.equal(anon.statusCode, 401);
+  });
+});
