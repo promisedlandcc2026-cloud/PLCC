@@ -1,5 +1,6 @@
 import { getSupabaseAdmin, verifyAuth } from '../auth.js';
 import { isValidTimeZone, parseOfficeInstant, validateOfficeSlot } from './workflow.js';
+import { alertOfficeStaff, cleanEmail, cleanPhone } from './website.js';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const restricted = new Set(['PENDING', 'GUEST', 'KIOSK', 'ACCOUNTANT']);
 const actions = new Set(['request_approval', 'approve', 'decline', 'cancel', 'complete', 'mark_no_show', 'request_reschedule']);
@@ -34,7 +35,7 @@ export async function handlePastoralRequests(req: any, res: any, injected?: { ad
         if (result.error) return res.status(result.error.code === '42501' ? 403 : 503).json({ok:false,error:'Private note unavailable.'});
         return res.status(200).json({ok:true,note:result.data || ''});
       }
-      let query;
+      let query: any;
       let redactAssistantMessage=false;
       if (scope === 'mine') {
         query = admin.from('pastoral_requests').select('id,office_id,category,preferred_start,preferred_zone,contact_preference,status,version,created_at,pastoral_appointments(starts_at,ends_at,display_zone,status)').eq('requester_user_id', auth.user.id);
@@ -66,10 +67,17 @@ export async function handlePastoralRequests(req: any, res: any, injected?: { ad
           return res.status(200).json({ok:true,blocks:data || []});
         }
         const fields = 'id,office_id,category,preferred_start,preferred_zone,contact_preference,status,version,created_at,requester:users!pastoral_requests_requester_user_id_fkey(name),pastoral_appointments(starts_at,ends_at,display_zone,status)';
+        // Contact details the member gave (falls back to their profile phone/email).
+        const withContact = fields.replace('requester:users!pastoral_requests_requester_user_id_fkey(name)','requester:users!pastoral_requests_requester_user_id_fkey(name,email,phone),contact_phone,contact_email');
         redactAssistantMessage=!owner.data;
-        query = admin.from('pastoral_requests').select(fields + ',brief_message').eq('office_id', officeId);
+        query = async () => {
+          const withNew = await admin.from('pastoral_requests').select(withContact + ',brief_message').eq('office_id', officeId).order('created_at', { ascending:false }).limit(100);
+          // Before pastors_office_contact_and_website.sql is run, the contact columns don't exist yet.
+          if (!withNew.error) return withNew;
+          return admin.from('pastoral_requests').select(fields + ',brief_message').eq('office_id', officeId).order('created_at', { ascending:false }).limit(100);
+        };
       } else return res.status(400).json({ ok:false,error:'Invalid request view.' });
-      const { data, error } = await query.order('created_at', { ascending:false }).limit(100);
+      const { data, error } = typeof query === 'function' ? await query() : await query.order('created_at', { ascending:false }).limit(100);
       if (error) return res.status(503).json({ ok:false,error:'Could not load requests.' });
       const requests = redactAssistantMessage ? (data || []).map((row:any) => {
         const {brief_message,...safe} = row;
@@ -102,7 +110,15 @@ export async function handlePastoralRequests(req: any, res: any, injected?: { ad
     }
     if (body.action === 'submit') {
       if (!UUID.test(String(body.officeId || '')) || !['appointment','counseling','baptism'].includes(body.category) || !['app','phone','email'].includes(body.contactPreference) || parseOfficeInstant(body.preferredStart) === null || !isValidTimeZone(body.timeZone) || (body.message != null && (typeof body.message !== 'string' || body.message.length > 500))) return res.status(400).json({ok:false,error:'Please check the request details.'});
+      const contactPhone = body.contactPhone ? cleanPhone(body.contactPhone) : null;
+      const contactEmail = body.contactEmail ? cleanEmail(body.contactEmail) : null;
+      if ((body.contactPhone && !contactPhone) || (body.contactEmail && !contactEmail)) return res.status(400).json({ok:false,error:'Please check your phone number and email.'});
       result = await admin.rpc('pastoral_submit_request',{p_actor:auth.user.id,p_office:body.officeId,p_category:body.category,p_preferred:body.preferredStart,p_zone:body.timeZone,p_contact:body.contactPreference,p_message:body.message || null});
+      if (!result.error && typeof result.data === 'string' && (contactPhone || contactEmail)) {
+        const saved = await admin.rpc('pastoral_set_request_contact',{p_actor:auth.user.id,p_request:result.data,p_phone:contactPhone,p_email:contactEmail});
+        if (saved.error) console.error('[PastorsOffice] contact not saved (run pastors_office_contact_and_website.sql):', saved.error.message);
+      }
+      if (!result.error) await alertOfficeStaff(admin, body.officeId, { source:'member', requestId: typeof result.data === 'string' ? result.data : null }, auth.user.id);
     } else if (body.action === 'propose') {
       if (!UUID.test(String(body.requestId || '')) || !Number.isSafeInteger(body.version) || body.version < 1 || !validateOfficeSlot(body.start,body.end,body.timeZone)) return res.status(400).json({ok:false,error:'Please check the proposed time.'});
       result = await admin.rpc('pastoral_propose_slot',{p_actor:auth.user.id,p_request:body.requestId,p_version:body.version,p_start:body.start,p_end:body.end,p_zone:body.timeZone});

@@ -10755,6 +10755,11 @@ const handleSettings = async (req: any, res: any) => {
                 const { handlePastoralRequests } = await import('./pastorsOffice/requests.js');
                 return handlePastoralRequests(req, res);
             }
+            case 'pastors-office-website': {
+                // Public: the church website's booking form (no sign-in). Staff views check sign-in inside.
+                const { handleWebsitePastoralRequests } = await import('./pastorsOffice/website.js');
+                return handleWebsitePastoralRequests(req, res);
+            }
             case 'pastors-office-mine': {
                 const { handleMyPastoralOffices } = await import('./pastorsOffice/offices.js');
                 return handleMyPastoralOffices(req, res);
