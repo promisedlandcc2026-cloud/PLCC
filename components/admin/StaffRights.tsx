@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { BookOpen, Circle, CheckCircle2, Crown, Loader2, Mic, Radio, UserPlus } from 'lucide-react';
+import { BookOpen, Crown, Loader2, Mic, Radio, UserPlus } from 'lucide-react';
 import { getAuthHeaders, parseApiJson } from '../../lib/api';
 
 /**
@@ -95,36 +95,41 @@ export const StaffRightsChips: React.FC<{
 }> = ({ userId, name, state }) => {
   const teamRole = state.team[userId];
   return (
-    <div className="mt-2 flex flex-wrap gap-1.5" data-testid="staff-rights">
+    <div className="mt-3 grid gap-1 sm:grid-cols-2 rounded-xl bg-[#FAFAF8] ring-1 ring-black/[0.05] p-2" data-testid="staff-rights">
       {RIGHT_CHIPS.map(({ key, field, label, blurb, Icon }) => {
         // A Leader seat (Ps Grace, Apostle) is changed on the Ka Link team page, not here.
         const isTeam = key === 'reader' || key === 'admin';
-        const locked = isTeam && teamRole === 'leader';
+        if (isTeam && teamRole === 'leader') return null;
         const on = isTeam ? teamRole === key : state.rights[userId]?.[field as keyof Rights] === true;
         const busy = state.busyKey === `${userId}:${key}`;
         return (
           <button
             key={key}
             type="button"
-            disabled={!state.ready || busy || locked || state.busyKey !== null}
+            role="switch"
+            aria-checked={on}
+            disabled={!state.ready || state.busyKey !== null}
             onClick={() => void state.toggle(userId, key)}
-            title={locked ? `Ka Link ${teamRole} (change it in Ka Link team)` : blurb}
-            aria-pressed={on}
-            aria-label={`${label} for ${name}: ${on ? 'on' : 'off'}`}
-            className={`min-h-[32px] px-2.5 rounded-full border text-[11px] font-bold inline-flex items-center gap-1 transition-colors disabled:opacity-60 ${
-              on ? 'bg-[#0d1a14] border-[#0d1a14] text-amber-100' : 'bg-white border-gray-200 text-gray-500 hover:border-[#0d1a14]'
-            }`}
+            aria-label={`${label} for ${name}`}
+            className="min-h-[52px] w-full text-left px-3 py-2 rounded-lg hover:bg-white flex items-center gap-3 disabled:opacity-60 transition-colors"
           >
-            {busy ? <Loader2 size={12} className="animate-spin" aria-hidden /> : on ? <CheckCircle2 size={12} aria-hidden /> : <Circle size={12} aria-hidden />}
-            <Icon size={12} aria-hidden /> {label}
+            <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${on ? 'bg-[#0d1a14] text-amber-100' : 'bg-white ring-1 ring-black/10 text-gray-400'}`}>
+              <Icon size={15} aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-[#0d1a14]">{label}</span>
+              <span className="block text-[11px] leading-snug text-gray-500">{blurb}</span>
+            </span>
+            <span aria-hidden className={`relative w-10 h-6 rounded-full shrink-0 transition-colors ${on ? 'bg-emerald-600' : 'bg-gray-300'}`}>
+              {busy ? (
+                <Loader2 size={14} className="absolute inset-0 m-auto animate-spin text-white" />
+              ) : (
+                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${on ? 'left-[18px]' : 'left-0.5'}`} />
+              )}
+            </span>
           </button>
         );
       })}
-      {teamRole === 'leader' ? (
-        <span className="min-h-[32px] px-2.5 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-bold text-amber-800 inline-flex items-center">
-          Ka Link Leader
-        </span>
-      ) : null}
     </div>
   );
 };
@@ -143,3 +148,33 @@ export const StaffRightsGuide: React.FC = () => (
     </ul>
   </details>
 );
+
+/** True when this person has any PLCC ONE right or Ka Link team seat. */
+export function hasAnyStaffRight(state: ReturnType<typeof useStaffRights>, userId: string): boolean {
+  const r = state.rights[userId];
+  return Boolean(state.team[userId] || r?.kaLinkModerator || r?.kaLinkRecording || r?.admissions);
+}
+
+/** Read-only badges for the rights someone already has (Nov 26 2026 cleanup). */
+export const StaffRightBadges: React.FC<{ userId: string; state: ReturnType<typeof useStaffRights> }> = ({ userId, state }) => {
+  const r = state.rights[userId];
+  const teamRole = state.team[userId];
+  const on = RIGHT_CHIPS.filter((c) =>
+    c.key === 'admin' || c.key === 'reader' ? teamRole === c.key : r?.[c.field as keyof Rights] === true,
+  );
+  if (!on.length && teamRole !== 'leader') return null;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {teamRole === 'leader' ? (
+        <span className="h-6 px-2 rounded-md bg-amber-50 text-amber-800 ring-1 ring-amber-200 text-[11px] font-semibold inline-flex items-center gap-1">
+          <Crown size={11} aria-hidden /> Ka Link Leader
+        </span>
+      ) : null}
+      {on.map(({ key, label, Icon }) => (
+        <span key={key} className="h-6 px-2 rounded-md bg-[#0d1a14]/[0.05] text-[#0d1a14] ring-1 ring-[#0d1a14]/10 text-[11px] font-semibold inline-flex items-center gap-1">
+          <Icon size={11} aria-hidden /> {label}
+        </span>
+      ))}
+    </div>
+  );
+};

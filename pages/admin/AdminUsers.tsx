@@ -10,6 +10,7 @@ import {
   Wrench,
   KeyRound,
   Copy,
+  ChevronDown,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../../App';
@@ -17,16 +18,16 @@ import { Role } from '../../types';
 import { getAuthHeaders, parseApiJson } from '../../lib/api';
 import { formatAccountContact, isPhonePlaceholderEmail } from '../../api/_utils/authPhone';
 import PastorsAssistantAssignments from './PastorsAssistantAssignments';
-import { StaffRightsChips, StaffRightsGuide, useStaffRights } from '../../components/admin/StaffRights';
+import { StaffRightBadges, StaffRightsChips, StaffRightsGuide, hasAnyStaffRight, useStaffRights } from '../../components/admin/StaffRights';
 
 const ROLE_OPTIONS: { group: string; roles: { value: string; label: string }[] }[] = [
   {
     group: 'Admin / Staff',
     roles: [
-      { value: 'SUPER_ADMIN', label: 'Super Admin (Full rights)' },
+      { value: 'SUPER_ADMIN', label: 'Super Admin (Full)' },
       { value: 'PASTOR', label: 'Pastor' },
       { value: 'FIRST_LADY', label: 'First Lady' },
-      { value: 'ADMIN', label: 'Admin (Canaan back end)' },
+      { value: 'ADMIN', label: 'Admin (back end)' },
       { value: 'ADMIN_STAFF', label: 'Admin Staff' },
       { value: 'SECRETARY', label: 'Secretary' },
       { value: 'ASST_SECRETARY', label: 'Asst. Secretary' },
@@ -53,6 +54,13 @@ const ROLE_OPTIONS: { group: string; roles: { value: string; label: string }[] }
     ],
   },
 ];
+
+const MEMBER_SIDE_ROLES = new Set(['MEMBER', 'PARENT', 'TEACHER', 'YOUTH', 'GUEST', 'PENDING', 'USER']);
+
+function initialsOf(name: string): string {
+  const parts = String(name || '').replace(/[^\p{L}\p{N}\s]/gu, '').trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] || '?') + (parts[1]?.[0] || '')).toUpperCase();
+}
 
 function formatRoleLabel(role: string | null | undefined): string {
   if (!role) return '—';
@@ -95,6 +103,8 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
 
   const [users, setUsers] = useState<any[]>([]);
   const staffRights = useStaffRights(isSuperAdmin);
+  const [listFilter, setListFilter] = useState<'team' | 'all' | 'pending'>('team');
+  const [rightsOpenId, setRightsOpenId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -250,6 +260,16 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
       (qDigits.length >= 3 && digits.includes(qDigits)) ||
       (u.role || '').toLowerCase().includes(q)
     );
+  });
+  /** Staff roles, or anyone holding a PLCC ONE right / Ka Link seat. */
+  const isTeamPerson = (u: any) =>
+    (u.role && !MEMBER_SIDE_ROLES.has(String(u.role))) || hasAnyStaffRight(staffRights, u.id);
+  // Searching always looks through everyone.
+  const visibleUsers = filteredUsers.filter((u) => {
+    if (searchTerm.trim()) return true;
+    if (listFilter === 'pending') return u.role === 'PENDING';
+    if (listFilter === 'team') return isTeamPerson(u);
+    return true;
   });
   const pendingUsers = users.filter((u) => {
     if (u.role !== 'PENDING') return false;
@@ -504,16 +524,39 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
         <p role="alert" className="text-sm font-medium text-red-800 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">{staffRights.error}</p>
       ) : null}
       <div className="bg-white border border-black/[0.06] rounded-2xl overflow-hidden shadow-sm">
-        <div className="p-4 sm:p-5 border-b border-black/[0.04]">
+        <div className="p-4 sm:p-5 border-b border-black/[0.05] space-y-3">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
             <input
               type="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, email, or role…"
+              placeholder="Search by name, email, phone or role…"
               className="w-full min-h-[44px] pl-11 pr-4 rounded-xl border border-gray-200 bg-[#FAFAF8] text-sm font-medium outline-none focus:border-burgundy focus:bg-white"
             />
+          </div>
+          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Show">
+            {([
+              ['team', 'Staff & team'],
+              ['all', 'Everyone'],
+              ['pending', 'Waiting'],
+            ] as const).map(([key, label]) => {
+              const count = key === 'all' ? users.length : key === 'pending' ? users.filter((u) => u.role === 'PENDING').length : users.filter(isTeamPerson).length;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={listFilter === key}
+                  onClick={() => setListFilter(key)}
+                  className={`h-9 px-3.5 rounded-full text-xs font-semibold transition-colors ${
+                    listFilter === key ? 'bg-[#0d1a14] text-amber-100' : 'bg-[#FAFAF8] text-gray-600 ring-1 ring-black/[0.06] hover:bg-gray-100'
+                  }`}
+                >
+                  {label} <span className="opacity-60">{count}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -521,94 +564,118 @@ const StaffRolesPage: React.FC<{ embedded?: boolean }> = ({ embedded = false }) 
           <div className="flex justify-center py-16 text-[#0d1a14]">
             <Loader2 className="animate-spin" size={28} />
           </div>
-        ) : filteredUsers.length === 0 ? (
-          <div className="px-6 py-14 text-center text-gray-500 font-medium">No users found.</div>
+        ) : visibleUsers.length === 0 ? (
+          <div className="px-6 py-14 text-center text-gray-500 font-medium">No one here.</div>
         ) : (
-          <div className="divide-y divide-gray-100">
-            {filteredUsers.map((u) => (
-              <div
-                key={u.id}
-                className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#FAFAF8]/80 transition-colors"
-              >
-                <div className="min-w-0">
-                  <p className="font-semibold text-[#0d1a14] truncate">
-                    {u.name || 'Unnamed user'}
-                    {u.id === userId ? (
-                      <span className="ml-2 text-[10px] font-bold uppercase tracking-wide text-burgundy/70">
-                        You
-                      </span>
-                    ) : null}
-                  </p>
-                  <p className="text-sm text-gray-500 truncate">
-                    {formatAccountContact(u.email, u.phone) || u.email}
-                  </p>
-                  {isPhonePlaceholderEmail(u.email) ? (
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mt-0.5">
-                      Phone sign-in
-                    </p>
-                  ) : null}
-                  {u.title ? <p className="text-xs text-gray-400 mt-0.5">{u.title}</p> : null}
-                  {u.role !== 'PENDING' ? <StaffRightsChips userId={u.id} name={u.name || 'this person'} state={staffRights} /> : null}
-                  {u.role === 'PENDING' ? (() => {
-                    const meta = getOnboardingMeta(u);
-                    if (!meta.path) return null;
-                    return (
-                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                            meta.path === 'new'
-                              ? 'bg-sky-100 text-sky-800'
-                              : 'bg-emerald-100 text-emerald-800'
-                          }`}
-                        >
-                          {meta.path === 'new' ? 'New guest' : 'Current member'}
-                        </span>
-                        {meta.summary ? (
-                          <span className="text-xs text-gray-400 truncate max-w-[240px]">{meta.summary}</span>
-                        ) : null}
-                      </div>
-                    );
-                  })() : null}
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {savingId === u.id ? (
-                    <Loader2 size={16} className="animate-spin text-burgundy" />
-                  ) : null}
-                  {u.id !== userId ? (
-                    <button
-                      type="button"
-                      onClick={() => setResetTarget(u)}
-                      className="min-h-[40px] px-3 rounded-xl border border-gray-200 bg-white text-xs font-bold text-[#0d1a14] hover:border-burgundy inline-flex items-center gap-1.5"
-                      aria-label={`Reset password for ${u.name || formatAccountContact(u.email, u.phone) || u.email}`}
-                      data-testid="staff-reset-password"
+          <ul className="divide-y divide-gray-100">
+            {visibleUsers.map((u) => {
+              const display = u.name || formatAccountContact(u.email, u.phone) || u.email || 'Unnamed user';
+              const isFull = u.role === 'SUPER_ADMIN';
+              const open = rightsOpenId === u.id;
+              const meta = u.role === 'PENDING' ? getOnboardingMeta(u) : null;
+              return (
+                <li key={u.id} className="px-4 sm:px-5 py-4" data-testid="staff-row">
+                  <div className="flex items-start gap-3">
+                    <span
+                      aria-hidden
+                      className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${
+                        isFull ? 'bg-[#0d1a14] text-amber-100' : 'bg-[#0d1a14]/[0.06] text-[#0d1a14]'
+                      }`}
                     >
-                      <KeyRound size={14} aria-hidden /> Reset password
-                    </button>
-                  ) : null}
-                  <select
-                    value={u.role || 'MEMBER'}
-                    disabled={savingId === u.id}
-                    onChange={(e) => handleRoleChange(u, e.target.value)}
-                    className="min-h-[40px] max-w-full sm:min-w-[200px] px-3 rounded-xl border border-gray-200 bg-white text-xs font-bold text-[#0d1a14] outline-none focus:border-burgundy disabled:opacity-60"
-                    aria-label={`Role for ${u.name || formatAccountContact(u.email, u.phone) || u.email}`}
-                  >
-                    {ROLE_OPTIONS.map((group) => (
-                      <optgroup key={group.group} label={group.group}>
-                        {group.roles.map((r) => (
-                          <option key={r.value} value={r.value}>
-                            {r.label}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                    {!ROLE_OPTIONS.some((g) => g.roles.some((r) => r.value === u.role)) && u.role ? (
-                      <option value={u.role}>{formatRoleLabel(u.role)}</option>
-                    ) : null}
-                  </select>
-                </div>
-              </div>
-            ))}
-          </div>
+                      {initialsOf(display)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#0d1a14] truncate">
+                            {display}
+                            {u.id === userId ? (
+                              <span className="ml-2 align-middle text-[10px] font-bold uppercase tracking-wide text-burgundy/70">You</span>
+                            ) : null}
+                          </p>
+                          <p className="text-[13px] text-gray-500 truncate">
+                            {formatAccountContact(u.email, u.phone) || u.email}
+                            {isPhonePlaceholderEmail(u.email) ? <span className="text-gray-400"> · phone sign-in</span> : null}
+                            {u.title ? <span className="text-gray-400"> · {u.title}</span> : null}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 w-full sm:w-auto shrink-0">
+                          <select
+                            value={u.role || 'MEMBER'}
+                            disabled={savingId === u.id}
+                            onChange={(e) => handleRoleChange(u, e.target.value)}
+                            className="h-10 w-full sm:w-[270px] pl-3 pr-8 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-[#0d1a14] outline-none focus:border-burgundy disabled:opacity-60"
+                            aria-label={`Role for ${display}`}
+                          >
+                            {ROLE_OPTIONS.map((group) => (
+                              <optgroup key={group.group} label={group.group}>
+                                {group.roles.map((r) => (
+                                  <option key={r.value} value={r.value}>
+                                    {r.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                            {!ROLE_OPTIONS.some((g) => g.roles.some((r) => r.value === u.role)) && u.role ? (
+                              <option value={u.role}>{formatRoleLabel(u.role)}</option>
+                            ) : null}
+                          </select>
+                          {savingId === u.id ? <Loader2 size={16} className="animate-spin text-burgundy" /> : null}
+                          {u.id !== userId ? (
+                            <button
+                              type="button"
+                              onClick={() => setResetTarget(u)}
+                              title="Reset password"
+                              className="w-10 h-10 shrink-0 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-[#0d1a14] hover:border-[#0d1a14] inline-flex items-center justify-center"
+                              aria-label={`Reset password for ${display}`}
+                              data-testid="staff-reset-password"
+                            >
+                              <KeyRound size={15} aria-hidden />
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {meta?.path ? (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <span className={`h-6 px-2 rounded-md text-[11px] font-semibold inline-flex items-center ${meta.path === 'new' ? 'bg-sky-50 text-sky-800 ring-1 ring-sky-200' : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200'}`}>
+                            {meta.path === 'new' ? 'New guest' : 'Current member'}
+                          </span>
+                          {meta.summary ? <span className="text-xs text-gray-400 truncate max-w-[260px]">{meta.summary}</span> : null}
+                        </div>
+                      ) : null}
+
+                      {u.role !== 'PENDING' ? (
+                        isFull ? (
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <span className="h-6 px-2 rounded-md bg-amber-50 text-amber-800 ring-1 ring-amber-200 text-[11px] font-semibold inline-flex items-center">Full rights</span>
+                            {staffRights.team[u.id] === 'leader' ? (
+                              <span className="h-6 px-2 rounded-md bg-amber-50 text-amber-800 ring-1 ring-amber-200 text-[11px] font-semibold inline-flex items-center">Ka Link Leader</span>
+                            ) : null}
+                            <span className="text-xs text-gray-400">Every tool, no switches needed</span>
+                          </div>
+                        ) : (
+                          <>
+                            {!open ? <StaffRightBadges userId={u.id} state={staffRights} /> : null}
+                            <button
+                              type="button"
+                              onClick={() => setRightsOpenId(open ? null : u.id)}
+                              aria-expanded={open}
+                              className="mt-2 h-8 px-2.5 -ml-2.5 rounded-lg text-xs font-semibold text-burgundy hover:bg-burgundy/[0.06] inline-flex items-center gap-1"
+                            >
+                              <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+                              {open ? 'Done' : 'Edit rights'}
+                            </button>
+                            {open ? <StaffRightsChips userId={u.id} name={display} state={staffRights} /> : null}
+                          </>
+                        )
+                      ) : null}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
       {resetTarget ? (
