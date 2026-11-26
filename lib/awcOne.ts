@@ -39,6 +39,32 @@ export const TITHE_URL = env.VITE_TITHE_URL || 'https://plcc-tithe.vercel.app/';
 /** Set VITE_AWC_ONE_SSO=false to open the apps without the sign-on handoff. */
 const SSO_ENABLED = env.VITE_AWC_ONE_SSO !== 'false';
 
+/** Shepherd Assist: where members report app problems (with screenshots). Opens the PLCC Help Center. */
+export const SHEPHERD_ASSIST_ORIGIN = trimSlash(env.VITE_SHEPHERD_ASSIST_URL || 'https://shepherd-assist.vercel.app');
+
+/**
+ * Open Shepherd Assist already signed in: PLCC ONE signs a 2-minute single-use pass that
+ * Shepherd Assist verifies at /auth/plcc-one. If no pass can be made, Shepherd Assist shows a try-again message.
+ */
+export async function shepherdAssistUrl(signedIn: boolean): Promise<string> {
+  // Never send members to a password page: Shepherd Assist explains and offers a way back to PLCC ONE.
+  const fallback = `${SHEPHERD_ASSIST_ORIGIN}/auth/plcc-one#reason=unavailable`;
+  if (!signedIn || !SSO_ENABLED) return fallback;
+  try {
+    const res = await authedFetch('/api/vault?resource=sso', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target: 'shepherd' }),
+    });
+    const body = await res.json().catch(() => null);
+    const pass = res.ok && body?.ok ? String(body.pass || '') : '';
+    if (!pass) return fallback;
+    return `${SHEPHERD_ASSIST_ORIGIN}/auth/plcc-one#${new URLSearchParams({ pass }).toString()}`;
+  } catch {
+    return fallback;
+  }
+}
+
 export const AWC_ONE_APPS: AwcOneApp[] = [
   { id: 'chat', name: 'Ka Link', blurb: 'Messages, Prayer & Calls', icon: '/images/awc-one/icon-chat.webp', iconH: 50 },
   { id: 'vault', name: 'PLCC Canaan', blurb: 'Church Administration', icon: '/images/awc-one/icon-vault.webp', iconH: 54 },

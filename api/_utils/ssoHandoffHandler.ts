@@ -1,6 +1,9 @@
 /**
  * PLCC ONE — one sign-on handoff.
- * resource=sso   POST { target: 'connect' | 'chat' }   (Bearer token required)
+ * resource=sso   POST { target: 'connect' | 'chat' | 'shepherd' }   (Bearer token required)
+ *
+ * target 'shepherd' returns a signed single-use pass for Shepherd Assist (its own Supabase
+ * project); see shepherdPass.ts. Phone-only members are included; pending accounts are not.
  *
  * The PLCC ONE launcher (inside the Vault) asks for a single-use sign-in token for
  * another PLCC app on the same Supabase tenant. We mint a fresh magic-link token
@@ -13,8 +16,9 @@
  * the launcher then opens the app normally and the member signs in there.
  */
 import { getSupabaseAdmin, requireAuth } from './auth.js';
+import { signShepherdPass } from './shepherdPass.js';
 
-const TARGETS = new Set(['connect', 'chat']);
+const TARGETS = new Set(['connect', 'chat', 'shepherd']);
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 30;
 const recent = new Map<string, number[]>();
@@ -57,6 +61,19 @@ export async function handleSsoHandoff(req: any, res: any) {
   // Use the auth user's own email (never one from the request body or the users table).
   const { data: authUser, error: userErr } = await supabaseAdmin.auth.admin.getUserById(userId);
   const email = String(authUser?.user?.email || '').trim().toLowerCase();
+
+  if (target === 'shepherd') {
+    const secret = (process.env.SHEPHERD_SSO_SECRET || '').trim();
+    if (secret.length < 32) {
+      return res.status(200).json({ ok: false, code: 'not_configured', error: 'Shepherd Assist sign-on is not configured.' });
+    }
+    if (userErr || !auth.role || auth.role === 'PENDING') {
+      return res.status(200).json({ ok: false, code: 'not_approved', error: 'Your PLCC account is waiting for approval.' });
+    }
+    const pass = signShepherdPass(secret, { id: userId, email, name: auth.user?.name });
+    console.log(`[sso] shepherd pass user=${userId}`);
+    return res.status(200).json({ ok: true, pass });
+  }
   if (userErr || !email) {
     return res.status(200).json({ ok: false, code: 'no_email', error: 'This account signs in by phone.' });
   }

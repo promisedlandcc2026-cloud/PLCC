@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNav } from '../lib/NavContext';
 import { Section } from '../types';
-import { BIBLE_URL, SANCTUM_URL, firstNameOf, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
+import { BIBLE_URL, SANCTUM_URL, firstNameOf, shepherdAssistUrl, signedInAppUrl, takePendingApp, type AwcOneAppId } from '../lib/awcOne';
+import { PlccHelpCard } from '../components/awcone/PlccHelpCard';
 import { authedFetch } from '../lib/authedFetch';
 import { BookOpen, CalendarDays, Flag, Globe2, HandHeart, Headphones, Heart, HelpCircle, Home, ShieldAlert, UserPlus, Users } from 'lucide-react';
 import { Role } from '../types';
@@ -52,6 +53,7 @@ const AwcOneLauncherPage: React.FC = () => {
   const navigate = useNavigate();
   const [busyId, setBusyId] = useState<AwcOneAppId | null>(null);
   const [note, setNote] = useState('');
+  const [helpBusy, setHelpBusy] = useState(false);
   const first = firstNameOf(userName);
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
@@ -85,10 +87,25 @@ const AwcOneLauncherPage: React.FC = () => {
     }
   };
 
+  // App problems go to Shepherd Assist (the PLCC Help Center), signed in, where members can add screenshots.
+  const openHelp = async () => {
+    if (helpBusy) return;
+    setMenuOpen(false);
+    setNote('');
+    setHelpBusy(true);
+    try {
+      window.location.assign(await shepherdAssistUrl(isAuthenticated));
+      window.setTimeout(() => setHelpBusy(false), 8000);
+    } catch {
+      setHelpBusy(false);
+      setNote('The Help Center did not open. Please try again.');
+    }
+  };
+
   // Coming back (Back button / swipe) can restore this page from the browser's cache
   // with the tile still spinning. Clear it whenever the page is shown again.
   useEffect(() => {
-    const reset = () => setBusyId(null);
+    const reset = () => { setBusyId(null); setHelpBusy(false); };
     const onShow = (e: PageTransitionEvent) => { if (e.persisted) reset(); };
     const onVisible = () => { if (document.visibilityState === 'visible') reset(); };
     window.addEventListener('pageshow', onShow);
@@ -176,7 +193,7 @@ const AwcOneLauncherPage: React.FC = () => {
     ...(can('/community/prayer-wall') ? [{ label: 'Prayer Wall', Icon: Heart, run: () => go('/community/prayer-wall') }] : []),
     ...(canAdmit || role === Role.SUPER_ADMIN ? [{ label: 'Admit new members', Icon: UserPlus, run: () => navigate('/admit-members') }] : []),
     { label: 'Find a Group', Icon: Users, run: () => void open('connect') },
-    { label: 'Get Support', Icon: Headphones, run: () => openReport({ kind: 'problem' }) },
+    { label: 'Get Support', Icon: Headphones, run: () => void openHelp() },
   ];
 
   const searchItems: SearchItem[] = [
@@ -187,7 +204,7 @@ const AwcOneLauncherPage: React.FC = () => {
     { label: 'Bible', hint: 'Read the Word in Luganda, Kiswahili, English and more', run: () => window.open(BIBLE_URL, '_blank', 'noopener') },
     ...(can('/giving') ? [{ label: 'Giving', hint: 'Give and tithe: MTN, Airtel, Sendwave', run: () => go('/giving') }] : []),
     ...(can('/notifications') ? [{ label: 'Notifications', hint: 'Alerts and messages', run: () => go('/notifications') }] : []),
-    { label: 'Report a problem', hint: 'Something not working in an app', run: () => openReport({ kind: 'problem' }) },
+    { label: 'Report a problem', hint: 'Something not working in an app', run: () => void openHelp() },
     { label: 'Report a safety concern', hint: 'Harassment, scams, impersonation', run: () => openReport({ kind: 'safety' }) },
     ...(can('/help/member-setup') ? [{ label: 'Help', hint: 'Member setup and how-to videos', run: () => go('/help/member-setup') }] : []),
   ];
@@ -202,7 +219,7 @@ const AwcOneLauncherPage: React.FC = () => {
     ...(can('/help/member-setup')
       ? [{ label: 'Help & Support', Icon: HelpCircle, onClick: () => go('/help/member-setup') }]
       : []),
-    { label: 'Report a Problem', Icon: Flag, onClick: () => openReport({ kind: 'problem' }) },
+    { label: 'Report a Problem', Icon: Flag, onClick: () => void openHelp() },
     { label: 'Report a Concern', Icon: ShieldAlert, onClick: () => openReport({ kind: 'safety' }) },
   ];
 
@@ -232,6 +249,7 @@ const AwcOneLauncherPage: React.FC = () => {
           {note ? (
             <p role="alert" className="text-center text-sm font-bold text-red-700">{note}</p>
           ) : null}
+          <PlccHelpCard onOpen={() => void openHelp()} busy={helpBusy} />
           <BibleFeature href={BIBLE_URL} />
           <PlccQuickActions actions={quick} />
           <PlccHomeExtras enabled={isAuthenticated} />
