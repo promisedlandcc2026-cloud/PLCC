@@ -70,7 +70,7 @@ export async function handleSsoHandoff(req: any, res: any) {
     if (userErr || !auth.role || auth.role === 'PENDING') {
       return res.status(200).json({ ok: false, code: 'not_approved', error: 'Your PLCC account is waiting for approval.' });
     }
-    const pass = signShepherdPass(secret, { id: userId, email, name: auth.user?.name });
+    const pass = signShepherdPass(secret, { id: userId, email, name: auth.user?.name, role: auth.role });
     console.log(`[sso] shepherd pass user=${userId}`);
     return res.status(200).json({ ok: true, pass });
   }

@@ -13,13 +13,15 @@ export const SHEPHERD_PASS_SECONDS = 120;
 export type ShepherdPass = {
   v: 1; iss: 'plcc-one'; aud: 'shepherd-assist'; church: 'plcc';
   sub: string; email: string; name: string; iat: number; exp: number; jti: string;
+  /** Church role, so Shepherd Assist can offer the Super Admin the IT Command Center. Grants nothing by itself. */
+  role: string;
 };
 
 const b64 = (value: string | Buffer) => Buffer.from(value).toString('base64url');
 
 export function signShepherdPass(
   secret: string,
-  member: { id: string; email?: string | null; name?: string | null },
+  member: { id: string; email?: string | null; name?: string | null; role?: string | null },
   now = Math.floor(Date.now() / 1000),
 ): string {
   const payload: ShepherdPass = {
@@ -27,6 +29,7 @@ export function signShepherdPass(
     sub: member.id,
     email: String(member.email || '').trim().toLowerCase().slice(0, 254),
     name: String(member.name || '').replace(/[\u0000-\u001f\s]+/g, ' ').trim().slice(0, 80),
+    role: String(member.role || '').toUpperCase().replace(/[^A-Z_]/g, '').slice(0, 32),
     iat: now, exp: now + SHEPHERD_PASS_SECONDS, jti: randomUUID(),
   };
   const body = b64(JSON.stringify(payload));
