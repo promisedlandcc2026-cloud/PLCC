@@ -35,10 +35,12 @@ function fakeAdmin({ offices = [{ id: office, pastor_user_id: pastor }], users =
   return { admin: { from: q }, inserts, updates };
 }
 
-const good = { fullName: 'Sarah Nakato', service: 'wedding', phone: '0772 123456', email: '', preferredStart: '2027-02-01T10:00:00+03:00', timeZone: 'Africa/Kampala', message: 'We would like to talk about our wedding.' };
+const good = { fullName: 'Sarah Nakato', service: 'wedding', phone: '0772 123456', email: 'sarah@example.com', preferredStart: '2027-02-01T10:00:00+03:00', timeZone: 'Africa/Kampala', message: 'We would like to talk about our wedding.' };
 
 describe('website request validation', () => {
-  it('needs a name, a service and a phone or email', () => {
+  it('needs a name, a service, a phone and an email', () => {
+    assert.equal(parseWebsiteRequest({ ...good, email: '' }).ok, false);
+    assert.equal(parseWebsiteRequest({ ...good, phone: '' }).ok, false);
     assert.equal(parseWebsiteRequest({ ...good, fullName: 'S' }).ok, false);
     assert.equal(parseWebsiteRequest({ ...good, service: 'party' }).ok, false);
     assert.equal(parseWebsiteRequest({ ...good, phone: '', email: '' }).ok, false);
@@ -78,7 +80,7 @@ describe('public website endpoint', () => {
   it('marks a request whose email matches a PLCC account as a member', async () => {
     const d = fakeAdmin({ users: [{ id: actor, email: 'sarah@example.com' }] });
     const r = res();
-    await handleWebsitePastoralRequests({ method: 'POST', query: {}, headers: {}, body: { ...good, phone: '', email: 'sarah@example.com' } }, r, { admin: d.admin, verify: async () => ({ user: null }) });
+    await handleWebsitePastoralRequests({ method: 'POST', query: {}, headers: {}, body: { ...good, email: 'sarah@example.com' } }, r, { admin: d.admin, verify: async () => ({ user: null }) });
     assert.equal(r.statusCode, 200);
     assert.equal(d.inserts.pastoral_website_requests[0].matched_user_id, actor);
   });

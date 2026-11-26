@@ -68,7 +68,8 @@ export function parseWebsiteRequest(body: any): { ok: true; value: WebsiteReques
   const email = cleanEmail(rawEmail);
   if (rawPhone && !phone) return { ok: false, error: 'Please check your phone number.' };
   if (rawEmail && !email) return { ok: false, error: 'Please check your email address.' };
-  if (!phone && !email) return { ok: false, error: 'Please give a phone number or email so the office can reach you.' };
+  if (!phone) return { ok: false, error: 'Please enter your phone number.' };
+  if (!email) return { ok: false, error: 'Please enter your email address.' };
   let preferredStart: string | null = null;
   let timeZone: string | null = null;
   if (body.preferredStart) {
