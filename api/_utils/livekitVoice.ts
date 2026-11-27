@@ -92,6 +92,8 @@ export type VoiceTokenClaimsInput = {
   allowMicrophone?: boolean;
   /** Ka Link team role (display + "I'm ready" button). Not a permission. */
   kaLinkTeam?: 'admin' | 'leader' | 'reader' | null;
+  /** Name badge in the call (Apostle / Pastor / Super Admin). Display only. */
+  badge?: string | null;
   ttlSeconds?: number;
 };
 
@@ -168,6 +170,7 @@ export async function mintLiveKitAccessToken(
     attributes: {
       'plcc.role': plan.grant.roomAdmin || input.canModerate ? 'moderator' : 'member',
       ...(input.kaLinkTeam ? { 'plcc.team': input.kaLinkTeam } : {}),
+      ...(input.badge ? { 'plcc.badge': String(input.badge).slice(0, 24) } : {}),
     },
   });
   at.addGrant(plan.grant);

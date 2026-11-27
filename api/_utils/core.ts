@@ -213,6 +213,7 @@ import {
     fetchKaLinkTeamLeaderIds,
     fetchKaLinkTeamReaderIds,
 } from './kaLinkTeam.js';
+import { kaLinkBadge } from './kaLinkBadge.js';
 import { handleVoiceTokenFallback, signHuddleFallbackPass } from './huddleFallbackPass.js';
 import { fetchPlccRights, listPlccRights, parsePlccRightChange, resolveKaLinkCanRecord, setPlccRight, type PlccRights } from './plccRights.js';
 import { DailyApiError, countDailyRoomParticipantsForChannels, getDailyApiKey, mintDailyMeetingToken } from './dailyVoice.js';
@@ -6933,6 +6934,7 @@ const handleCommunity = async (req: any, res: any) => {
                         roomAdmin,
                         allowMicrophone,
                         kaLinkTeam: kaStart.teamRole,
+                        badge: kaLinkBadge(authRole, (auth.user as any)?.title),
                     });
                     if (entry.mode === 'start') {
                         await logHuddleAudit({
