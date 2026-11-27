@@ -5984,13 +5984,12 @@ const handleCommunity = async (req: any, res: any) => {
             if (chatType === 'mark-read') {
                 const cid = String(req.body?.channelId || first(channelId) || '').trim();
                 if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
-                const { fetchChannelForRead, shouldBroadcastRead } = await import('./chatReadThrottle.js');
+                const { fetchChannelForRead } = await import('./chatReadThrottle.js');
                 const channel = await fetchChannelForRead(supabaseAdmin, cid);
                 const gate = await assertChannelAccess(channel);
                 if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: 'Forbidden' });
+                // Unread counts only ("Seen by" was removed after the Nov 27, 2026 outage).
                 await upsertChatReadStatus(supabaseAdmin, authUserId, cid);
-                // Senders' ✓✓ turn to "seen" — at most one "read" signal per room every few seconds.
-                if (shouldBroadcastRead(cid)) waitUntil(broadcastChatEvent(cid, 'read', { id: String(authUserId) }));
                 return res.status(200).json({ ok: true });
             }
             if (chatType === 'edit-message') {
@@ -6044,20 +6043,6 @@ const handleCommunity = async (req: any, res: any) => {
                     secret: lkPass.apiSecret,
                 });
                 return res.status(200).json({ ok: true, passes });
-            }
-            if (chatType === 'read-receipts') {
-                // Who has read this room up to when (for ✓✓ / "Seen by"). Never includes yourself.
-                const cid = String(req.body?.channelId || first(channelId) || '').trim();
-                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
-                const { fetchChannelForRead, roomReceipts } = await import('./chatReadThrottle.js');
-                const channel = await fetchChannelForRead(supabaseAdmin, cid);
-                const gate = await assertChannelAccess(channel);
-                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: 'Forbidden' });
-                const all = await roomReceipts(supabaseAdmin, cid);
-                return res.status(200).json({
-                    ok: true,
-                    readers: all.filter((r) => r.userId !== String(authUserId)).slice(0, 300),
-                });
             }
             if (chatType === 'reactions') {
                 const messageId = String(req.body?.messageId || req.body?.message_id || '').trim();
@@ -10526,7 +10511,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'ka-link-passes' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update' || subResource === 'issue-report' || subResource === 'issues' || subResource === 'member-conduct' || subResource === 'dm-call') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'ka-link-passes' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update' || subResource === 'issue-report' || subResource === 'issues' || subResource === 'member-conduct' || subResource === 'dm-call') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }

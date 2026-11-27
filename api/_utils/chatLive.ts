@@ -40,7 +40,7 @@ export function __setChatLiveFetchForTests(fn: Fetch | null) {
 /** Ping everyone looking at this room ("message" | "deleted"). Never throws. */
 export async function broadcastChatEvent(
   channelId: string,
-  event: 'message' | 'deleted' | 'read',
+  event: 'message' | 'deleted',
   payload: Record<string, string>
 ): Promise<boolean> {
   return broadcastToTopic(chatRealtimeTopic(channelId), event, payload);
