@@ -5983,12 +5983,533 @@ const handleCommunity = async (req: any, res: any) => {
             if (chatType === 'mark-read') {
                 const cid = String(req.body?.channelId || first(channelId) || '').trim();
                 if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
-                const channel = await fetchChannel(supabaseAdmin, cid);
+                const { fetchChannelForRead, shouldBroadcastRead } = await import('./chatReadThrottle.js');
+                const channel = await fetchChannelForRead(supabaseAdmin, cid);
                 const gate = await assertChannelAccess(channel);
                 if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: 'Forbidden' });
                 await upsertChatReadStatus(supabaseAdmin, authUserId, cid);
-                // Senders' ✓✓ turn to "seen" right away.
-                waitUntil(broadcastChatEvent(cid, 'read', { id: String(authUserId) }));
+                // Senders' ✓✓ turn to "seen" — at most one "read" signal per room every few seconds.
+                if (shouldBroadcastRead(cid)) waitUntil(broadcastChatEvent(cid, 'read', { id: String(authUserId) }));
+                return res.status(200).json({ ok: true });
+            }
+            if (chatType === 'edit-message') {
+                // Author fixes their own text message (within 24 hours), like WhatsApp's Edit.
+                const messageId = String(req.body?.messageId || req.body?.message_id || '').trim();
+                const content = String(req.body?.content || '').trim();
+                if (!messageId) return res.status(400).json({ ok: false, error: 'messageId is required' });
+                if (!content) return res.status(400).json({ ok: false, error: 'The message can’t be empty.' });
+                if (content.length > 4000) return res.status(400).json({ ok: false, error: 'That message is too long.' });
+                const gate = await resolveMessageChannelAccess(messageId);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+                const edit = decideChatEdit({
+                    authorId: gate.message.user_id,
+                    userId: authUserId,
+                    createdAt: gate.message.created_at,
+                    deletedAt: gate.message.deleted_at,
+                });
+                if (edit.ok === false) return res.status(edit.status).json({ ok: false, error: edit.error });
+                const { data, error } = await supabaseAdmin
+                    .from('chat_messages')
+                    .update({ content, edited_at: new Date().toISOString() })
+                    .eq('id', messageId)
+                    .select()
+                    .single();
+                if (error) throw error;
+                waitUntil(broadcastChatEvent(String(gate.channel.id), 'message', { id: messageId }));
+                const [enrichedEdit] = await enrichMessagesWithAvatars(supabaseAdmin, [data]);
+                return res.status(200).json(enrichedEdit || data);
+            }
+            if (chatType === 'read-receipts') {
+                // Who has read this room up to when (for ✓✓ / "Seen by"). Never includes yourself.
+                const cid = String(req.body?.channelId || first(channelId) || '').trim();
+                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
+                const { fetchChannelForRead, roomReceipts } = await import('./chatReadThrottle.js');
+                const channel = await fetchChannelForRead(supabaseAdmin, cid);
+                const gate = await assertChannelAccess(channel);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: 'Forbidden' });
+                const all = await roomReceipts(supabaseAdmin, cid);
+                return res.status(200).json({
+                    ok: true,
+                    readers: all.filter((r) => r.userId !== String(authUserId)).slice(0, 300),
+                });
+            }
+            if (chatType === 'reactions') {
+                const messageId = String(first(req.query.messageId) || req.query.messageId || '').trim();
+                if (!messageId) return res.status(400).json({ ok: false, error: 'messageId is required' });
+                const gate = await resolveMessageChannelAccess(messageId);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+                const { data, error } = await supabaseAdmin
+                    .from('chat_message_reactions')
+                    .select('*')
+                    .eq('message_id', messageId)
+                    .order('created_at', { ascending: true });
+                if (error) throw error;
+                return res.status(200).json(data || []);
+            }
+            return res.status(200).json([]);
+        }
+        if (req.method === 'POST') {
+            if (chatType === 'channels') {
+                if (!canCreateCommunityChannels(authRole)) {
+                    return res.status(403).json({
+                        ok: false,
+                        error: 'Forbidden: only church leadership/staff roles may create Community channels',
+                    });
+                }
+                const name = String(req.body?.name || '').trim();
+                if (!name) return res.status(400).json({ ok: false, error: 'Channel name is required' });
+
+                // Default remains open for backward compatibility when channelType omitted
+                const kind =
+                    parseChannelCreateKind(req.body?.channelType || req.body?.channel_type || req.body?.kind) ||
+                    'open';
+                const description = req.body?.description != null ? String(req.body.description).trim() || null : null;
+                const rawMemberIds = Array.isArray(req.body?.memberIds)
+                    ? req.body.memberIds
+                    : Array.isArray(req.body?.member_ids)
+                      ? req.body.member_ids
+                      : [];
+                const memberIds = rawMemberIds.map((id: unknown) => String(id || '').trim()).filter(Boolean);
+
+                let insertRow: Record<string, any> = {
+                    name,
+                    description,
+                    slug: slugifyChannelName(name) || null,
+                    created_by: authUserId,
+                };
+
+                if (kind === 'open') {
+                    insertRow = {
+                        ...insertRow,
+                        type: 'public',
+                        visibility: 'open',
+                        ministry_id: null,
+                    };
+                } else if (kind === 'private') {
+                    insertRow = {
+                        ...insertRow,
+                        type: 'private',
+                        visibility: 'private',
+                        ministry_id: null,
+                    };
+                } else if (kind === 'ministry') {
+                    const ministryId = String(req.body?.ministryId || req.body?.ministry_id || '').trim();
+                    if (!ministryId) {
+                        return res.status(400).json({ ok: false, error: 'ministryId is required for ministry channels' });
+                    }
+                    const { data: ministry } = await supabaseAdmin
+                        .from('ministries')
+                        .select('id, name')
+                        .eq('id', ministryId)
+                        .maybeSingle();
+                    if (!ministry) {
+                        return res.status(400).json({ ok: false, error: 'Ministry not found' });
+                    }
+                    const scoped = await userCanAccessMinistryScope(
+                        supabaseAdmin,
+                        authUserId,
+                        ministryId,
+                        authRole
+                    );
+                    if (!scoped) {
+                        return res.status(403).json({
+                            ok: false,
+                            error: 'Forbidden: ministry channel outside your authorized ministry scope',
+                        });
+                    }
+                    insertRow = {
+                        ...insertRow,
+                        type: 'private',
+                        visibility: 'ministry',
+                        ministry_id: ministryId,
+                    };
+                }
+
+                // Reject client attempts to create leadership/dm via this path
+                if (['leadership', 'dm'].includes(String(req.body?.visibility || '').toLowerCase())) {
+                    return res.status(400).json({ ok: false, error: 'Invalid channel visibility' });
+                }
+
+                const { data, error } = await supabaseAdmin
+                    .from('chat_channels')
+                    .insert(insertRow)
+                    .select()
+                    .single();
+                if (error) throw error;
+
+                // Private + ministry: creator must be moderator (server-enforced)
+                if (kind === 'private' || kind === 'ministry') {
+                    await ensureCreatorModerator(supabaseAdmin, data.id, authUserId);
+                    const others = memberIds.filter((id: string) => id !== authUserId);
+
+                    if (kind === 'ministry') {
+                        // Order: creator → roster ministry_sync → explicit manual extras only
+                        await syncMinistryMembershipsForChannel(supabaseAdmin, data);
+                        await ensureCreatorModerator(supabaseAdmin, data.id, authUserId);
+                        const rosterIds = new Set(
+                            await listMinistryRosterUserIds(
+                                supabaseAdmin,
+                                String(data.ministry_id || '')
+                            )
+                        );
+                        const extras = others.filter((id: string) => !rosterIds.has(id));
+                        if (extras.length > 0) {
+                            await addManualMembers(supabaseAdmin, data.id, extras, 'member');
+                        }
+                    } else if (others.length > 0) {
+                        await addManualMembers(supabaseAdmin, data.id, others, 'member');
+                    }
+                }
+
+                const logAudit = await getAudit();
+                await logAudit({
+                    userId: authUserId,
+                    action: 'Chat Channel Created',
+                    details: {
+                        name: data?.name,
+                        visibility: data?.visibility || kind,
+                        slug: data?.slug,
+                    },
+                    resourceType: 'chat_channel',
+                    resourceId: data?.id,
+                    severity: 'info',
+                    req,
+                });
+
+                return res.status(200).json(data);
+            }
+            if (chatType === 'share-image') {
+                // Upload + save chat_channels.share_image_url for WhatsApp OG cards.
+                const cid = String(
+                    req.body?.channelId || req.body?.channel_id || first(channelId) || ''
+                ).trim();
+                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
+                const channel = await fetchChannel(supabaseAdmin, cid);
+                if (!channel) return res.status(404).json({ ok: false, error: 'Channel not found' });
+                const mayManage = await canManageChannelMembers(
+                    supabaseAdmin,
+                    channel,
+                    authUserId,
+                    authRole
+                );
+                const isCreator =
+                    String((channel as any)?.created_by || '') === String(authUserId);
+                if (!mayManage && !isCreator && !canCreateCommunityChannels(authRole)) {
+                    return res.status(403).json({
+                        ok: false,
+                        error: 'Forbidden: cannot update this channel share card',
+                    });
+                }
+                if (String((channel as any)?.visibility || '').toLowerCase() === 'dm') {
+                    return res.status(400).json({ ok: false, error: 'DM channels cannot have share cards' });
+                }
+
+                const raw = String(req.body?.imageBase64 || req.body?.dataUrl || '');
+                if (!raw) {
+                    return res.status(400).json({ ok: false, error: 'Missing image data' });
+                }
+                const match = raw.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+                const base64 = match?.[2] || raw.replace(/^data:image\/\w+;base64,/, '');
+                const buffer = Buffer.from(base64, 'base64');
+                if (!buffer.length) {
+                    return res.status(400).json({ ok: false, error: 'Invalid image data' });
+                }
+                if (buffer.length > 6 * 1024 * 1024) {
+                    return res.status(400).json({ ok: false, error: 'Image too large (max 6MB)' });
+                }
+
+                // Always store a WhatsApp-safe JPEG (large PNGs are dropped by WhatsApp).
+                let uploadBuf = buffer;
+                let uploadType = 'image/jpeg';
+                try {
+                    const { compressImageForWhatsAppOg } = await import('./whatsappOgImage.js');
+                    const compressed = await compressImageForWhatsAppOg(buffer);
+                    uploadBuf = compressed.buffer;
+                    uploadType = compressed.contentType;
+                } catch (compressErr: any) {
+                    console.error('[share-image] compress', compressErr?.message || compressErr);
+                    return res.status(400).json({
+                        ok: false,
+                        error: 'Could not process that image. Try a JPEG under 2MB.',
+                    });
+                }
+
+                const path = `huddle-share/${cid}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+
+                let publicUrl: string | null = null;
+                for (const bucket of ['event-images', 'avatars']) {
+                    const { error: uploadError } = await supabaseAdmin.storage
+                        .from(bucket)
+                        .upload(path, uploadBuf, { contentType: uploadType, upsert: false });
+                    if (!uploadError) {
+                        const { data: pub } = supabaseAdmin.storage.from(bucket).getPublicUrl(path);
+                        publicUrl = pub?.publicUrl || null;
+                        break;
+                    }
+                    console.error(`[share-image] upload (${bucket}):`, uploadError.message || uploadError);
+                }
+                if (!publicUrl) {
+                    return res.status(500).json({
+                        ok: false,
+                        error: 'Image upload failed. Check storage bucket permissions.',
+                    });
+                }
+
+                const { data: updated, error: updateError } = await supabaseAdmin
+                    .from('chat_channels')
+                    .update({ share_image_url: publicUrl })
+                    .eq('id', cid)
+                    .select('*')
+                    .maybeSingle();
+
+                if (updateError) {
+                    console.error('[share-image] update', updateError.message);
+                    if (/share_image_url/i.test(updateError.message)) {
+                        return res.status(503).json({
+                            ok: false,
+                            error:
+                                'Database column missing. Run migration add_chat_channel_share_image.sql in Supabase, then try again.',
+                        });
+                    }
+                    return res.status(500).json({
+                        ok: false,
+                        error: 'Image uploaded but could not save channel card.',
+                    });
+                }
+                if (!updated) {
+                    return res.status(404).json({ ok: false, error: 'Channel not found' });
+                }
+
+                const logAudit = await getAudit();
+                await logAudit({
+                    userId: authUserId,
+                    action: 'Chat Channel Share Image Updated',
+                    details: { name: updated?.name, share_image_url: publicUrl },
+                    resourceType: 'chat_channel',
+                    resourceId: cid,
+                    severity: 'info',
+                    req,
+                });
+
+                return res.status(200).json({
+                    ok: true,
+                    url: publicUrl,
+                    channel: updated,
+                    shareUrl: null,
+                });
+            }
+            if (chatType === 'channel-members') {
+                const cid = String(req.body?.channelId || req.body?.channel_id || first(channelId) || '').trim();
+                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
+                const channel = await fetchChannel(supabaseAdmin, cid);
+                if (!channel) return res.status(404).json({ ok: false, error: 'Channel not found' });
+                const mayManage = await canManageChannelMembers(
+                    supabaseAdmin,
+                    channel,
+                    authUserId,
+                    authRole
+                );
+                if (!mayManage) {
+                    return res.status(403).json({ ok: false, error: 'Forbidden: cannot manage this channel' });
+                }
+                const rawIds = Array.isArray(req.body?.userIds)
+                    ? req.body.userIds
+                    : Array.isArray(req.body?.user_ids)
+                      ? req.body.user_ids
+                      : req.body?.userId
+                        ? [req.body.userId]
+                        : [];
+                const userIds = rawIds.map((id: unknown) => String(id || '').trim()).filter(Boolean);
+                if (userIds.length === 0) {
+                    return res.status(400).json({ ok: false, error: 'userIds required' });
+                }
+                // Ministry leaders cannot add members to out-of-scope ministry rooms (already gated by canManage)
+                const result = await addManualMembers(supabaseAdmin, cid, userIds, 'member');
+                const members = await listChannelMembers(supabaseAdmin, channel);
+                return res.status(200).json({ ok: true, ...result, members });
+            }
+            if (chatType === 'messages') {
+                // Blocked after a warning (member conduct): can't send messages.
+                {
+                    const { isMemberBlocked, MEMBER_BLOCKED_CODE, MEMBER_BLOCKED_MESSAGE } = await import('./memberConduct.js');
+                    if (await isMemberBlocked(supabaseAdmin, authUserId)) {
+                        return res.status(403).json({ ok: false, code: MEMBER_BLOCKED_CODE, error: MEMBER_BLOCKED_MESSAGE });
+                    }
+                }
+                const cid = String(req.body?.channelId || '').trim();
+                const content = String(req.body?.content || '').trim();
+                // Attachment-only: allow empty content when client declares a follow-up upload.
+                // Auth/access checks are unchanged; empty body alone is still rejected.
+                const attachmentPending =
+                    req.body?.attachmentPending === true || req.body?.attachment_pending === true;
+                if (!cid) {
+                    return res.status(400).json({ ok: false, error: 'channelId is required' });
+                }
+                if (!content && !attachmentPending) {
+                    return res.status(400).json({
+                        ok: false,
+                        error: 'content is required unless attachmentPending is true',
+                    });
+                }
+                const channel = await fetchChannel(supabaseAdmin, cid);
+                const gate = await assertChannelAccess(channel);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+
+                // Announcement rooms: only room leaders post (everyone can read and react).
+                if (isAnnounceOnly(gate.channel)) {
+                    const leader = await resolveHuddleStartPermission({
+                        supabase: supabaseAdmin,
+                        channel: gate.channel,
+                        userId: authUserId,
+                        role: authRole,
+                    });
+                    if (!decideCanPost({ announceOnly: true, isRoomLeader: leader.canStart })) {
+                        return res.status(403).json({ ok: false, code: 'announce_only', error: ANNOUNCE_ONLY_ERROR });
+                    }
+                }
+
+                // Blocked DMs: neither side can send while a block is in place.
+                const dmPartner = dmPartnerOf(gate.channel.name, authUserId);
+                if (dmPartner) {
+                    const blockState = await getBlockStatus(supabaseAdmin, authUserId, dmPartner);
+                    if (blockState !== 'none') {
+                        return res.status(403).json({
+                            ok: false,
+                            code: 'blocked',
+                            error: blockState === 'i_blocked' ? BLOCKED_BY_ME_ERROR : BLOCKED_ME_ERROR,
+                        });
+                    }
+                }
+
+                // Phase 4E.1 — never trust client AI identity on the human message path.
+                if (isClientVaultAiSpoofAttempt(req.body)) {
+                    return res.status(400).json({
+                        ok: false,
+                        error:
+                            'Cannot set AI identity on chat messages; use the server ai-message path',
+                    });
+                }
+
+                let parentId: string | null = null;
+                const rawParent = String(req.body?.parent_id || req.body?.parentId || '').trim();
+                if (rawParent) {
+                    const { data: parent } = await supabaseAdmin
+                        .from('chat_messages')
+                        .select('id, channel_id, deleted_at')
+                        .eq('id', rawParent)
+                        .maybeSingle();
+                    if (!parent || parent.channel_id !== cid || parent.deleted_at) {
+                        return res.status(400).json({ ok: false, error: 'Invalid parent_id for this channel' });
+                    }
+                    parentId = parent.id;
+                }
+
+                const explicitMentions = Array.isArray(req.body?.mentionedUserIds)
+                    ? req.body.mentionedUserIds
+                    : Array.isArray(req.body?.mentioned_user_ids)
+                      ? req.body.mentioned_user_ids
+                      : [];
+
+                // Human identity is always the authenticated user (never client display-name tricks).
+                const humanDisplayName = sanitizeHumanChatDisplayName(authDisplayName);
+
+                const insertRow: Record<string, any> = {
+                    channel_id: cid,
+                    content,
+                    user_id: authUserId,
+                    user_name: humanDisplayName,
+                    parent_id: parentId,
+                };
+
+                const { data, error } = await supabaseAdmin
+                    .from('chat_messages')
+                    .insert(insertRow)
+                    .select()
+                    .single();
+                if (error) throw error;
+                await upsertChatReadStatus(supabaseAdmin, authUserId, cid);
+                await recordMentionsAndNotify(
+                    data.id,
+                    gate.channel,
+                    content,
+                    parentId,
+                    explicitMentions
+                );
+                // @everyone from a room leader alerts the whole room (even muted). Others: plain text.
+                let everyoneAlert = false;
+                if (mentionsEveryone(content) && normalizeVisibility(gate.channel) !== 'dm') {
+                    const leader = await resolveHuddleStartPermission({
+                        supabase: supabaseAdmin,
+                        channel: gate.channel,
+                        userId: authUserId,
+                        role: authRole,
+                    });
+                    everyoneAlert = leader.canStart;
+                }
+                // Instant delivery + phone alerts run after the reply (sender isn't kept waiting).
+                waitUntil(
+                    Promise.all([
+                        broadcastChatEvent(cid, 'message', { id: String(data.id) }),
+                        alertChatMessage(supabaseAdmin, {
+                            channel: gate.channel,
+                            authorId: authUserId,
+                            authorName: humanDisplayName,
+                            content,
+                            everyone: everyoneAlert,
+                        }),
+                        // Direct messages: email people who have no phone alerts on (once per unread burst).
+                        emailDmIfNoAlerts(supabaseAdmin, {
+                            channel: gate.channel,
+                            authorId: authUserId,
+                            authorName: humanDisplayName,
+                            messageId: String(data.id),
+                        }),
+                    ])
+                );
+                const [enriched] = await enrichMessagesWithAvatars(supabaseAdmin, [data]);
+                return res.status(200).json(enriched || data);
+            }
+            if (chatType === 'ai-message') {
+                // Phase 4E.1 — server-controlled Vault AI insert (no client isAi / userName trust).
+                const cid = String(req.body?.channelId || req.body?.channel_id || first(channelId) || '').trim();
+                const content = String(req.body?.content || req.body?.text || '').trim();
+                if (!cid) {
+                    return res.status(400).json({ ok: false, error: 'channelId is required' });
+                }
+                if (!content) {
+                    return res.status(400).json({ ok: false, error: 'content is required' });
+                }
+                const channel = await fetchChannel(supabaseAdmin, cid);
+                const gate = await assertChannelAccess(channel);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
+
+                const insertRow = {
+                    channel_id: cid,
+                    content,
+                    user_id: null,
+                    user_name: 'Vault AI',
+                    parent_id: null as string | null,
+                };
+                const { data, error } = await supabaseAdmin
+                    .from('chat_messages')
+                    .insert(insertRow)
+                    .select()
+                    .single();
+                if (error) throw error;
+                await upsertChatReadStatus(supabaseAdmin, authUserId, cid);
+                const [enriched] = await enrichMessagesWithAvatars(supabaseAdmin, [data]);
+                return res.status(200).json(enriched || data);
+            }
+            if (chatType === 'mark-read') {
+                const cid = String(req.body?.channelId || first(channelId) || '').trim();
+                if (!cid) return res.status(400).json({ ok: false, error: 'channelId is required' });
+                const { fetchChannelForRead, shouldBroadcastRead } = await import('./chatReadThrottle.js');
+                const channel = await fetchChannelForRead(supabaseAdmin, cid);
+                const gate = await assertChannelAccess(channel);
+                if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: 'Forbidden' });
+                await upsertChatReadStatus(supabaseAdmin, authUserId, cid);
+                // Senders' ✓✓ turn to "seen" — at most one "read" signal per room every few seconds.
+                if (shouldBroadcastRead(cid)) waitUntil(broadcastChatEvent(cid, 'read', { id: String(authUserId) }));
                 return res.status(200).json({ ok: true });
             }
             if (chatType === 'edit-message') {
