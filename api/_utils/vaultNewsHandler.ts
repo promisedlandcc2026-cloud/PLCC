@@ -122,23 +122,27 @@ async function storeNewsImage(supabase: any, raw: string): Promise<string> {
   throw err;
 }
 
-export async function handleVaultHealth(_req: any, res: any) {
+/**
+ * GET /api/vault?resource=health → { ok, database: 'healthy' | 'unavailable' } (always 200, for the apps).
+ * Add &strict=1 for uptime monitors: answers 503 when the database doesn't respond in time,
+ * so UptimeRobot / Better Stack can text the church the moment it goes down.
+ */
+export async function handleVaultHealth(req: any, res: any) {
+  res.setHeader?.('Cache-Control', 'no-store');
+  const strict = String(req?.query?.strict || '') === '1';
+  const answer = (healthy: boolean) =>
+    res.status(!healthy && strict ? 503 : 200).json({ ok: healthy || !strict, database: healthy ? 'healthy' : 'unavailable' });
   const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    return res.status(200).json({ ok: true, database: 'unavailable' });
-  }
+  if (!supabase) return answer(false);
   try {
     const { error } = await withSupabaseTimeout(
       supabase.from('users').select('id').limit(1),
       HEALTH_TIMEOUT_MS,
       'vault.health'
     );
-    if (error) {
-      return res.status(200).json({ ok: true, database: 'unavailable' });
-    }
-    return res.status(200).json({ ok: true, database: 'healthy' });
+    return answer(!error);
   } catch {
-    return res.status(200).json({ ok: true, database: 'unavailable' });
+    return answer(false);
   }
 }
 

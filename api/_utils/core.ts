@@ -6020,6 +6020,31 @@ const handleCommunity = async (req: any, res: any) => {
                 const [enrichedEdit] = await enrichMessagesWithAvatars(supabaseAdmin, [data]);
                 return res.status(200).json(enrichedEdit || data);
             }
+            if (chatType === 'ka-link-passes') {
+                // Emergency entry: 24-hour passes for every prayer room this member may join,
+                // used by Ka Link only if the database is down later (voice-token-fallback).
+                const lkPass = getLiveKitServerConfig();
+                if (!lkPass) return res.status(200).json({ ok: true, passes: [] });
+                const { buildPrayerRoomPasses } = await import('./kaLinkPasses.js');
+                const { kaLinkTeamHasAdmins } = await import('./kaLinkTeam.js');
+                const [rooms, teamRole, teamHasAdmins, standingMod] = await Promise.all([
+                    listAccessibleChannels(supabaseAdmin, authUserId, authRole),
+                    fetchKaLinkTeamRole(supabaseAdmin, authUserId),
+                    kaLinkTeamHasAdmins(supabaseAdmin),
+                    isStandingKaLinkMod(),
+                ]);
+                const passes = buildPrayerRoomPasses({
+                    channels: rooms as any[],
+                    userId: String(authUserId),
+                    displayName: authDisplayName,
+                    role: authRole,
+                    moderator: isBroadChatAdmin(authRole) || standingMod,
+                    teamRole,
+                    teamHasAdmins,
+                    secret: lkPass.apiSecret,
+                });
+                return res.status(200).json({ ok: true, passes });
+            }
             if (chatType === 'read-receipts') {
                 // Who has read this room up to when (for ✓✓ / "Seen by"). Never includes yourself.
                 const cid = String(req.body?.channelId || first(channelId) || '').trim();
@@ -10501,7 +10526,7 @@ export default async function handler(req: any, res: any) {
 
         // Normalize subResource for Community
         if (resource === 'community') {
-            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update' || subResource === 'issue-report' || subResource === 'issues' || subResource === 'member-conduct' || subResource === 'dm-call') {
+            if (subResource === 'unread-count' || subResource === 'channels' || subResource === 'messages' || subResource === 'ai-message' || subResource === 'dm-channel' || subResource === 'mentors' || subResource === 'mention-candidates' || subResource === 'mark-read' || subResource === 'channel-members' || subResource === 'member-picker' || subResource === 'chat-ministries' || subResource === 'share-image' || subResource === 'voice-token' || subResource === 'voice-token-fallback' || subResource === 'voice-huddle-provider' || subResource === 'voice-daily-token' || subResource === 'voice-huddle-status' || subResource === 'voice-huddle-statuses' || subResource === 'voice-huddle-attendance' || subResource === 'voice-huddle-end' || subResource === 'voice-huddle-can-start' || subResource === 'attachment-upload-url' || subResource === 'room-info' || subResource === 'dm-list' || subResource === 'archives' || subResource === 'room-archive' || subResource === 'dm-delete' || subResource === 'dm-block' || subResource === 'dm-report' || subResource === 'report-message' || subResource === 'pin' || subResource === 'room-settings' || subResource === 'search' || subResource === 'edit-message' || subResource === 'read-receipts' || subResource === 'ka-link-passes' || subResource === 'room-mute' || subResource === 'attachment-confirm' || subResource === 'voice-hand-lower' || subResource === 'voice-participant-mute' || subResource === 'voice-mic-restore' || subResource === 'voice-huddle-mod' || subResource === 'voice-huddle-stage' || subResource === 'ka-link-team' || subResource === 'voice-recording' || subResource === 'ka-link-songs' || subResource === 'polls' || subResource === 'poll-create' || subResource === 'poll-vote' || subResource === 'poll-close' || subResource === 'cards' || subResource === 'card-options' || subResource === 'card-create' || subResource === 'card-going' || subResource === 'requests' || subResource === 'request-create' || subResource === 'request-update' || subResource === 'issue-report' || subResource === 'issues' || subResource === 'member-conduct' || subResource === 'dm-call') {
                 req.query.chatType = subResource;
                 subResource = 'chat';
             }
