@@ -12,8 +12,10 @@ import {
   mintLiveKitAccessToken,
   resolveVoiceCanModerate,
   readHuddleStage,
+  listVoiceRoomParticipantCount,
 } from './livekitVoice.js';
-import { decideHuddleEntry, readHuddleIsLive } from './huddleStartPolicy.js';
+import { combineHuddleOccupancy, decideHuddleEntry } from './huddleStartPolicy.js';
+import { countDailyRoomParticipants, getDailyApiKey, mintDailyMeetingToken } from './dailyVoice.js';
 import { huddleMicAllowed, huddleUserBlocked } from './huddleStage.js';
 
 export const HUDDLE_FALLBACK_TTL_SECONDS = 12 * 60 * 60;
@@ -103,7 +105,40 @@ export function verifyHuddleFallbackPass(
   }
 }
 
-/** Mint a LiveKit token from a previously saved pass. Does not call Supabase. */
+export type FallbackLine = 'livekit' | 'daily';
+
+/**
+ * Pure (Nov 28, 2026 backup-line test): which line to open while the database is
+ * down. The shared "which line is this room on" record lives in the database, so
+ * it can't be read. Follow the people instead: if the backup line (Daily) has
+ * people and LiveKit has none, join them on Daily. A phone that already knows
+ * which line it needs (LiveKit refused it: out of minutes) asks for it directly.
+ */
+export function decideFallbackLine(
+  requested: FallbackLine | null,
+  counts: { livekit: number | null; daily: number | null },
+  dailyConfigured: boolean
+): FallbackLine {
+  if (requested) return requested;
+  if (dailyConfigured && (counts.daily ?? 0) > 0 && !((counts.livekit ?? 0) > 0)) return 'daily';
+  return 'livekit';
+}
+
+/** Who is on each line right now — LiveKit and Daily only, never the database. */
+async function readLineCounts(channelId: string): Promise<{ livekit: number | null; daily: number | null }> {
+  const lk = getLiveKitServerConfig();
+  const dailyKey = getDailyApiKey();
+  const [livekit, daily] = await Promise.all([
+    lk ? listVoiceRoomParticipantCount(lk, channelId).then((r) => r.participantCount, () => null) : Promise.resolve(null),
+    dailyKey ? countDailyRoomParticipants(dailyKey, channelId).catch(() => null) : Promise.resolve(null),
+  ]);
+  return { livekit, daily };
+}
+
+/**
+ * Mint a token from a previously saved pass — LiveKit, or (Nov 28) the Daily
+ * backup line. Does not call Supabase.
+ */
 export async function handleVoiceTokenFallback(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
   const lk = getLiveKitServerConfig();
@@ -119,10 +154,42 @@ export async function handleVoiceTokenFallback(req: any, res: any) {
     });
   }
 
+  const rawLine = String(req.body?.line || '').trim().toLowerCase();
+  if (rawLine && rawLine !== 'livekit' && rawLine !== 'daily') {
+    return res.status(400).json({ ok: false, error: 'Choose a Ka Link line.' });
+  }
+  const counts = await readLineCounts(channelId);
   // Outage path must not bypass the start rule: a join-only pass can't open an empty room.
-  const entry = decideHuddleEntry({ isLive: await readHuddleIsLive(channelId), canStart: claims.canStart });
+  const entry = decideHuddleEntry({
+    isLive: combineHuddleOccupancy([counts.livekit, counts.daily]),
+    canStart: claims.canStart,
+  });
   if (entry.ok === false) {
     return res.status(entry.status).json({ ok: false, code: entry.code, error: entry.error, canStart: false });
+  }
+
+  const dailyKey = getDailyApiKey();
+  const line = decideFallbackLine((rawLine || null) as FallbackLine | null, counts, Boolean(dailyKey));
+  if (line === 'daily') {
+    if (!dailyKey) {
+      return res.status(503).json({ ok: false, error: 'Backup Ka Link audio is not configured yet.', configured: false });
+    }
+    try {
+      const minted = await mintDailyMeetingToken(dailyKey, channelId, claims.displayName);
+      return res.status(200).json({
+        ok: true,
+        fallback: true,
+        provider: 'daily',
+        token: minted.token,
+        url: minted.url,
+        roomName: minted.roomName,
+        expiresIn: minted.expiresIn,
+        channelId,
+      });
+    } catch (err: any) {
+      console.warn('[voice-token-fallback] daily', err?.detail || err?.message || err);
+      return res.status(502).json({ ok: false, error: 'Backup Ka Link audio is unavailable right now.' });
+    }
   }
 
   try {

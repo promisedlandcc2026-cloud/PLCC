@@ -240,6 +240,7 @@ import {
     setChatArchived,
     setMessagePinned,
 } from './chatRooms.js';
+import { parseChatMessagesPageQuery } from './chatMessagesPage.js';
 import { alertChatMessage, broadcastChatEvent, emailDmIfNoAlerts, chatRealtimeTopic, decideChatEdit, isRoomMuted, mentionsEveryone, setRoomMuted } from './chatLive.js';
 import {
     CHAT_MEDIA_ALLOWED_MIME,
@@ -5420,12 +5421,23 @@ const handleCommunity = async (req: any, res: any) => {
                 const channel = await fetchChannel(supabaseAdmin, cid);
                 const gate = await assertChannelAccess(channel);
                 if (gate.ok === false) return res.status(gate.status).json({ ok: false, error: gate.error });
-                const { data, error } = await supabaseAdmin
+                // Light reloads (Nov 28, 2026): phones ask only for what changed —
+                // ids= (messages named in a live ping), after= (newer than what they
+                // have) and/or limit= (latest N). No params = the full room, as before.
+                const pageQ = parseChatMessagesPageQuery(req.query);
+                if (pageQ.ok === false) return res.status(400).json({ ok: false, error: pageQ.error });
+                let msgQuery: any = supabaseAdmin
                     .from('chat_messages')
                     .select('*')
-                    .eq('channel_id', cid)
-                    .order('created_at', { ascending: true });
+                    .eq('channel_id', cid);
+                if (pageQ.ids) msgQuery = msgQuery.in('id', pageQ.ids);
+                if (pageQ.after) msgQuery = msgQuery.gte('created_at', pageQ.after);
+                msgQuery = pageQ.limit
+                    ? msgQuery.order('created_at', { ascending: false }).limit(pageQ.limit)
+                    : msgQuery.order('created_at', { ascending: true });
+                const { data: pageRows, error } = await msgQuery;
                 if (error) throw error;
+                const data = pageQ.limit ? [...(pageRows || [])].reverse() : pageRows;
                 // "Delete chat" on a DM: hide what came before your delete (for you only).
                 const myClears = await listDmClears(supabaseAdmin, authUserId, [cid]);
 
@@ -5440,7 +5452,8 @@ const handleCommunity = async (req: any, res: any) => {
                     return { ...m, is_deleted: false };
                 });
 
-                await upsertChatReadStatus(supabaseAdmin, authUserId, cid);
+                // Partial reloads don't touch read status (the app marks read on its own pace).
+                if (!pageQ.partial) await upsertChatReadStatus(supabaseAdmin, authUserId, cid);
                 let enriched = await enrichMessagesWithAvatars(supabaseAdmin, rawMessages);
 
                 const messageIds = enriched.map((m: any) => m.id).filter(Boolean);
